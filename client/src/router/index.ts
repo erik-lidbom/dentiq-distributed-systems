@@ -1,3 +1,4 @@
+import SignupView from '@/views/SignupView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -6,7 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: { render: () => {} },
+      component: SignupView,
     },
   ],
 })
