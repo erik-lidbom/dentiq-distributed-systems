@@ -98,7 +98,7 @@
         </router-link>
       </div>
       <button
-        @click="validateForm"
+        @click="onSubmit"
         class="w-full rounded-xl bg-dentiqBtnBlue text-white font-thin py-3 hover:bg-opacity-30 transition-all duration-300"
         placeholder="Confirm password"
       >
