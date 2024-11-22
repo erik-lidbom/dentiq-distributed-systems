@@ -15,5 +15,5 @@ a {
 #app {
   width: 100vw;
   height: 100vh;
-  @apply bg-dentiq-muted-lightest;
+  @apply bg-dentiq-muted-lightest font-archivo;
 }

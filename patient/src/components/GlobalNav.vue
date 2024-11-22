@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import logo from './../../public/svgs/logo-dark.svg'
+import logo from '@/../public/svgs/logo-dark.svg'
+import avatar from '@/../public/svgs/user-avatar.svg'
+import Search from '@/components/Search.vue'
 </script>
 
 <template>
     <nav class="flex h-[80px] w-screen bg-white px-4">
-        <ul class="flex flex-row justify-between items-center w-full">
+        <ul class="flex flex-row justify-between items-center w-full space-x-2 md:space-x-6">
             <li>
-                <a href="/" class="flex flex-row items-center space-x-2">
+                <a href="/" class="items-center space-x-2 flex min-w-fit">
                     <img :src=logo href="/" />
-                    <h1 class="text-dentiq-text-primary font-archivoBlack text-dentiq-h2">Denti<span class="text-dentiq-text-secondary">Q</span></h1>
+                    <h1 class="hidden sm:block  text-dentiq-text-primary font-archivoBlack text-dentiq-h2">Denti<span class="text-dentiq-text-secondary">Q</span></h1>
                 </a>
             </li>
-            <div class="w-full max-w-[800px]">
-                <input placeholder="Search" class="w-full h-[48px] px-3 text-dentiq-text-dark rounded-[10px] items-center bg-dentiq-muted-lighter" />
-            </div>
-            <div class="flex flex-row">
-                <li><a href="/profile">Nabil Al Sayed</a></li>
+            <Search />
+            <div class="flex flex-row items-center space-x-2">
+                <div class="hidden sm:flex flex-col text-right">
+                    <p class="text-dentiq-text-dark font-normal text-dentiq-body-small">Nabil Al Sayed</p>
+                    <p class="text-dentiq-muted-default font-normal text-dentiq-body-small">Patient</p>
+                </div>
+                <img :src=avatar alt="User" class="h-[60px] w-[60px] border-4 rounded-full"/>
             </div>
         </ul>
     </nav>
