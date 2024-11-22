@@ -1,5 +1,4 @@
 import mqtt, { MqttClient, IClientOptions } from "mqtt";
-import * as mqttt from 'mqtt';
 import dotenv from "dotenv";
 dotenv.config();
 
