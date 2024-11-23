@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import mqttClient from "./mqtt/mqtt";
+import patientRouter from "./routes/patientRoutes"; // Patient routes
 import connectToDB from "./db/db"; // Database connection function
 
 // Initialize environment variables
@@ -15,6 +16,9 @@ connectToDB();
 //Start MQTT Client
 mqttClient;
 
+// Middleware
+app.use(express.json());
+
 // Root Route for Testing
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
@@ -25,6 +29,9 @@ app.get("/", (req: Request, res: Response) => {
     },
   });
 });
+
+// Patient Routes
+app.use("/api/patients", patientRouter);
 
 // Fallback Route for Undefined Routes
 app.use((req: Request, res: Response) => {
