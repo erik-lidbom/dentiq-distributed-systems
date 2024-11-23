@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import mqttClient from "./mqtt/mqtt";
 import patientRouter from "./routes/patientRoutes"; // Patient routes
+import dentistRouter from "./routes/dentistRoutes"; // Dentist routes
 import connectToDB from "./db/db"; // Database connection function
 
 // Initialize environment variables
@@ -32,6 +33,9 @@ app.get("/", (req: Request, res: Response) => {
 
 // Patient Routes
 app.use("/api/patients", patientRouter);
+
+// Dentist Routes
+app.use("/api/dentists", dentistRouter);
 
 // Fallback Route for Undefined Routes
 app.use((req: Request, res: Response) => {
