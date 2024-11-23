@@ -5,10 +5,10 @@ import Search from '@/components/Search.vue'
 </script>
 
 <template>
-    <nav class="flex h-[80px] w-screen bg-white px-4">
+    <nav class="flex h-[80px] bg-white px-4 rounded-2xl border-dentiq-muted-semilight border-2">
         <ul class="flex flex-row justify-between items-center w-full space-x-2 md:space-x-6">
             <li>
-                <a href="/" class="items-center space-x-2 flex min-w-fit">
+                <a href="/" class="items-center space-x-2 flex min-w-full">
                     <img :src=logo href="/" />
                     <h1 class="hidden sm:block  text-dentiq-text-primary font-archivoBlack text-dentiq-h2">Denti<span class="text-dentiq-text-secondary">Q</span></h1>
                 </a>
