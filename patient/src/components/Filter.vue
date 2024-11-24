@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-full rounded-2xl p-2 w-[228px] space-y-8">
+    <div class="h-full rounded-2xl p-2 w-[228px] space-y-8 bg-dentiq-muted-lightest">
       <!-- Header -->
       <h2 class="text-dentiq-h4 font-semibold text-dentiq-muted-darkest">Filter by</h2>
       
