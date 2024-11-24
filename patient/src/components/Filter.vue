@@ -21,8 +21,6 @@
         </div>
       </div>
   
-      <!-- Divider -->
-      <hr class="text-dentiq-muted-light w-full">
     </div>
   </template>
   
