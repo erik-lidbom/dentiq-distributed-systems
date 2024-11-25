@@ -1,46 +1,66 @@
 <template>
-    <div class="bg-white p-4 rounded shadow-lg">
-      <!-- Placeholder Image -->
-      <div class="flex flex-row items-center">
+    <!-- Placeholder Image -->
+    <div class="absolute flex flex-col left-14 top-0 items-center bg-white rounded-3xl max-h-[480px] w-[310px] overflow-hidden shadow-lg shadow-dentiq-muted-light border-dentiq-border-shadowStrenghter border-[2px] font-archivo">
+      <div class="w-full max-h-[220px] bg-dentiq-muted-lighter justify-center items-center overflow-hidden">
         <img
-          :src="defaultPlaceholder"
-          alt="Placeholder Image"
-          class="w-20 h-20 rounded-full mr-4"
+        :src="clinic.image || defaultPlaceholder"
+        alt="Clinic Placeholder Image"
+        class="w-[100%] h-[100%]"
         />
-        <div class="flex flex-col">
-          <h1 class="text-xl font-bold">{{ clinic.name }}</h1>
-          <p class="flex items-center text-gray-700">
-            <font-awesome-icon :icon="['fas', 'map-marker-alt']" class="mr-2" />
-            {{ clinic.address }}
-          </p>
-          <p class="flex items-center text-gray-700">
-            <font-awesome-icon :icon="['fas', 'phone']" class="mr-2" />
-            {{ clinic.phone }}
-          </p>
+      </div>
+      <div class="w-full p-4 space-y-[20px]">
+        
+        <div class="flex flex-col w-full justify-center items-start space-y-[5px]">
+          <h1 class="font-semibold w-fit text-dentiq-h3">{{ clinic.name }}</h1>
+          <h2 class="font-normal w-full text-dentiq-body-large text-dentiq-muted-default">{{ clinic.address }}</h2>
+        </div>
+
+        <div class="flex flex-col items-center w-full space-y-[20px]">
+          
+          <div class="flex flex-row w-full">
+            <h2 class="font-normal w-full text-dentiq-body text-dentiq-muted-default">First Availabillity</h2>
+            <div class="flex flex-row w-full space-x-[5px] justify-center items-center">
+              <FontAwesomeIcon icon="circle" class="text-green-500" />
+              <h2 class="font-normal w-fit text-dentiq-body">{{ clinic.firstAvailableTime }}</h2>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap w-full gap-[10px]">
+            <p v-for="service in visibleServices" class="text-dentiq-body-small px-2 py-[7px] rounded-lg text-dentiq-muted-darker bg-dentiq-muted-lighter">{{ service }}</p>
+            <p v-if="hiddenServices.length > 0" class="text-dentiq-body-small px-2 py-[7px] rounded-lg text-dentiq-muted-darker bg-dentiq-muted-lighter">+{{ hiddenServices.length }}</p>
+          </div>
+
         </div>
       </div>
     </div>
   </template>
   
   <script setup lang="ts">
-  import { defineProps } from "vue";
+  import { defineProps, computed } from "vue";
   import { library } from "@fortawesome/fontawesome-svg-core";
   import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-  import { faMapMarkerAlt, faPhone } from "@fortawesome/free-solid-svg-icons";
+  import { faCircle, faWheelchair, faB ,faStar } from "@fortawesome/free-solid-svg-icons";
   
   // Add icons to the library
-  library.add(faMapMarkerAlt, faPhone);
+  library.add(faWheelchair, faStar, faB, faCircle);
   
   // Props
-  defineProps({
+  const props = defineProps({
     clinic: {
       type: Object,
       required: true,
     },
   });
+
+  // Services Logic
+  const services = props.clinic.services || [];
+
+  // Compute visible and hidden services
+  const visibleServices = computed(() => services.slice(0, 5));
+  const hiddenServices = computed(() => services.slice(5));
   
   const defaultPlaceholder = new URL(
-    "@/../public/svgs/user-avatar.svg",
+    "/images/clinic-placeholder.svg",
     import.meta.url
   ).href;
   </script>
