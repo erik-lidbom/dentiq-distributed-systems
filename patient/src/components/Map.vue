@@ -1,7 +1,7 @@
 <template>
   <GoogleMap
     :api-key="googleMapsApiKey"
-    map-id="308fb395aaafab13"
+    :map-id="googleMapId"
     style="width: 100%;"
     :center="center"
     :zoom="15"
@@ -54,6 +54,7 @@ const mapOptions = {
 
 // API Key from environment variable
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const googleMapId = import.meta.env.VITE_GOOGLE_MAP_ID;
 
 // Clinic Mock Data
 const clinics = ref([
