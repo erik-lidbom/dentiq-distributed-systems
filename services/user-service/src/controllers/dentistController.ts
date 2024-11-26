@@ -1,5 +1,21 @@
 import { Request, Response, NextFunction } from "express";
 import { Dentist } from "../models/dentistSchema";
+import { publishMessage } from "../mqtt/mqtt";
+
+// Helper function to handle errors
+const handleError = (error: any, res: Response): void => {
+    if (error.code === 11000) {
+        const duplicateField = Object.keys(error.keyValue)[0];
+        res.status(409).json({
+            message: `Duplicate value for field '${duplicateField}': ${error.keyValue[duplicateField]}`,
+        });
+    } else {
+        res.status(500).json({
+            message: "An unexpected error occurred.",
+            error: error.message,
+        });
+    }
+};
 
 // Create a new dentist
 export const createDentist = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -22,10 +38,21 @@ export const createDentist = async (req: Request, res: Response, next: NextFunct
 
         const savedDentist = await newDentist.save();
 
+        // Publish message to MQTT
+        const message = {
+            dentistId: savedDentist._id,
+            personnummer,
+            firstName,
+            lastName,
+            email,
+        };
+
+        publishMessage(process.env.DENTIST_TOPIC!, message);
+
         res.status(201).json({ message: "New dentist registered", dentist: savedDentist });
     } catch (error) {
         console.error("[ERROR] Could not create dentist: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
 
@@ -49,7 +76,7 @@ export const deleteDentist = async (req: Request, res: Response, next: NextFunct
         res.status(200).json({ message: "Dentist deleted", dentistId });
     } catch (error) {
         console.error("[ERROR] Could not delete dentist: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
 
@@ -73,7 +100,7 @@ export const getDentist = async (req: Request, res: Response, next: NextFunction
         res.status(200).json(dentist);
     } catch (error) {
         console.error("[ERROR] Could not fetch dentist: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
 
@@ -97,7 +124,7 @@ export const patchDentist = async (req: Request, res: Response, next: NextFuncti
         res.status(200).json({ message: "Dentist updated", dentist: updatedDentist });
     } catch (error) {
         console.error("[ERROR] Could not update dentist: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
 
@@ -116,6 +143,6 @@ export const queryDentists = async (req: Request, res: Response, next: NextFunct
         res.status(200).json(dentists);
     } catch (error) {
         console.error("[ERROR] Could not query dentists: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
