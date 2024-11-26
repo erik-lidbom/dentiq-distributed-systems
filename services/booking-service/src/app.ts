@@ -4,14 +4,12 @@ import mqttClient from "./mqtt/mqtt";
 import appointmentRouter from "./routes/appointmentRoutes"
 import connectToDB from "./db/db";
 
-
 mqttClient
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
-const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/dentiq'
 
 connectToDB();
 

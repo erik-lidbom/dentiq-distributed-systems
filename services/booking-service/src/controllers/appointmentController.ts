@@ -35,12 +35,14 @@ export const deleteAppointment = async (req: Request, res: Response, next: NextF
 
     if (!appointmentId) {
         res.status(400).json({ message: "Missing required field."});
+        return;
     }
 
     const deletedAppointment = await Appointment.findById(appointmentId);
 
     if(!deleteAppointment) {
         res.status(404).json({ message: "Appointment not found."});
+        return;
     }
 
     res.status(200).json({ message: "Appointment deleted: ", appointmentId })
@@ -55,7 +57,8 @@ export const getAppointment = async (req: Request, res: Response, next: NextFunc
         const { appointmentId } = req.body.appointmentId;
 
         if (!appointmentId) {
-            res.status(400).json({ message: "Missing required field."});
+            res.status(400).json({ message: "Missing required field." });
+            return;
         }
 
         const appointment = await Appointment.findById(appointmentId);
@@ -70,8 +73,28 @@ export const getAppointment = async (req: Request, res: Response, next: NextFunc
 
 export const patchAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+        const { appointmentId} = req.body.appointmentId;
+
+        if(!appointmentId) {
+            res.status(400).json({ message: "Missing required field. " })
+            return;
+        }
+
+        const appointment = await Appointment.findById(appointmentId);
+
+        if(!appointment) {
+            res.status(404).json({ message: "Appointment could not be found. " })
+            return;
+        }
+
+        appointment.clinicId = req.body.clinicId || appointment.clinicId;
+        appointment.dentistId = req.body.dentistId || appointment.dentistId;
+        appointment.patientId = req.body.patientId || appointment.patientId;
+        appointment.start_time = req.body.start_time || appointment.start_time;
+        appointment.end_time = req.body.end_time || appointment.end_time;
 
     } catch (error) {
-        
+       console.error("[ERROR] Could not update appointment: ", error);
+       next(error);
     }
 }
