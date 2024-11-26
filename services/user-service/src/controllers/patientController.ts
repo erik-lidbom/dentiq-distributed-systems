@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Patient } from "../models/patientSchema";
+import mqttClient from '../mqtt/mqtt'
 
 // Create a new patient
 export const createPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -20,7 +21,28 @@ export const createPatient = async (req: Request, res: Response, next: NextFunct
         });
 
         const savedPatient = await newPatient.save();
-        
+
+        // Publish message to MQTT
+        const message = {
+            patientId: savedPatient._id,
+            Personnummer,
+            Firstname,
+            Lastname,
+            email,
+        };
+
+        mqttClient.publish(
+            process.env.PATIENT_TOPIC!,
+            JSON.stringify(message),
+            { qos: 2 },
+            (err) => {
+                if (err) {
+                    console.error("[MQTT]: Failed to publish message:", err);
+                } else {
+                    console.log("[MQTT]: Message published successfully:", message);
+                }
+            }
+        );
 
         res.status(201).json({ message: "New patient registered", patient: savedPatient });
     } catch (error) {
