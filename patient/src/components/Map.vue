@@ -40,8 +40,11 @@ import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { GoogleMap, CustomMarker } from "vue3-google-map";
 import CustomMapCard from "./ClinicMapCard.vue";
 import Filter from "./Filter.vue";
+import { fetchClinics } from "@/services/clinicService";
 
+// Google Maps Center
 const center = { lat: 57.7089, lng: 11.9746 };
+// Google Maps Options
 const mapOptions = {
   mapTypeControl: false,
   fullscreenControl: false,
@@ -49,10 +52,15 @@ const mapOptions = {
   zoomControl: false,
   rotateControl: false,
 };
+// Google Maps API Key
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const googleMapId = import.meta.env.VITE_GOOGLE_MAP_ID;
+// Track filter status
 const showFilter = ref(false);
+// Track mobile status
 const isMobile = ref(window.innerWidth < 630);
+// Track clinics
+const clinics = ref([]);
 // Track active clinic
 const activeClinic = ref(null);
 // Track selected services
@@ -72,26 +80,15 @@ onBeforeUnmount(() => {
   window.removeEventListener("resize", updateIsMobile);
 });
 
-
-const clinics = ref([
-  {
-    id: 1,
-    name: "Dentiq Clinic",
-    lat: 57.7089,
-    lng: 11.9746,
-    address: "123 Main St",
-    services: ["Dentist", "Orthodontist", "Endodontist"],
-  },
-  {
-    id: 2,
-    name: "Smile Dental",
-    lat: 57.7001,
-    lng: 11.9668,
-    address: "456 Elm St",
-    services: ["Dentist", "Orthodontist", "Endodontist", "Oral Surgeon", "Pediatric Dentist", "Periodontist", "Prosthodontist"],
-  },
-]);
-
+onMounted(async () => {
+  try{
+    const response = await fetchClinics();
+    
+    clinics.value = response;
+  } catch (error) {
+    console.error(error)} 
+  }
+);
 
 // Functions to toggle and close the filter
 function toggleFilter() {

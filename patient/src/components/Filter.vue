@@ -89,10 +89,6 @@ function toggleService(service: { name: string; selected: boolean }) {
   // Emit the updated array
   emit("update:services", selectedServices.value);
 
-  // Save to localStorage
-  localStorage.setItem("selectedServices", JSON.stringify(selectedServices.value));
-
-
 }
 
 // Add event listeners on mount and remove on unmount
