@@ -11,19 +11,24 @@
         <h3 class="text-dentiq-body font-semibold text-dentiq-muted-darkest">Services</h3>
         <hr />
         <div class="text-dentiq-body-small text-dentiq-muted-darker flex-wrap gap-1 flex">
-          <h3
+          <div
             v-for="(service, index) in services"
             :key="index"
             :class="[
-              'px-2 py-1 rounded-md w-fit',
+              'px-2 py-1 rounded-md w-fit cursor-pointer focus:outline-1 outline-dentiq-button-secondary',
               service.selected || selectedServices.includes(service.name)
                 ? 'bg-dentiq-button-primary text-white'
                 : 'bg-dentiq-muted-light text-dentiq-muted-darker'
             ]"
+            tabindex="0"
             @click="toggleService(service)"
+            @keydown.enter.prevent="toggleService(service)"
+            @keydown.space.prevent="toggleService(service)"
+            role="button"
+            :aria-pressed="service.selected || selectedServices.includes(service.name)"
           >
             {{ service.name }}
-          </h3>
+          </div>
         </div>
       </div>
     </div>
