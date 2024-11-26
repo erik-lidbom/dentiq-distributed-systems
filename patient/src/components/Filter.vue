@@ -78,7 +78,7 @@ function toggleService(service: { name: string; selected: boolean }) {
       selectedServices.value.push(service.name);
     }
   } else {
-    selectedServices.value = selectedServices.value.filter((name) => name !== service.name);
+    selectedServices.value = selectedServices.value.filter((name : string) => name !== service.name);
   }
 
   // Emit the updated array
