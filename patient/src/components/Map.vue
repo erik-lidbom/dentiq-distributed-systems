@@ -95,15 +95,3 @@ function closeInfoWindow() {
   activeClinic.value = null;
 }
 </script>
-
-<style>
-/* General styling for InfoWindow */
-.info-window {
-  position: absolute;
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 100;
-}
-</style>
