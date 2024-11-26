@@ -1,4 +1,5 @@
 <template>
+  <Filter v-if="!isMobile || showFilter" @close="closeFilter" @update:services="filterClinics" />
   <GoogleMap
     :api-key="googleMapsApiKey"
     :map-id="googleMapId"
@@ -10,88 +11,115 @@
     :fullscreen-control="mapOptions.fullscreenControl"
     :street-view-control="mapOptions.streetViewControl"
   >
-    <!-- Custom Markers -->
     <CustomMarker
-      v-for="clinic in clinics"
+      v-for="clinic in filteredClinics"
       :key="clinic.id"
       :options="{ position: { lng: clinic.lng, lat: clinic.lat }, anchorPoint: 'BOTTOM_CENTER' }"
       @click="showInfoWindow(clinic)"
     >
-      <div
-        class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]"
-      >
+      <div class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]">
         <img src="/public/svgs/logo-dark.svg" width="30" height="30" />
       </div>
-
-      <!-- InfoWindow displayed for the active marker -->
-      <div
-        v-if="activeClinic && activeClinic.id === clinic.id"
-        class="absolute z-50"
-        style="transform: translate(-50%, -100%);"
-      >
+      <div v-if="activeClinic && activeClinic.id === clinic.id" class="absolute z-50" style="transform: translate(-50%, -100%);">
         <CustomMapCard :clinic="clinic" />
       </div>
     </CustomMarker>
+    <!-- Filter Button in mobile Only -->
+    <button
+      v-if="isMobile && !showFilter"
+      @click="toggleFilter"
+      class="fixed bottom-9 h-[48px] w-[100px] left-1/2 transform -translate-x-1/2 bg-dentiq-button-primary text-white font-bold py-2 px-6 rounded-lg z-50"
+    >
+      Filter
+    </button>
   </GoogleMap>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { GoogleMap, CustomMarker } from "vue3-google-map";
 import CustomMapCard from "./ClinicMapCard.vue";
+import Filter from "./Filter.vue";
 
-// Map Center
 const center = { lat: 57.7089, lng: 11.9746 };
-
-// Map Options
 const mapOptions = {
-  mapTypeControl: false, // Disable map/satellite toggle
-  fullscreenControl: false, // Disable fullscreen control
-  streetViewControl: false, // Disable person logo for Street View
-  zoomControl: false, // Enable or disable zoom controls (optional)
-  rotateControl: false, // Disable rotate control
+  mapTypeControl: false,
+  fullscreenControl: false,
+  streetViewControl: false,
+  zoomControl: false,
+  rotateControl: false,
 };
-
-// API Key from environment variable
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const googleMapId = import.meta.env.VITE_GOOGLE_MAP_ID;
+const showFilter = ref(false);
+const isMobile = ref(window.innerWidth < 630);
+// Track active clinic
+const activeClinic = ref(null);
+// Track selected services
+const selectedServices = ref([]); 
 
-// Clinic Mock Data
+// Function to update the mobile status
+function updateIsMobile() {
+  isMobile.value = window.innerWidth < 630;
+}
+
+// Add event listeners on mount and remove on unmount
+onMounted(() => {
+  window.addEventListener("resize", updateIsMobile);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", updateIsMobile);
+});
+
+
 const clinics = ref([
   {
     id: 1,
-    image: null,
     name: "Dentiq Clinic",
     lat: 57.7089,
     lng: 11.9746,
     address: "123 Main St",
-    firstAvailableTime: "2024 Dec 19",
     services: ["Dentist", "Orthodontist", "Endodontist"],
   },
   {
     id: 2,
-    image: null,
     name: "Smile Dental",
     lat: 57.7001,
     lng: 11.9668,
     address: "456 Elm St",
-    phone: "031 654 321",
-    firstAvailableTime: "2024 Dec 23",
     services: ["Dentist", "Orthodontist", "Endodontist", "Oral Surgeon", "Pediatric Dentist", "Periodontist", "Prosthodontist"],
   },
 ]);
 
-// Active Clinic
-const activeClinic = ref(null);
 
-// Show InfoWindow
-function showInfoWindow(clinic) {
-  activeClinic.value = clinic;
-  console.log("Active clinic:", activeClinic.value);
+// Functions to toggle and close the filter
+function toggleFilter() {
+  showFilter.value = !showFilter.value;
 }
 
-// Close InfoWindow
-function closeInfoWindow() {
-  activeClinic.value = null;
+// Function to close the filter
+function closeFilter() {
+  showFilter.value = false;
+}
+
+// Filter clinics based on selected services
+const filteredClinics = computed(() => {
+  // Show all clinics if no filters are selected
+  if (selectedServices.value.length === 0) return clinics.value; 
+  return clinics.value.filter((clinic) =>
+    clinic.services.some((service) => selectedServices.value.includes(service))
+  );
+});
+
+const filterClinics = (services) => {
+  // Update selected services
+  selectedServices.value = services; 
+}
+
+// Function to show the info window
+const showInfoWindow = (clinic) => {
+  activeClinic.value = clinic;
+  console.log("Active clinic:", activeClinic.value);
 }
 </script>
