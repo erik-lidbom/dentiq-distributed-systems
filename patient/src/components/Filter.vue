@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col justify-between h-full rounded-2xl p-6 min-[630px]:w-[250px] space-y-8 bg-dentiq-muted-lightest absolute min-[630px]:relative right-0 left-0 top-0 bottom-0 z-50 w-full">
+  <div class="flex flex-col justify-between h-full rounded-2xl p-6 sm:max-w-[250px] space-y-8 bg-dentiq-muted-lightest absolute right-0 left-0 top-0 bottom-0 z-50 w-full">
     <div class="space-y-6">
       <!-- Header -->
       <div>
@@ -10,7 +10,7 @@
       <div class="flex flex-col space-y-4">
         <h3 class="text-dentiq-body font-semibold text-dentiq-muted-darkest">Services</h3>
         <hr />
-        <div class="text-dentiq-body-small text-dentiq-muted-darker flex-wrap gap-1 flex">
+        <div class="text-dentiq-body-small text-dentiq-muted-darker flex flex-wrap gap-1">
           <div
             v-for="(service, index) in services"
             :key="index"
@@ -66,11 +66,11 @@ const selectedServices = ref(savedServices);
 
 const emit = defineEmits(["close", "update:services"]);
 
-const isMobile = ref(window.innerWidth < 630);
+const isMobile = ref(window.innerWidth < 640);
 
 // Function to update the mobile status
 function updateIsMobile() {
-  isMobile.value = window.innerWidth < 630;
+  isMobile.value = window.innerWidth < 640;
 }
 
 // Emit selected services as an array
