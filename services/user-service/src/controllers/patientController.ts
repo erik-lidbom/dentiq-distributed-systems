@@ -1,6 +1,21 @@
 import { Request, Response, NextFunction } from "express";
 import { Patient } from "../models/patientSchema";
-import mqttClient from '../mqtt/mqtt'
+import mqttClient from "../mqtt/mqtt";
+
+// Helper function to handle errors
+const handleError = (error: any, res: Response): void => {
+    if (error.code === 11000) {
+        const duplicateField = Object.keys(error.keyValue)[0];
+        res.status(409).json({
+            message: `Duplicate value for field '${duplicateField}': ${error.keyValue[duplicateField]}`,
+        });
+    } else {
+        res.status(500).json({
+            message: "An unexpected error occurred.",
+            error: error.message,
+        });
+    }
+};
 
 // Create a new patient
 export const createPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -47,7 +62,7 @@ export const createPatient = async (req: Request, res: Response, next: NextFunct
         res.status(201).json({ message: "New patient registered", patient: savedPatient });
     } catch (error) {
         console.error("[ERROR] Could not create patient: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
 
@@ -57,7 +72,7 @@ export const deletePatient = async (req: Request, res: Response, next: NextFunct
         const { patientId } = req.body;
 
         if (!patientId) {
-            res.status(400).json({ message: "Missing required field." });
+            res.status(400).json({ message: "Missing required field: patientId." });
             return;
         }
 
@@ -71,7 +86,7 @@ export const deletePatient = async (req: Request, res: Response, next: NextFunct
         res.status(200).json({ message: "Patient deleted", patientId });
     } catch (error) {
         console.error("[ERROR] Could not delete patient: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
 
@@ -98,7 +113,7 @@ export const getPatient = async (req: Request, res: Response, next: NextFunction
         res.status(200).json(patient);
     } catch (error) {
         console.error("[ERROR] Could not fetch patient: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
 
@@ -122,6 +137,6 @@ export const patchPatient = async (req: Request, res: Response, next: NextFuncti
         res.status(200).json({ message: "Patient updated", patient: updatedPatient });
     } catch (error) {
         console.error("[ERROR] Could not update patient: ", error);
-        next(error);
+        handleError(error, res);
     }
 };
