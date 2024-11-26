@@ -68,7 +68,7 @@ const selectedServices = ref([]);
 
 // Function to update the mobile status
 function updateIsMobile() {
-  isMobile.value = window.innerWidth < 630;
+  isMobile.value = window.innerWidth < 640;
 }
 
 // Add event listeners on mount and remove on unmount
