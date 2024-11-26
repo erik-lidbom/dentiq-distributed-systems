@@ -1,6 +1,6 @@
 <template>
   <GoogleMap
-    api-key="AIzaSyD2mhiM4-Oem9ysJpOmYwYXJrHqv15aJ9s"
+    :api-key="googleMapsApiKey"
     map-id="308fb395aaafab13"
     style="width: 100%;"
     :center="center"
@@ -39,7 +39,6 @@
 import { ref } from "vue";
 import { GoogleMap, CustomMarker } from "vue3-google-map";
 import CustomMapCard from "./ClinicMapCard.vue";
-import defaultClinicImage from "/public/images/clinic-placeholder.svg";
 
 // Map Center
 const center = { lat: 57.7089, lng: 11.9746 };
@@ -52,6 +51,9 @@ const mapOptions = {
   zoomControl: false, // Enable or disable zoom controls (optional)
   rotateControl: false, // Disable rotate control
 };
+
+// API Key from environment variable
+const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 // Clinic Mock Data
 const clinics = ref([
