@@ -87,7 +87,7 @@ function toggleService(service: { name: string; selected: boolean }) {
   // Save to localStorage
   localStorage.setItem("selectedServices", JSON.stringify(selectedServices.value));
 
-  console.log("Updated Selected Services:", selectedServices.value);
+
 }
 
 // Add event listeners on mount and remove on unmount
