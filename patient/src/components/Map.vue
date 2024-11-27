@@ -21,7 +21,7 @@
       <div
         class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]"
       >
-        <img src="/public/svgs/logo-dark.svg" width="30" height="30" />
+        <img src="/svgs/logo-dark.svg" width="30" height="30" />
       </div>
       <!-- InfoWindow displayed for the active marker -->
       <div

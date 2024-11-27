@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import logo from '@/../public/svgs/logo-dark.svg'
-import avatar from '@/../public/svgs/user-avatar.svg'
 import Search from '@/components/Search.vue'
 </script>
 
@@ -9,7 +7,7 @@ import Search from '@/components/Search.vue'
         <ul class="flex flex-row justify-between items-center w-full space-x-2 md:space-x-6">
             <li>
                 <a href="/" class="items-center space-x-2 flex min-w-full">
-                    <img :src=logo href="/" />
+                    <img src="/svgs/logo-dark.svg" alt="Logo" />
                     <h1 class="hidden sm:block  text-dentiq-text-primary font-archivoBlack text-dentiq-h2">Denti<span class="text-dentiq-text-secondary">Q</span></h1>
                 </a>
             </li>
@@ -19,7 +17,7 @@ import Search from '@/components/Search.vue'
                     <p class="text-dentiq-text-dark font-normal text-dentiq-body-small">Nabil Al Sayed</p>
                     <p class="text-dentiq-muted-default font-normal text-dentiq-body-small">Patient</p>
                 </div>
-                <img :src=avatar alt="User" class="h-[60px] w-[60px] border-4 rounded-full"/>
+                <img src="/svgs/user-avatar.svg" alt="User" class="h-[60px] w-[60px] border-4 rounded-full" />
             </div>
         </ul>
     </nav>
