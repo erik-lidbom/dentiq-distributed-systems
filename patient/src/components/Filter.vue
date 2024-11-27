@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col justify-between h-full rounded-2xl p-6 sm:max-w-[250px] space-y-8 bg-dentiq-muted-lightest absolute right-0 left-0 top-0 bottom-0 z-50 w-full">
+  <div class="flex flex-col justify-between h-full p-6 sm:max-w-[250px] space-y-8 bg-dentiq-muted-lightest absolute right-0 left-0 top-0 bottom-0 z-50 w-full">
     <div class="space-y-6">
       <!-- Header -->
       <div>
