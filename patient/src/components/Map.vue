@@ -17,10 +17,19 @@
       :options="{ position: { lng: clinic.lng, lat: clinic.lat }, anchorPoint: 'BOTTOM_CENTER' }"
       @click="showInfoWindow(clinic)"
     >
-      <div class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]">
+      <!-- Marker Icon -->
+      <div
+        class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]"
+      >
         <img src="/public/svgs/logo-dark.svg" width="30" height="30" />
       </div>
-      <div v-if="activeClinic && activeClinic.id === clinic.id" class="absolute z-50" style="transform: translate(-50%, -100%);">
+      <!-- InfoWindow displayed for the active marker -->
+      <div
+        v-if="activeClinic && activeClinic.id === clinic.id"
+        class="absolute z-50"
+        style="transform: translate(-50%, -100%);"
+        @click.stop
+      >
         <CustomMapCard :clinic="clinic" />
       </div>
     </CustomMarker>
