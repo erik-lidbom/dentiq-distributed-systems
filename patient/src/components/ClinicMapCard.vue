@@ -30,6 +30,9 @@
             <p v-if="hiddenServices.length > 0" class="text-dentiq-caption-small min-[425px]:text-dentiq-body-small px-2 py-[7px] rounded-lg text-dentiq-muted-darker bg-dentiq-muted-lighter">+{{ hiddenServices.length }}</p>
           </div>
 
+          <button @click="openModal" class="flex items-center justify-center space-x-2 w-full bg-dentiq-background-secondary py-2 rounded-xl">
+            <span class="text-dentiq-button-light font-semibold text-dentiq-body-small">View</span>
+          </button>
         </div>
       </div>
     </div>
@@ -39,10 +42,10 @@
   import { defineProps, computed } from "vue";
   import { library } from "@fortawesome/fontawesome-svg-core";
   import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-  import { faCircle, faWheelchair, faB ,faStar } from "@fortawesome/free-solid-svg-icons";
+  import { faCircle, faCalendar ,faB ,faStar } from "@fortawesome/free-solid-svg-icons";
   
   // Add icons to the library
-  library.add(faWheelchair, faStar, faB, faCircle);
+  library.add(faStar,faCalendar, faB, faCircle);
   
   // Props
   const props = defineProps({
@@ -58,6 +61,13 @@
   // Compute visible and hidden services
   const visibleServices = computed(() => services.slice(0, 5));
   const hiddenServices = computed(() => services.slice(5));
+
+
+  // Open Modal Function
+  // TODO: Implement Modal
+  const openModal = () => {
+    console.log("Open Modal");
+  };
   
   const defaultPlaceholder = new URL(
     "/images/clinic-placeholder.svg",

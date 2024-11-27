@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { GoogleMap, CustomMarker } from "vue3-google-map";
 import CustomMapCard from "./ClinicMapCard.vue";
 import Filter from "./Filter.vue";
@@ -90,6 +90,7 @@ onMounted(async () => {
   }
 );
 
+
 // Functions to toggle and close the filter
 function toggleFilter() {
   showFilter.value = !showFilter.value;
@@ -116,6 +117,10 @@ const filterClinics = (services) => {
 
 // Function to show the info window
 const showInfoWindow = (clinic) => {
+  if(activeClinic.value && activeClinic.value.id === clinic.id) {
+    activeClinic.value = null;
+    return;
+  }
   activeClinic.value = clinic;
   console.log("Active clinic:", activeClinic.value);
 }

@@ -24,6 +24,7 @@ export default {
           button: {
             primary: '#1565C0',
             secondary: '#46BCEC',
+            light: '#FFFFFF',
           },
           text: {
             light: '#FFFFFF',
