@@ -1,10 +1,9 @@
 import express from 'express';
-import { Request, Response } from 'express';
+import routingController from '../controllers/routingController';
 
 const router = express.Router();
 
-router.all('/:apiName', (req : Request, res : Response) => {
-    res.send(req.params.apiName);
-})
+// Dynamic route to handle optional path
+router.all('/:serviceName/:path*?', routingController);
 
-module.exports = router;
+export default router;
