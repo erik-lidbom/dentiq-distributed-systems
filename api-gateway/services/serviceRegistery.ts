@@ -6,7 +6,8 @@ interface Service {
 }
 
 const services: Record<string, Service> = {
-  booking: { name: "booking", host: "http://localhost", port: 3001, url: "http://localhost:3001/api/appointments" },
+  user: { name: "user", host: "http://localhost", port: 3001, url: "http://localhost:3001/api" },
+  booking: { name: "booking", host: "http://localhost", port: 3002, url: "http://localhost:3002/api/appointments" },
   fake: { name: "fake", host: "http://localhost", port: 3002, url: "http://localhost:3002/api" },
 };
 
