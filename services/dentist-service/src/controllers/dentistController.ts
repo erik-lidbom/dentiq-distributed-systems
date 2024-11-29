@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Dentist } from "../models/dentistSchema";
+import { publishMessage } from "../mqtt/mqtt"; // Import MQTT helper function
 
 // Helper function to handle errors
 const handleError = (error: any, res: Response): void => {
@@ -38,6 +39,19 @@ export const createDentist = async (req: Request, res: Response, next: NextFunct
         });
 
         const savedDentist = await newDentist.save();
+
+        // Publish message to HiveMQ
+        const message = {
+            type: "dentist",
+            dentistId: savedDentist._id,
+            personnummer,
+            firstName,
+            lastName,
+            email,
+            appointments,
+            clinics,
+        };
+        publishMessage(process.env.DENTIST_TOPIC!, message);
 
         res.status(201).json({ message: "New dentist registered", dentist: savedDentist });
     } catch (error) {

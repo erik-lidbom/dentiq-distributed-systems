@@ -21,7 +21,7 @@ const mqttConnOptions: IClientOptions = {
   port: parseInt(process.env.MQTT_PORT, 10) || 8883,
   protocol: 'mqtts',
   username: process.env.MQTT_USERNAME,
-  password: process.env.MQTT_PASSWORD
+  password: process.env.MQTT_PASSWORD,
 };
 
 // Create MQTT client
