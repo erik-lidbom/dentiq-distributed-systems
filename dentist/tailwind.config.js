@@ -20,6 +20,7 @@ export default {
             secondary: '#46BCEC',
             primary: '#1565C0',
             selected: '#46BCEC40',
+            beige: '#F7F6F2'
           },
           button: {
             primary: '#1565C0',

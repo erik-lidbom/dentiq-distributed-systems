@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="flex flex-col min-h-screen bg-dentiq-muted-light p-4">
+  <div id="app" class="flex flex-col min-h-screen bg-dentiq-background-beige p-4">
     <!-- Global Navigation Bar -->
     <header>
       <GlobalNav />
