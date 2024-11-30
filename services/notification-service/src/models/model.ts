@@ -3,15 +3,23 @@ import mongoose, { Document } from "mongoose";
 export interface Notification {
   email: string;
   message: string;
-  senderId: string;
-  receiverId: string;
   senderService: string;
-  receiverClient: "patientClient" | "dentistClient";
+  patientId?: string;
+  dentistId?: string;
 }
 
-export type NotificationDocument = Notification & Document;
+export interface NotificationDocument extends Document {
+  email: string;
+  message: string;
+  senderService: string;
+  patientId?: string;
+  dentistId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 /**
- * Mongoose schema for notifications. Every field is required, which means that the request body must contain these fields.
+ * Mongoose schema for notifications. Every field is required except for patientId and * dentistId.
+ * patientId and dentistId always needs to be provided whenever we shall notify a specific dentist or patient
  * Also added timestamp to ensure that we can sort the notification logs.
  */
 
@@ -26,22 +34,17 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       required: [true, "message is required"],
     },
-    senderId: {
-      type: String,
-      required: [true, "senderId is required"],
-    },
-    receiverId: {
-      type: String,
-      required: [true, "receiverId is required"],
-    },
     senderService: {
       type: String,
       required: [true, "senderService is required"],
     },
-    receiverClient: {
+    patientId: {
       type: String,
-      enum: ["patientClient", "dentistClient"],
-      required: true,
+      required: false,
+    },
+    dentistId: {
+      type: String,
+      required: false,
     },
   },
   { timestamps: true }
