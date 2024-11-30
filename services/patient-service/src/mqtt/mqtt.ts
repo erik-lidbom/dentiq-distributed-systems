@@ -49,14 +49,27 @@ mqttClient.on("connect", () => {
 // Handle incoming messages
 mqttClient.on("message", (topic, message) => {
   try {
-    const messageString = message.toString(); // Convert the message to a string
     let payload;
 
-    // Attempt to parse JSON. If it fails, treat it as a plain string.
-    try {
-      payload = JSON.parse(messageString); // Parse as JSON
-    } catch {
-      payload = messageString; // If parsing fails, treat it as a plain string
+    // Check the type of the incoming message
+    if (typeof message === "string") {
+      // If the message is a string, try parsing as JSON
+      try {
+        payload = JSON.parse(message);
+      } catch {
+        payload = message; // If parsing fails, keep it as a string
+      }
+    } else if (Buffer.isBuffer(message)) {
+      // If the message is a buffer, convert it to a string
+      const messageString = message.toString();
+      try {
+        payload = JSON.parse(messageString);
+      } catch {
+        payload = messageString; // If parsing fails, keep it as a string
+      }
+    } else {
+      // If the message is neither a string nor a buffer, leave it as is
+      payload = message;
     }
 
     console.log(`[MQTT]: Message received from ${topic}:`, payload);
