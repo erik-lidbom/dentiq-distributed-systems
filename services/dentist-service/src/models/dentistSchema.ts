@@ -43,12 +43,6 @@ const dentistSchema: Schema<IDentist> = new mongoose.Schema({
             "Please provide a valid email address",
         ],
     },
-    appointments: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Appointment",
-        },
-    ],
     clinics: [
         {
             type: mongoose.Schema.Types.ObjectId,

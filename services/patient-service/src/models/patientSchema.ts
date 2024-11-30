@@ -34,12 +34,6 @@ const patientSchema: Schema<IPatient> = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    appointments: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Appointment",
-        },
-    ],
 });
 
 // Create the model
