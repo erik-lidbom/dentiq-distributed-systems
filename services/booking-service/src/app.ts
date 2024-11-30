@@ -15,6 +15,8 @@ connectToDB();
 
 app.use(express.json());
 app.use("/api/appointments", appointmentRouter);
+app.use("/api/bookAppointment", appointmentRouter);
+
 
 app.get("/", (req, res) => {
   res.send("BASIC MQTT + EXPRESS + NODE + TS SETUP");
