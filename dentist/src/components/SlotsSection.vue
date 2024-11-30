@@ -8,7 +8,7 @@
          </div>
         <!-- Date Display -->
         <div class="flex items-center justify-between mb-4 relative pt-3">
-            <h3 class="text-lg font-medium">{{  formattedDate }}</h3>
+            <h4 class="text-dentiq-h4">{{  formattedDate }}</h4>
             <button @click="toggleCalendar" class="py-1 px-3 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"> Cal </button>
         
           <!-- Calendar Display -->
@@ -25,6 +25,9 @@
             @click="toggleSlot(slot)">
             {{ slot.time }} 
           </button>
+        </div>
+        <div class="border-b border-gray-400 flex justify-center">
+          <button class="bg-dentiq-button-primary m-2 p-4 text-white rounded-md">Confirm Changes</button>
         </div>
       </div>
     </div>
