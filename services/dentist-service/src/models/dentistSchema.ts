@@ -16,26 +16,31 @@ const dentistSchema: Schema<IDentist> = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+        trim: true, 
     },
     firstName: {
         type: String,
         required: true,
+        trim: true,
     },
     lastName: {
         type: String,
         required: true,
+        trim: true,
     },
     password: {
         type: String,
         required: true,
+        trim: true,
     },
     email: {
         type: String,
         required: true,
         unique: true,
+        trim: true,
         match: [
             /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            'Please provide a valid email address',
+            "Please provide a valid email address",
         ],
     },
     appointments: [
