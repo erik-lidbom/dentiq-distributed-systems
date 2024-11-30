@@ -1,35 +1,22 @@
 import { Request, Response } from "express";
 import Notification, { NotificationDocument } from "../models/model";
-import { publistMqtt } from "../mqtt/mqtt";
 
 /**
  * This file contains all the necessary methods for a notification service
- * createNotification creates a new notification into the database. If the write is successfull, the function will publish the * * * notification to the receiverID
- * TODO --> Currently the message is only publishing to the MQTT if the write to the database is successfull. Shall we follow that * structure or should we publish a message no matter what
  */
-export const createNotification = async (
+
+/*
+ * httpCreateNotification write a new notification into the database.
+ * Works as a HTTP wrapper in case we would need to use normal REST requests for  *creating notifications.
+ */
+export const httpCreateNotification = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const notification = new Notification(req.body);
-    const savedNotification: NotificationDocument = await notification.save();
-
-    // Refining message to make sure to not leak any sensitive information
-    const { email, message, senderService, receiverClient, receiverId } =
-      savedNotification;
-    const payload = JSON.stringify({
-      email: email,
-      message: message,
-      senderService: senderService,
-    });
-
-    // Every topic follows this structure: `receiverClient/receiverId` --> Eg. `patientClient/userId`
-    await publistMqtt(`${receiverClient}/${receiverId}`, payload);
-
+    await createNotification(req.body);
     res.status(201).json({
       message: "Notification created successfully!",
-      notification: savedNotification,
     });
   } catch (error: unknown) {
     console.error("Error creating notification:", error);
@@ -40,6 +27,25 @@ export const createNotification = async (
     }
   }
 };
+
+/**
+ * Creates a notification and write it to the database
+ * @returns a promise of a Notification Document
+ */
+export const createNotification = async (
+  data: Buffer
+): Promise<NotificationDocument> => {
+  try {
+    const payload = Buffer.isBuffer(data) ? JSON.parse(data.toString()) : data;
+    const notification = new Notification(payload);
+    const savedNotification: NotificationDocument = await notification.save();
+    return savedNotification;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// TODO --> Create functions to retrive a patient or dentists notification
 
 export const getPatientNotifications = async (req: Request, res: Response) => {
   try {
