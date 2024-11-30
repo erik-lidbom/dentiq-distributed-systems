@@ -7,35 +7,34 @@ interface IDentist extends Document {
     lastName: string;
     password: string;
     email: string;
-    appointments: mongoose.Types.ObjectId[];
     clinics: mongoose.Types.ObjectId[];
 }
 
 const dentistSchema: Schema<IDentist> = new mongoose.Schema({
     personnummer: {
         type: String,
-        required: true,
+        required: [true, "Personnummer is required"],
         unique: true,
-        trim: true, 
+        trim: true,
     },
     firstName: {
         type: String,
-        required: true,
+        required: [true, "First name is required"],
         trim: true,
     },
     lastName: {
         type: String,
-        required: true,
+        required: [true, "Last name is required"],
         trim: true,
     },
     password: {
         type: String,
-        required: true,
+        required: [true, "Password is required"],
         trim: true,
     },
     email: {
         type: String,
-        required: true,
+        required: [true, "Email is required"],
         unique: true,
         trim: true,
         match: [

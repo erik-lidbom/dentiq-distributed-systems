@@ -7,35 +7,34 @@ interface IPatient extends Document {
     Lastname: string;
     password: string;
     email: string;
-    appointments: mongoose.Types.ObjectId[];
 }
 
 // Create the schema
 const patientSchema: Schema<IPatient> = new mongoose.Schema({
     Personnummer: {
         type: String,
-        required: true,
+        required: [true, "Personnummer is required"],
         unique: true,
         trim: true,
     },
     Firstname: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, "Firstname is required"],
+        trim: true,
     },
     Lastname: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, "Lastname is required"],
+        trim: true,
     },
     password: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, "Password is required"],
+        trim: true,
     },
     email: {
         type: String,
-        required: true,
+        required: [true, "Email is required"],
         unique: true,
         trim: true,
         match: [
