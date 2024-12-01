@@ -1,11 +1,13 @@
 export const TOPICS = {
     APPOINTMENT: {
         PATIENT_BOOKING: "dentiq/appointmentService/patientService/bookSlot",
-        APP_CANCELED: "dentiq/appointmentService/dentistService/cancelSlot",
+        DENTIST_DELETE_SLOT: "dentiq/appointmentService/notificationService/deleteSlot",
+        PATIENT_CANCEL_SLOT: "dentiq/appointmentService/notificationService/cancelSlot",
         APP_CANCEL_CONF: "dentiq/appointmentService/notificationService/cancelSlot",
-        PATIENT_AWAIT_CONFIRMATION: "dentiq/appointmentService/patientService/bookSlot/status",
+
         DENTIST_CREATE_APP: "dentiq/appointmentService/dentistService/addSlot",
-        DENTIST_AWAIT_CONF: "dentiq/dentistService/appointmentService/addSlots/status",
+        DENTIST_AWAIT_CONF: "dentiq/dentistService/appointmentService/addSlot/status",
+        PATIENT_AWAIT_CONFIRMATION: "dentiq/patientService/appointmentService/bookSlot/status",
         APPOINTMENT_BOOKED: "dentiq/appointmentService/notificationService/bookedSlot",
         APPOINTMENT_CREATED: "dentiq/appointmentService/notificationService/addSlots"
     },

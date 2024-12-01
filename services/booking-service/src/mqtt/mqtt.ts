@@ -1,6 +1,6 @@
 import mqtt, { MqttClient, IClientOptions } from "mqtt";
 import dotenv from "dotenv";
-import { TOPICS } from '../mqtt/topics'
+import { TOPICS } from './topics'
 
 dotenv.config();
 
