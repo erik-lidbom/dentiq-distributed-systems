@@ -1,6 +1,9 @@
 import mqtt, { MqttClient, IClientOptions } from "mqtt";
 import dotenv from "dotenv";
+import { TOPICS } from './topics'
+
 dotenv.config();
+
 
 const mqttConnOptions: IClientOptions = {
     host: process.env.MQTT_HOST,
@@ -15,11 +18,11 @@ const mqttConnOptions: IClientOptions = {
   mqttClient.on("connect", () => {
     console.log("[MQTT]: Successfully connected to the broker!");
   
-    mqttClient.subscribe(process.env.APPOINTMENT_TOPIC!, (err) => {
+    mqttClient.subscribe([TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF, TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION], (err) => {
       if (err) {
         console.error("[MQTT]: Could not establish subscription connection: ", err);
       } else {
-        console.log("[MQTT]: Subscribed to topic", process.env.APPOINTMENT_TOPIC);
+        console.log("[MQTT]: Subscribed to topic(s)", TOPICS.APPOINTMENT.APPOINTMENT_CREATED, TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION);
         console.log("-------------------------------------------------------");
       }
     });

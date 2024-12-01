@@ -45,7 +45,7 @@
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
     "mongoose": "^8.8.2",
-    "mqtt": "^5.10.2",
+    "mqtt": "^5.10.3",
     "ms": "^2.0.0",
     "negotiator": "^0.6.3",
     "object-inspect": "^1.13.3",
@@ -69,6 +69,7 @@
     "undici-types": "^6.19.8",
     "unpipe": "^1.0.0",
     "utils-merge": "^1.0.1",
+    "uuid": "^11.0.3",
     "vary": "^1.1.2"
   },
   "devDependencies": {
