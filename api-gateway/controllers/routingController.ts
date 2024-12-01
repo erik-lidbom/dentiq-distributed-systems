@@ -28,7 +28,7 @@ const routingController = async (req: Request, res: Response, next: NextFunction
       targetUrl += `?${queryString}`;
     }
 
-    console.log(`[INFO]: Forwarding request to: ${targetUrl}`);
+    console.log(`[INFO]: Forwarding request ${req.method} ${req.url} to: ${targetUrl}`);
 
     // Forward the request to the target service
     const response = await axios({
@@ -42,7 +42,9 @@ const routingController = async (req: Request, res: Response, next: NextFunction
   } catch (error: any) {
     if (error.response) {
       // Backend service error
-      console.error(`[ERROR]: Backend service error at ${error.config.url}`);
+      console.error(
+        `[ERROR]: Backend service error. Service: ${req.params.serviceName}, URL: ${error.config.url}, Status: ${error.response.status}`
+      );
       return next(
         new ServiceError(
           `Error from service ${req.params.serviceName}: ${error.response.data.message || 'Unknown error'}`,
@@ -52,8 +54,7 @@ const routingController = async (req: Request, res: Response, next: NextFunction
     }
 
     console.error(`[ERROR]: Internal error in routingController: ${error.message}`);
-    // Pass unexpected errors to global error handler
-    next(error); 
+    next(new ServiceError('Internal Server Error', 500));
   }
 };
 
