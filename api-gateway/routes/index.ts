@@ -14,11 +14,12 @@ router.all(
     // Apply rate limiter dynamically based on the serviceName
     const limiter = rateLimiter(serviceName);
     limiter(req, res, next);
-  },
+  }
   // Authentication middleware
-  authMiddleware, 
+    // ,authMiddleware, 
+    // TODO: Uncomment the line above to enable authentication
   // Routing controller to forward requests to the appropriate service
-  routingController 
+  ,routingController
 );
 
 export default router;

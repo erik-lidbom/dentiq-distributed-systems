@@ -4,6 +4,7 @@ import cors from "cors";
 import routes from "./routes/index";
 import morgan from 'morgan';
 import { errorHandler } from "./middleware/errorHandler";
+import { initRateLimiters } from "./middleware/rateLimiter";
 
 dotenv.config();
 
@@ -13,11 +14,10 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
 
-// TODO: Use it with the Logging Service
-// Logs requests with details like method, path, status, etc.
-app.use(morgan('dev')); 
-
+// Initialize rate limiters
+initRateLimiters();
 
 // Dynamic routes
 app.use("/api", routes);

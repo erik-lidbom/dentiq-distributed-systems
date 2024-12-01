@@ -15,7 +15,7 @@ export const initRateLimiters = () => {
       rateLimiters[serviceName] = rateLimit({
         windowMs,
         max,
-        message: `Too many requests to ${serviceName}. Please try again in ${Math.ceil(rateLimit. - Date.now()) / 1000} seconds.`,
+        message: `Too many requests to ${serviceName}. Please try again in ${Math.ceil(windowMs - Date.now()) / 1000} seconds.`,
       });
     }
   });
