@@ -1,5 +1,5 @@
 <template> 
-    <div class="min-h-full w-2/3 relative border-r border-gray-400">
+    <div class="min-h-full w-2/3 relative border-r border-gray-400 flex">
       <div class="ml-5 w-4/5">
         <!-- Title and Description -->
          <div class="border-b border-gray-400">
@@ -21,7 +21,7 @@
           <button
             v-for="slot in slots"
             :key="slot.time"
-            :class="['h-full w-full mb-5 mr-2 text-lg font-semibold rounded-3xl transition-all duration-200', slot.active ? 'bg-dentiq-button-dark text-white border-2 border-transparent' : 'bg-white text-gray-800 border-2 border-dentiq-button-dark']"
+            :class="['h-full w-full p-3 text-lg font-semibold rounded-3xl transition-all duration-200', slot.active ? 'bg-dentiq-button-dark text-white border-2 border-transparent' : 'bg-white text-gray-800 border-2 border-dentiq-button-dark']"
             @click="toggleSlot(slot)">
             {{ slot.time }} 
           </button>
@@ -55,8 +55,8 @@ const selectedDate = ref(new Date()); // Holds the selected date
 
     // Handle date change
     const onDateChange = (date) => {
-    selectedDate.value = date;
-    showCalendar.value = false; // Close the calendar after a date is selected
+      selectedDate.value = date;
+      showCalendar.value = false; // Close the calendar after a date is selected
     };
 
     // Predefined slot times
