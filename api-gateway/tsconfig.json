@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "typeRoots": ["./node_modules/@types", "./"],
+    "types": ["node", "express"]
+  },
+  "include": ["**/*.ts", "**/*.json", "controllers/routingController.js"],
+  "exclude": ["node_modules"]
+}

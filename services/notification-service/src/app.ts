@@ -27,7 +27,7 @@ mongoose
     process.exit(1);
   })
   .then(function () {
-    console.log(`Connected to MongoDB with URI: ${mongoURI}`); // mistake when forward porting
+    console.log(`Connected to MongoDB with URI: ${mongoURI}`);
   });
 
 // Routes
