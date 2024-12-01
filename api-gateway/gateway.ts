@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import routes from "./routes/index";
 import morgan from 'morgan';
+import { errorHandler } from "./middleware/errorHandler";
 
 dotenv.config();
 
@@ -15,11 +16,14 @@ app.use(express.json());
 
 // TODO: Use it with the Logging Service
 // Logs requests with details like method, path, status, etc.
-app.use(morgan('combined')); 
+app.use(morgan('dev')); 
 
 
 // Dynamic routes
 app.use("/api", routes);
+
+// Global Error Handler
+app.use(errorHandler);
 
 // Start the server
 app.listen(PORT, () => {

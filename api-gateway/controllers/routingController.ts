@@ -1,15 +1,15 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { getService } from '../services/serviceRegistery';
+import { ServiceError } from '../utils/customError'; // Custom Error Classes
 
-const routingController = async (req: Request, res: Response) => {
+const routingController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { serviceName, path } = req.params;
     const service = getService(serviceName);
 
     if (!service) {
-      res.status(404).json({ error: `Service ${serviceName} not found` });
-      return;
+      throw new ServiceError(`Service ${serviceName} not found`, 404);
     }
 
     // Construct target URL dynamically
@@ -28,7 +28,7 @@ const routingController = async (req: Request, res: Response) => {
       targetUrl += `?${queryString}`;
     }
 
-    console.log(`Forwarding request to: ${targetUrl}`);
+    console.log(`[INFO]: Forwarding request to: ${targetUrl}`);
 
     // Forward the request to the target service
     const response = await axios({
@@ -40,8 +40,20 @@ const routingController = async (req: Request, res: Response) => {
 
     res.status(response.status).send(response.data);
   } catch (error: any) {
-    console.error('Error in routingController:', error.message);
-    res.status(500).json({ error: error.message });
+    if (error.response) {
+      // Backend service error
+      console.error(`[ERROR]: Backend service error at ${error.config.url}`);
+      return next(
+        new ServiceError(
+          `Error from service ${req.params.serviceName}: ${error.response.data.message || 'Unknown error'}`,
+          error.response.status
+        )
+      );
+    }
+
+    console.error(`[ERROR]: Internal error in routingController: ${error.message}`);
+    // Pass unexpected errors to global error handler
+    next(error); 
   }
 };
 

@@ -1,40 +1,58 @@
-import express, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { User } from '../types';
-import { getService } from '../services/serviceRegistery'; 
+import { getService } from '../services/serviceRegistery';
+import { ServiceError } from '../utils/customError';
 
-// Authentication middleware
 const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
 
   if (!authHeader) {
-    return res.status(401).json({ error: 'Authorization header missing' });
+    console.error(`[AUTH ERROR]: Missing Authorization header`);
+    return next(new ServiceError('Authorization header missing', 401));
   }
 
-  // For "Bearer <token>"
+  // Extract token from "Bearer <token>"
   const token = authHeader.split(' ')[1];
 
   // Retrieve the authentication service from the service registry
   const authService = getService('auth');
 
   if (!authService) {
-    console.error('Authentication service not found in service registry');
-    return res.status(500).json({ error: 'Authentication service not available' });
+    console.error(`[AUTH ERROR]: Authentication service not found in service registry`);
+    return next(new ServiceError('Authentication service not available', 500));
   }
 
   try {
+    // Validate token via the authentication service
     const response = await axios.post(`${authService.url}/validate-token`, { token });
 
     if (response.data.valid) {
-      // Attach user info to the request
+      // Attach user info to the request object for downstream use
       req.user = response.data.user as User;
+      console.log(`[AUTH SUCCESS]: User ${response.data.user.id} authenticated successfully`);
       next();
     } else {
-      res.status(401).json({ error: 'Invalid token' });
+      console.error(`[AUTH ERROR]: Invalid token`);
+      return next(new ServiceError('Invalid token', 401));
     }
-  } catch (error) {
-    console.error('Error validating token:', (error as Error).message);
-    res.status(401).json({ error: 'Unauthorized' });
+  } catch (error: any) {
+    // Handle errors from the authentication service
+    if (error.response) {
+      console.error(
+        `[AUTH ERROR]: Authentication service responded with status ${error.response.status}: ${error.response.data.message || 'Unknown error'}`
+      );
+      return next(
+        new ServiceError(
+          `Authentication service error: ${error.response.data.message || 'Unknown error'}`,
+          error.response.status
+        )
+      );
+    }
+
+    // Handle unexpected errors
+    console.error(`[AUTH ERROR]: Error validating token: ${(error as Error).message}`);
+    next(new ServiceError('Unauthorized', 401));
   }
 };
 
