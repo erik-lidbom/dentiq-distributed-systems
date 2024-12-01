@@ -8,7 +8,7 @@
          </div>
         <!-- Date Display -->
         <div class="flex items-center justify-between mb-4 relative pt-3">
-            <h4 class="text-dentiq-h4">{{  formattedDate }}</h4>
+            <h4 class="text-dentiq-h4">{{ formattedDate }}</h4>
             <button @click="toggleCalendar" class="py-1 px-3 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition"> Cal </button>
         
           <!-- Calendar Display -->
@@ -34,6 +34,7 @@
 </template>
 
 <script setup>
+  //Imports for calendar
   import { ref, computed } from 'vue';
   import Datepicker from 'vue3-datepicker';
   import 'vue3-datepicker';
