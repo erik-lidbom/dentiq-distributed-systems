@@ -33,6 +33,11 @@
                         <span class="text-sm">{{ appointment.patient }}</span>
                     </div>
                 </div>
+
+                <!-- Cancel Button -->
+                <div class="flex items-center">
+                    <button class="bg-red-500 px-5 py-2 rounded-lg text-white mr-3">Cancel</button>
+                </div>
                 
             </div>
         </div>
