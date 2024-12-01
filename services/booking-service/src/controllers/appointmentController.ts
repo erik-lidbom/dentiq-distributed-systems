@@ -12,22 +12,15 @@ export const createAppointment = async (
         const { dentistId, start_time, end_time } = req.body;
 
         if (!dentistId || !start_time || !end_time) {
-            res.status(400).json({ message: "Missing required field(s)."});
+            res.status(400).json({ message: "Missing required field(s)." });
             return;
         }
 
         const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
-
         mqttClient.publish(
             TOPICS.APPOINTMENT.DENTIST_CREATE_APP,
             JSON.stringify({ correlationId, dentistId }),
             {qos: 2}
-        );
-
-        // mock test dentist service
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF,
-            JSON.stringify({  correlationId, status: true })
         );
 
         const validateDentist = await validateId(correlationId, TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF);
@@ -125,12 +118,6 @@ export const bookAppointment = async (req: Request, res: Response, next: NextFun
             TOPICS.APPOINTMENT.PATIENT_BOOKING,
             JSON.stringify({ correlationId, patientId }),
             {qos: 2}
-        );
-
-        // mock test
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION,
-            JSON.stringify({  correlationId, status: true })
         );
 
         const validatePatient = await validateId(correlationId, TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION);
