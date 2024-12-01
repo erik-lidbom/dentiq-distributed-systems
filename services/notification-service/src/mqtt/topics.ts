@@ -4,8 +4,10 @@ export const TOPICS = {
       "dentiq/appointmentService/notificationService/addSlots",
     APPOINTMENT_BOOKED:
       "dentiq/appointmentService/notificationService/bookedSlot",
-    APPOINTMENT_CANCEL_CONFIRMATION:
+    APPOINTMENT_PATIENT_CANCEL_CONFIRMATION:
       "dentiq/appointmentService/notificationService/cancelSlot",
+    APPOINTMENT_DENTIST_CANCEL_CONFIRMATION:
+      "dentiq/appointmentService/notificationService/deleteSlot",
   },
   PUBLISH: {
     APPOINTMENT_CREATED_DENTIST:
