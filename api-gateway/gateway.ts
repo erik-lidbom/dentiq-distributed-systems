@@ -13,8 +13,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Add this to your API Gateway setup
-app.use(morgan('combined')); // Logs requests with details like method, path, status, etc.
+// TODO: Use it with the Logging Service
+// Logs requests with details like method, path, status, etc.
+app.use(morgan('combined')); 
 
 
 // Dynamic routes
