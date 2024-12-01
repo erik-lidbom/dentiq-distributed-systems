@@ -1,5 +1,5 @@
 {
-    "name": "user-service",
+    "name": "dentist-service",
     "version": "1.0.0",
     "type": "module",
     "main": "dist/app.js",
