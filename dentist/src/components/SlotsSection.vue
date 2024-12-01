@@ -26,7 +26,7 @@
             {{ slot.time }} 
           </button>
         </div>
-        <div class="border-b border-gray-400 flex justify-center">
+        <div class="flex justify-center">
           <button class="bg-dentiq-button-primary m-2 p-4 text-white rounded-md">Confirm Changes</button>
         </div>
       </div>

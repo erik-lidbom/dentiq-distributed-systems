@@ -6,14 +6,34 @@
 
             <!-- Appointment Boxes -->
              <div v-for="(appointment, index) in appointments" :key="index" class="bg-white border border-gray-300 rounded-lg flex justify-between items-stretch">
-                <div class="min-w-4 flex space-x-4 border-r border-gray-300 p-4"> 
+                <div class="flex space-x-4 border-r border-gray-300 p-4"> 
                     <!-- Date Section -->
                     <div class="flex flex-col items-center">
                         <span class="text-dentiq-h4">{{ appointment.date.split(' ')[0] }}</span>
                         <span class="text-dentiq-h1">{{ appointment.date.split(' ')[1] }}</span>
                     </div>
                 </div>
-
+                <!-- 'Info' Section -->
+                <div class="flex-col justify-center ml-4 flex-grow space-y-2">
+                    <!-- Time -->
+                    <div class="flex items-center space-x-2 mt-3">
+                        <i class="pi pi-clock w-5 h-5 text-gray-500"></i>
+                        <span class="text-sm">{{ appointment.time }}</span>
+                    </div>
+                
+                    <!-- Location -->
+                    <div class="flex items-center space-x-2 mt-1">
+                        <i class="pi pi-globe w-5 h-5 text-gray-500"></i>
+                        <span class="text-sm">{{ appointment.location }}</span>
+                    </div>
+                    
+                    <!-- Patient Name -->
+                    <div class="flex items-center space-x-2 mt-2">
+                        <i class="pi pi-user w-5 h-5 text-gray-500"></i>
+                        <span class="text-sm">{{ appointment.patient }}</span>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
