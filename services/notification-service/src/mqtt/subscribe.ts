@@ -16,13 +16,28 @@ export const subscribeTopics = async () => {
     }
     console.error("MQTT Subscription error:", err);
   });
-  client?.subscribe(TOPICS.SUBSCRIBE.APPOINTMENT_CANCEL_CONFIRMATION, (err) => {
-    if (!err) {
-      console.log(
-        `Subscribed to ${TOPICS.SUBSCRIBE.APPOINTMENT_CANCEL_CONFIRMATION}`
-      );
-      return;
+  client?.subscribe(
+    TOPICS.SUBSCRIBE.APPOINTMENT_PATIENT_CANCEL_CONFIRMATION,
+    (err) => {
+      if (!err) {
+        console.log(
+          `Subscribed to ${TOPICS.SUBSCRIBE.APPOINTMENT_PATIENT_CANCEL_CONFIRMATION}`
+        );
+        return;
+      }
+      console.error("MQTT Subscription error:", err);
     }
-    console.error("MQTT Subscription error:", err);
-  });
+  );
+  client?.subscribe(
+    TOPICS.SUBSCRIBE.APPOINTMENT_DENTIST_CANCEL_CONFIRMATION,
+    (err) => {
+      if (!err) {
+        console.log(
+          `Subscribed to ${TOPICS.SUBSCRIBE.APPOINTMENT_DENTIST_CANCEL_CONFIRMATION}`
+        );
+        return;
+      }
+      console.error("MQTT Subscription error:", err);
+    }
+  );
 };
