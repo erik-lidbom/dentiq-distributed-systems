@@ -35,7 +35,6 @@ mqttClient.on("connect", () => {
   // Subscribe to topics
   const subscriptionTopics = [
     TOPICS.SUBSCRIBE.DENTIST_CREATE_APP,
-    TOPICS.SUBSCRIBE.PATIENT_BOOKING,
   ];
 
   mqttClient.subscribe(subscriptionTopics, (err) => {
