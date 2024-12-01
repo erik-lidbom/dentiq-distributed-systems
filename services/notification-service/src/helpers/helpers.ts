@@ -19,11 +19,18 @@ export const createPublishTopics = (
         `${TOPICS.PUBLISH.APPOINTMENT_BOOKED_PATIENT}/${data.patientId}`,
       ];
       break;
-    case TOPICS.SUBSCRIBE.APPOINTMENT_CANCEL_CONFIRMATION:
+    case TOPICS.SUBSCRIBE.APPOINTMENT_PATIENT_CANCEL_CONFIRMATION:
       topics = [
-        TOPICS.PUBLISH.APPOINTMENT_CANCEL_DENTIST,
-        TOPICS.PUBLISH.APPOINTMENT_CANCEL_PATIENT,
+        `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_DENTIST}/${data.dentistId}`,
+        `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_PATIENT}/${data.patientId}`,
       ];
+      break;
+    case TOPICS.SUBSCRIBE.APPOINTMENT_DENTIST_CANCEL_CONFIRMATION:
+      topics = [
+        `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_DENTIST}/${data.dentistId}`,
+        `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_PATIENT}`,
+      ];
+      break;
     default:
       [];
   }
