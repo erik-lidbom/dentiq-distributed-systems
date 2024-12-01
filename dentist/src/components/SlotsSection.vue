@@ -1,5 +1,5 @@
 <template> 
-    <div class="min-h-full w-2/3 relative border-r border-gray-400 flex">
+    <div class="min-h-full w-full md:w-2/3 md:h-auto relative border-r border-gray-400 flex">
       <div class="ml-5 w-4/5">
         <!-- Title and Description -->
          <div class="border-b border-gray-400">

@@ -1,6 +1,6 @@
 
 <template>
-    <div class="min-h-full w-1/3 flex-col justify-center">
+    <div class="min-h-full w-full md:w-1/3 h-screen md:h-auto flex-col justify-center">
         <h2 class="pt-4 text-dentiq-h2 text-center">My Appointments</h2>
         <div class="w-11/12 h-auto space-y-4 mt-6 mx-auto">
 
