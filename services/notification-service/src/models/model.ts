@@ -1,7 +1,7 @@
 import mongoose, { Document } from "mongoose";
 
 export interface Notification {
-  email: string;
+  email?: string;
   message: string;
   senderService: string;
   patientId?: string;
@@ -9,7 +9,7 @@ export interface Notification {
 }
 
 export interface NotificationDocument extends Document {
-  email: string;
+  email?: string;
   message: string;
   senderService: string;
   patientId?: string;
@@ -27,7 +27,7 @@ const notificationSchema = new mongoose.Schema(
   {
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: false,
       trim: true,
     },
     message: {
