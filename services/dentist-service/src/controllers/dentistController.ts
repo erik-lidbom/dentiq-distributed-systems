@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Dentist } from "../models/dentistSchema";
-import { publishMessage } from "../mqtt/mqtt";
+import { publishMessage } from "../mqtt/mqtt"; // Import MQTT helper function
 
 // Helper function to handle errors
 const handleError = (error: any, res: Response): void => {
@@ -20,7 +20,7 @@ const handleError = (error: any, res: Response): void => {
 // Create a new dentist
 export const createDentist = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { personnummer, firstName, lastName, password, email } = req.body;
+        const { personnummer, firstName, lastName, password, email, appointments, clinics } = req.body;
 
         // Validate required fields
         if (!personnummer || !firstName || !lastName || !password || !email) {
@@ -34,19 +34,23 @@ export const createDentist = async (req: Request, res: Response, next: NextFunct
             lastName,
             password,
             email,
+            appointments,
+            clinics,
         });
 
         const savedDentist = await newDentist.save();
 
-        // Publish message to MQTT
+        // Publish message to HiveMQ
         const message = {
+            type: "dentist",
             dentistId: savedDentist._id,
             personnummer,
             firstName,
             lastName,
             email,
+            appointments,
+            clinics,
         };
-
         publishMessage(process.env.DENTIST_TOPIC!, message);
 
         res.status(201).json({ message: "New dentist registered", dentist: savedDentist });
@@ -90,7 +94,7 @@ export const getDentist = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        const dentist = await Dentist.findById(dentistId);
+        const dentist = await Dentist.findById(dentistId).populate("appointments clinics");
 
         if (!dentist) {
             res.status(404).json({ message: "Dentist not found." });
@@ -114,7 +118,7 @@ export const patchDentist = async (req: Request, res: Response, next: NextFuncti
             return;
         }
 
-        const updatedDentist = await Dentist.findByIdAndUpdate(dentistId, updates, { new: true });
+        const updatedDentist = await Dentist.findByIdAndUpdate(dentistId, updates, { new: true }).populate("appointments clinics");
 
         if (!updatedDentist) {
             res.status(404).json({ message: "Dentist not found." });
@@ -133,7 +137,7 @@ export const queryDentists = async (req: Request, res: Response, next: NextFunct
     try {
         const filters = req.body.filters || {};
 
-        const dentists = await Dentist.find(filters);
+        const dentists = await Dentist.find(filters).populate("appointments clinics");
 
         if (!dentists || dentists.length === 0) {
             res.status(404).json({ message: "No dentists found." });
