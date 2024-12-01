@@ -1,6 +1,6 @@
 
 <template>
-    <div class="min-h-full w-full md:w-1/3 h-screen md:h-auto flex-col justify-center">
+    <div class="lg:min-h-full w-full lg:w-1/3 flex-col justify-center pb-4">
         <h2 class="pt-4 text-dentiq-h2 text-center">My Appointments</h2>
         <div class="w-11/12 h-auto space-y-4 mt-6 mx-auto">
 
@@ -18,19 +18,19 @@
                     <!-- Time -->
                     <div class="flex items-center space-x-2 mt-3">
                         <i class="pi pi-clock w-5 h-5 text-gray-500"></i>
-                        <span class="text-sm">{{ appointment.time }}</span>
+                        <span class="text-xs md:text-sm">{{ appointment.time }}</span>
                     </div>
                 
                     <!-- Location -->
                     <div class="flex items-center space-x-2 mt-1">
                         <i class="pi pi-globe w-5 h-5 text-gray-500"></i>
-                        <span class="text-sm">{{ appointment.location }}</span>
+                        <span class="text-xs md:text-sm">{{ appointment.location }}</span>
                     </div>
                     
                     <!-- Patient Name -->
                     <div class="flex items-center space-x-2 mt-2">
                         <i class="pi pi-user w-5 h-5 text-gray-500"></i>
-                        <span class="text-sm">{{ appointment.patient }}</span>
+                        <span class="text-xs md:text-sm">{{ appointment.patient }}</span>
                     </div>
                 </div>
 
