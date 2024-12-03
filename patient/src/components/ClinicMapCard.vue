@@ -39,7 +39,7 @@
   </template>
   
   <script setup lang="ts">
-  import { defineProps, computed } from "vue";
+  import { computed } from "vue";
   import { library } from "@fortawesome/fontawesome-svg-core";
   import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
   import { faCircle, faCalendar ,faB ,faStar } from "@fortawesome/free-solid-svg-icons";

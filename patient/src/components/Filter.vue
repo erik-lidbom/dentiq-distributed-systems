@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineEmits, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 
 // Retrieve selected services from localStorage
 let savedServices = JSON.parse(localStorage.getItem("selectedServices") || "[]");
