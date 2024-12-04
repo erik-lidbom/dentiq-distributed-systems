@@ -1,5 +1,5 @@
 <template>
-    <div class="flex bg-white w-3/4 md:w-2/4 min-h-[600px] rounded-2xl p-4">
-        sdasd
+    <div class="flex bg-white w-[75vw] md:min-w-[600px] max-w-[700px] min-h-[75vh] p-4">
+        Clinic
     </div>
 </template>
