@@ -15,7 +15,8 @@
       v-for="clinic in filteredClinics"
       :key="clinic.id"
       :options="{ position: { lng: clinic.lng, lat: clinic.lat }, anchorPoint: 'BOTTOM_CENTER' }"
-      @click="showInfoWindow(clinic)"
+      @click="openCard(clinic)"
+      @click.stop
     >
       <!-- Marker Icon -->
       <div
@@ -25,15 +26,17 @@
       </div>
       <!-- InfoWindow displayed for the active marker -->
       <div
-        v-if="activeClinic && activeClinic.id === clinic.id"
+        v-if="activeClinic && activeClinic.id === clinic.id && !modalIsOpen"
         class="absolute z-50"
         style="transform: translate(-50%, -100%);"
         @click.stop
       >
-        <CustomMapCard :clinic="clinic" />
+        <CustomMapCard :clinic="clinic" @card-is-open="openModal" />
       </div>
     </CustomMarker>
-    <!-- Filter Button in mobile Only -->
+    <Modal v-if="modalIsOpen" :isOpen="modalIsOpen" @close="modalIsOpen = false">
+      <ClinicScheduleModal :clinic="activeClinic" />
+    </Modal>
     <button
       v-if="isMobile && !showFilter"
       @click="toggleFilter"
@@ -45,11 +48,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from "vue";
-import { GoogleMap, CustomMarker } from "vue3-google-map";
-import CustomMapCard from "./ClinicMapCard.vue";
-import Filter from "./Filter.vue";
-import { fetchClinics } from "@/services/clinicService";
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { GoogleMap, CustomMarker } from 'vue3-google-map';
+import CustomMapCard from './ClinicMapCard.vue';
+import ClinicScheduleModal from './ClinicScheduleModal.vue';
+import Modal from './Modal.vue';
+import Filter from './Filter.vue';
+import { fetchClinics } from '@/services/clinicService';
 
 // Google Maps Center
 const center = { lat: 57.7089, lng: 11.9746 };
@@ -73,7 +78,8 @@ const clinics = ref([]);
 // Track active clinic
 const activeClinic = ref(null);
 // Track selected services
-const selectedServices = ref([]); 
+const selectedServices = ref([]);
+const modalIsOpen = ref(false);
 
 // Function to update the mobile status
 function updateIsMobile() {
@@ -82,23 +88,20 @@ function updateIsMobile() {
 
 // Add event listeners on mount and remove on unmount
 onMounted(() => {
-  window.addEventListener("resize", updateIsMobile);
+  window.addEventListener('resize', updateIsMobile);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("resize", updateIsMobile);
+  window.removeEventListener('resize', updateIsMobile);
 });
 
 onMounted(async () => {
-  try{
-    const response = await fetchClinics();
-    
-    clinics.value = response;
+  try {
+    clinics.value = await fetchClinics();
   } catch (error) {
-    console.error(error)} 
+    console.error(error);
   }
-);
-
+});
 
 // Functions to toggle and close the filter
 function toggleFilter() {
@@ -113,7 +116,7 @@ function closeFilter() {
 // Filter clinics based on selected services
 const filteredClinics = computed(() => {
   // Show all clinics if no filters are selected
-  if (selectedServices.value.length === 0) return clinics.value; 
+  if (selectedServices.value.length === 0) return clinics.value;
   return clinics.value.filter((clinic) =>
     clinic.services.some((service) => selectedServices.value.includes(service))
   );
@@ -121,8 +124,8 @@ const filteredClinics = computed(() => {
 
 const filterClinics = (services) => {
   // Update selected services
-  selectedServices.value = services; 
-}
+  selectedServices.value = services;
+};
 
 // Function to show the info window
 const showInfoWindow = (clinic) => {
@@ -133,4 +136,13 @@ const showInfoWindow = (clinic) => {
   activeClinic.value = clinic;
   console.log("Active clinic:", activeClinic.value);
 }
+
+const openCard = (clinic) => {
+  modalIsOpen.value = false;
+  showInfoWindow(clinic);
+};
+
+const openModal = () => {
+  modalIsOpen.value = true;
+};
 </script>

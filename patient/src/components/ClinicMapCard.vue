@@ -31,7 +31,7 @@
           </div>
 
           <button @click="openModal" class="flex items-center justify-center space-x-2 w-full bg-dentiq-background-secondary py-2 rounded-xl">
-            <span class="text-dentiq-button-light font-semibold text-dentiq-body-small md:text-dentiq-body-large">View</span>
+            <span class="text-dentiq-button-light font-semibold text-dentiq-body-small md:text-dentiq-body-large">Start Booking</span>
           </button>
         </div>
       </div>
@@ -39,7 +39,7 @@
   </template>
   
   <script setup lang="ts">
-  import { computed } from "vue";
+  import { computed, ref } from "vue";
   import { library } from "@fortawesome/fontawesome-svg-core";
   import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
   import { faCircle, faCalendar ,faB ,faStar } from "@fortawesome/free-solid-svg-icons";
@@ -55,6 +55,10 @@
     },
   });
 
+  const emit = defineEmits(
+    ["cardIsOpen"]
+  );
+
   // Services Logic
   const services = props.clinic.services || [];
 
@@ -66,9 +70,9 @@
   // Open Modal Function
   // TODO: Implement Modal
   const openModal = () => {
-    console.log("Open Modal");
+    emit("cardIsOpen", false); 
   };
-  
+
   const defaultPlaceholder = new URL(
     "/images/clinic-placeholder.svg",
     import.meta.url
