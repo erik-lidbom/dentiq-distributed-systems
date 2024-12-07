@@ -15,6 +15,10 @@ dist/
 build/
 out/
 
+
+# Mock Server
+Server/
+
 # Production files
 .env
 .env.*.local

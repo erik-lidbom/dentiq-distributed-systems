@@ -1,6 +1,6 @@
 
 // TODO: Replace this with the API gateway URL
-const BASE_URL = "http://localhost:3000/";
+const BASE_URL = "http://localhost:3000/api/clinics";
 
 /**
  * Fetch clinics from the API gateway

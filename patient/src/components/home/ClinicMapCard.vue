@@ -39,7 +39,7 @@
   </template>
   
   <script setup lang="ts">
-  import { computed, ref } from "vue";
+  import { computed } from "vue";
   import { library } from "@fortawesome/fontawesome-svg-core";
   import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
   import { faCircle, faCalendar ,faB ,faStar } from "@fortawesome/free-solid-svg-icons";
@@ -74,7 +74,7 @@
   };
 
   const defaultPlaceholder = new URL(
-    "/images/clinic-placeholder.svg",
+    "/images/clinics/clinic-placeholder.svg",
     import.meta.url
   ).href;
   </script>

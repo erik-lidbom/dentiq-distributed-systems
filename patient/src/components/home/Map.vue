@@ -1,58 +1,58 @@
 <template>
   <Filter v-if="!isMobile || showFilter" @close="closeFilter" @update:services="filterClinics" />
   <GoogleMap
-    :api-key="googleMapsApiKey"
-    :map-id="googleMapId"
-    style="width: 100%;"
-    :center="center"
-    :zoom="15"
-    :zoom-control="mapOptions.zoomControl"
-    :map-type-control="mapOptions.mapTypeControl"
-    :fullscreen-control="mapOptions.fullscreenControl"
-    :street-view-control="mapOptions.streetViewControl"
+      :api-key="googleMapsApiKey"
+      :map-id="googleMapId"
+      style="width: 100%;"
+      :center="center"
+      :zoom="15"
+      :zoom-control="mapOptions.zoomControl"
+      :map-type-control="mapOptions.mapTypeControl"
+      :fullscreen-control="mapOptions.fullscreenControl"
+      :street-view-control="mapOptions.streetViewControl"
   >
     <CustomMarker
-      v-for="clinic in filteredClinics"
-      :key="clinic.id"
-      :options="{ position: { lng: clinic.lng, lat: clinic.lat }, anchorPoint: 'BOTTOM_CENTER' }"
-      @click="openCard(clinic)"
-      @click.stop
+        v-for="clinic in filteredClinics"
+        :key="clinic.id"
+        :options="{ position: { lng: clinic.lng, lat: clinic.lat }, anchorPoint: 'BOTTOM_CENTER' }"
+        @click="openCard(clinic)"
+        @click.stop
     >
-      <!-- Marker Icon -->
-      <div
-        class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]"
-      >
+      <div class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]">
         <img src="/svgs/logo-dark.svg" width="30" height="30" />
       </div>
-      <!-- InfoWindow displayed for the active marker -->
       <div
-        v-if="activeClinic && activeClinic.id === clinic.id && !modalIsOpen"
-        class="absolute z-50"
-        style="transform: translate(-50%, -100%);"
-        @click.stop
+          v-if="activeClinic && activeClinic.id === clinic.id && !modalIsOpen"
+          class="absolute z-50"
+          style="transform: translate(-50%, -100%);"
+          @click.stop
       >
         <CustomMapCard :clinic="clinic" @card-is-open="openModal" />
       </div>
     </CustomMarker>
-    <Modal v-if="modalIsOpen" :isOpen="modalIsOpen" @close="modalIsOpen = false">
+
+    <!-- Modal -->
+    <Modal v-if="modalIsOpen" @close="modalIsOpen = false">
       <ClinicScheduleModal :clinic="activeClinic" />
     </Modal>
+
     <button
-      v-if="isMobile && !showFilter"
-      @click="toggleFilter"
-      class="fixed bottom-9 h-[48px] w-[100px] left-1/2 transform -translate-x-1/2 bg-dentiq-button-primary text-white font-bold py-2 px-6 rounded-lg z-50"
+        v-if="isMobile && !showFilter"
+        @click="toggleFilter"
+        class="fixed bottom-9 h-[48px] w-[100px] left-1/2 transform -translate-x-1/2 bg-dentiq-button-primary text-white font-bold py-2 px-6 rounded-lg z-50"
     >
       Filter
     </button>
   </GoogleMap>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { GoogleMap, CustomMarker } from 'vue3-google-map';
 import CustomMapCard from './ClinicMapCard.vue';
 import ClinicScheduleModal from './ClinicScheduleModal.vue';
-import Modal from './Modal.vue';
+import Modal from '../shared/Modal.vue';
 import Filter from './Filter.vue';
 import { fetchClinics } from '@/services/clinicService';
 
