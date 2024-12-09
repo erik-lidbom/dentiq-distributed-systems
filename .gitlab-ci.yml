@@ -13,23 +13,23 @@ install_services:
     - MONGODB_PORTS=("APPOINTMENT_PORT" "NOTIFICATION_PORT" "DENTIST_PORT" "PATIENT_PORT")
     ## Creating .env and inserting CI/CD variables
     - for i in ${!SERVICES[@]}; do
-        SERVICE=${SERVICES[$i]}
-        MONGODB_URI=${!MONGODB_URIS[$i]}
-        PORT=${!MONGODB_PORTS[$i]}
-        echo "Creating .env and inserting values for $SERVICE"
-        echo "MONGODB_URI=$MONGODB_URI" > services/$SERVICE/.env
-        echo "PORT=$PORT" >> services/$SERVICE/.env
-        echo "MQTT_HOST=$MQTT_HOST" >> services/$SERVICE/.env
-        echo "MQTT_PORT=$MQTT_PORT" >> services/$SERVICE/.env
-        echo "MQTT_PROTOCOL=$MQTT_PROTOCOL" >> services/$SERVICE/.env
-        echo "MQTT_USERNAME=$MQTT_USERNAME" >> services/$SERVICE/.env
-        echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> services/$SERVICE/.env
+        SERVICE=${SERVICES[$i]};
+        MONGODB_URI=${!MONGODB_URIS[$i]};
+        PORT=${!MONGODB_PORTS[$i]};
+        echo "Creating .env and inserting values for $SERVICE";
+        echo "MONGODB_URI=$MONGODB_URI" > services/$SERVICE/.env;
+        echo "PORT=$PORT" >> services/$SERVICE/.env;
+        echo "MQTT_HOST=$MQTT_HOST" >> services/$SERVICE/.env;
+        echo "MQTT_PORT=$MQTT_PORT" >> services/$SERVICE/.env;
+        echo "MQTT_PROTOCOL=$MQTT_PROTOCOL" >> services/$SERVICE/.env;
+        echo "MQTT_USERNAME=$MQTT_USERNAME" >> services/$SERVICE/.env;
+        echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> services/$SERVICE/.env;
       done
 
     ## Installing dependencies for the different services
     - for SERVICE in "${SERVICES[@]}"; do
-        echo "Installing dependencies for $SERVICE"
-        npm install --prefix services/$SERVICE
+        echo "Installing dependencies for $SERVICE";
+        npm install --prefix services/$SERVICE;
       done
   cache:
     paths:
@@ -46,8 +46,8 @@ build_services:
     - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
     ## Building each service
     - for SERVICE in "${SERVICES[@]}"; do
-        echo "Building $SERVICE"
-        npm run build --prefix services/$SERVICE
+        echo "Building $SERVICE";
+        npm run build --prefix services/$SERVICE;
       done
 
 #test_services: // will be used later
