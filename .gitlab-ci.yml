@@ -31,8 +31,7 @@ install_services:
     ## Installing dependencies for the different services
     - for SERVICE in "${SERVICES[@]}"; do
         echo "Installing dependencies for $SERVICE";
-        npm install --prefix services/$SERVICE;
-        npm install --save-dev typescript --prefix services/$SERVICE;
+        npm ci --prefix services/$SERVICE;
       done
   cache:
     paths:
