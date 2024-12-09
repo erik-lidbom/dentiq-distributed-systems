@@ -8,6 +8,13 @@ install_services:
   image: node:18
   tags:
     - docker
+  cache:
+    paths:
+      - .npm
+      - services/booking-service/node_modules
+      - services/notification-service/node_modules
+      - services/dentist-service/node_modules
+      - services/patient-service/node_modules
   script:
     - set -e
     - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
@@ -31,21 +38,21 @@ install_services:
     ## Installing dependencies for the different services
     - for SERVICE in "${SERVICES[@]}"; do
         echo "Installing dependencies for $SERVICE";
-        npm ci --prefix services/$SERVICE;
+        npm ci --prefix services/$SERVICE --cache .npm --prefer-offline;
         npm install typescript;
       done
-  cache:
-    paths:
-      - services/booking-service/node_modules
-      - services/notification-service/node_modules
-      - services/dentist-service/node_modules
-      - services/patient-service/node_modules
 
 build_services:
   stage: build
   image: node:18
   tags:
     - docker
+  artifacts:
+    paths:
+      - services/booking-service/dist
+      - services/notification-service/dist
+      - services/dentist-service/dist
+      - services/patient-service/dist
   script:
     - set -e
     - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
