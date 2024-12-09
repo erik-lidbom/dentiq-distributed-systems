@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { Patient } from "../models/patientSchema";
 import mqttClient from "../mqtt/mqtt";
+import { TOPICS } from "../mqtt/topics";
 
 // Helper function to handle errors
 const handleError = (error: any, res: Response): void => {
@@ -37,29 +38,33 @@ export const createPatient = async (req: Request, res: Response, next: NextFunct
 
         const savedPatient = await newPatient.save();
 
-        // Publish message to MQTT
+    // Publish message to Notification Service topic
         const message = {
+        type: "PatientRegistered",
             patientId: savedPatient._id,
-            Personnummer,
             Firstname,
             Lastname,
             email,
+            message: "Patient Registered Successfully",
         };
 
         mqttClient.publish(
-            process.env.PATIENT_TOPIC!,
+            TOPICS.PUBLISH.PATIENT_REGISTERED,
             JSON.stringify(message),
             { qos: 2 },
             (err) => {
                 if (err) {
-                    console.error("[MQTT]: Failed to publish message:", err);
+                    console.error("[MQTT]: Failed to publish patient registration:", err);
                 } else {
-                    console.log("[MQTT]: Message published successfully:", message);
+                    console.log("[MQTT]: Patient registration message published:", message);
                 }
             }
         );
 
-        res.status(201).json({ message: "New patient registered", patient: savedPatient });
+        res.status(201).json({
+            message: "New patient registered successfully",
+            patient: savedPatient,
+            });
     } catch (error) {
         console.error("[ERROR] Could not create patient: ", error);
         handleError(error, res);
@@ -93,14 +98,12 @@ export const deletePatient = async (req: Request, res: Response, next: NextFunct
 // Get a patient by ID
 export const getPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { patientId } = req.query; // Retrieve from query parameters
+        const { patientId } = req.query;
 
-        // Validate if patientId is provided
         if (!patientId) {
             res.status(400).json({ message: "Missing required field: patientId." });
             return;
         }
-
         // Find the patient by ID
         const patient = await Patient.findById(patientId);
 
@@ -108,7 +111,6 @@ export const getPatient = async (req: Request, res: Response, next: NextFunction
             res.status(404).json({ message: "Patient not found." });
             return;
         }
-
         // Return the patient details
         res.status(200).json(patient);
     } catch (error) {
