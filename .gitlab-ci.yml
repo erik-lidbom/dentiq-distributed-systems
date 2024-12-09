@@ -29,9 +29,6 @@ install_and_build_services:
         echo "MQTT_USERNAME=$MQTT_USERNAME" >> services/$SERVICE/.env;
         echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> services/$SERVICE/.env;
       done
-  artifacts:
-    paths:
-      - services/**/dist
 
     ## Install and build services
     - for SERVICE in "${SERVICES[@]}"; do
@@ -40,6 +37,10 @@ install_and_build_services:
         echo "Building $SERVICE";
         npm run build --prefix services/$SERVICE;
       done
+
+  artifacts:
+    paths:
+      - services/**/dist
 
 #test_services: // will be used later
 #  stage: test
