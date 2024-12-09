@@ -32,6 +32,7 @@ install_services:
     - for SERVICE in "${SERVICES[@]}"; do
         echo "Installing dependencies for $SERVICE";
         npm ci --prefix services/$SERVICE;
+        npm install typescript;
       done
   cache:
     paths:
