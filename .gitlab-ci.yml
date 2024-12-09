@@ -6,6 +6,8 @@ stages:
 install_services:
   stage: install
   image: node:18
+  tags:
+    - docker
   script:
     - set -e
     - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
@@ -41,6 +43,8 @@ install_services:
 build_services:
   stage: build
   image: node:18
+  tags:
+    - docker
   script:
     - set -e
     - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
@@ -53,6 +57,8 @@ build_services:
 #test_services: // will be used later
 #  stage: test
 #  image: node:18
+#  tags:
+#    - docker
 #  script:
 #    - set -e
 #    - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
