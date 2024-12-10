@@ -175,6 +175,12 @@ const goStepBack = () => {
   }
 };
 
+// State
+const selectedLanguage = ref<string | null>("Any Language");
+const selectedDoctor = ref<Dentist | null>(null);
+const selectedDate = ref<number | null>(null);
+const selectedTime = ref<string | null>(null);
+const reason = ref<string>("");
 
 const calendarDates = computed(() => {
   const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
