@@ -16,14 +16,14 @@ const clinics = [
         lng: 11.9746,
         address: "123 Main St, Gothenburg",
         phone: "031 123 456",
-        services: ["General Dentistry", "Orthodontics"],
+        services: ["Prosthodontist", "Pediatric Dentist", "Pediatric Dentist"],
         firstAvailableTime: "2024-12-20",
         languages: ["English", "Svenska"],
         dentists: [
             {
                 id: "1",
                 name: "Nabil Al Sayed",
-                speciality: "General Dentistry",
+                speciality: "Prosthodontist",
                 languages: ["English", "Svenska", "العربية"],
                 availability: [
                     { date: "2024-11-10", times: ["09:30 AM", "10:30 AM", "11:30 AM"] },
@@ -33,11 +33,14 @@ const clinics = [
             {
                 id: "2",
                 name: "Erik Lidbom",
-                speciality: "Orthodontics",
+                speciality: "Pediatric Dentist",
                 languages: ["English", "Svenska"],
                 availability: [
                     { date: "2024-11-11", times: ["09:00 AM", "10:30 AM", "11:30 AM"] },
-                    { date: "2024-11-13", times: ["10:00 AM", "12:30 PM"] },
+                    { date: "2024-12-13", times: ["10:00 AM", "12:30 PM"] },
+                    { date: "2025-01-10", times: ["10:00 AM", "12:30 PM"] },
+                    { date: "2025-01-05", times: ["10:00 AM", "12:30 PM"] },
+                    { date: "2025-01-14", times: ["10:00 AM", "12:30 PM"] },
                 ],
             },
             {
@@ -47,7 +50,18 @@ const clinics = [
                 languages: ["English", "Svenska", "Spanish"],
                 availability: [
                     { date: "2024-11-11", times: ["09:00 AM", "10:30 AM", "11:30 AM"] },
-                    { date: "2024-11-13", times: ["10:00 AM", "12:30 PM"] },
+                    { date: "2024-12-13", times: ["10:00 AM", "12:30 PM"] },
+                    { date: "2024-12-18", times: ["10:00 AM", "12:30 PM"] },
+                ],
+            },
+            {
+                id: "4",
+                name: "Ahmad Al Sayed",
+                speciality: "Prosthodontist",
+                languages: ["English", "Svenska", "العربية"],
+                availability: [
+                    { date: "2025-01-10", times: ["09:30 AM", "10:30 AM", "11:30 AM"] },
+                    { date: "2025-02-12", times: ["10:00 AM", "11:00 AM", "01:00 PM"] },
                 ],
             },
         ],
@@ -59,7 +73,7 @@ const clinics = [
         lng: 11.9668,
         address: "456 Elm St, Gothenburg",
         phone: "031 654 321",
-        services: ["Oral Surgery", "Pediatric Dentistry", "Endodontics", "Prosthodontics"],
+        services: ["Oral Surgeon", "Dentist", "Prosthodontist"],
         firstAvailableTime: "2025-02-23",
         languages: ["English", "Svenska", "Spanish"],
         dentists: [
@@ -76,6 +90,18 @@ const clinics = [
         ],
     },
 ];
+
+/*
+const services = ref([
+  { name: "Dentist", selected: savedServices.includes("Dentist") },
+  { name: "Orthodontist", selected: savedServices.includes("Orthodontist") },
+  { name: "Endodontist", selected: savedServices.includes("Endodontist") },
+  { name: "Oral Surgeon", selected: savedServices.includes("Oral Surgeon") },
+  { name: "Pediatric Dentist", selected: savedServices.includes("Pediatric Dentist") },
+  { name: "Periodontist", selected: savedServices.includes("Periodontist") },
+  { name: "Prosthodontist", selected: savedServices.includes("Prosthodontist") },
+]);
+ */
 
 // Endpoints
 
