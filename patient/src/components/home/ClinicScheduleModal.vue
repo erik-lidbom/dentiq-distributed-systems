@@ -81,25 +81,6 @@
         </button>
       </div>
 
-          <!--    Section/Languages      -->
-
-          <div class="w-1/2 space-y-5 ">
-            <h5 class="text-dentiq-body-large font-semibold text-dentiq-muted-darkest" >Languages</h5>
-            <!--     List of Languages       -->
-            <div class="space-y-3 max-h-[140px] overflow-y-scroll">
-              <!--    Dentist Info       -->
-              <div v-for="lang in clinic.languages" :key="lang" class="flex items center space-x-3">
-                <div class="flex flex-row space-x-2 justify-center items-center">
-                  <img src="/images/users/user-avatar.svg" alt="Dentist Placeholder" class="w-11 h-11 rounded-full bg-dentiq-muted-lightest border-2 border-dentiq-muted-light" />
-                  <h6 class="text-dentiq-body">{{lang}}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!--    End of Section      -->
-        </div>
-      </div>
-    </div>
       <h4 class="text-lg font-medium text-dentiq-muted-darkest">Select Time <span class="text-dentiq-muted-semiLight">*</span></h4>
       <div class="flex flex-wrap gap-2">
         <div
@@ -112,6 +93,19 @@
           {{ time }}
         </div>
       </div>
+    </div>
+
+    <!-- Step 3: Reason for Visit -->
+    <div class="flex flex-col w-full max-h-fit space-y-4" v-if="step === 3">
+      <h4 class="text-lg font-medium text-dentiq-muted-darkest">
+        Reason for Visit <span class="text-dentiq-muted-semiLight">(Optional)</span>
+      </h4>
+      <textarea
+          v-model="reason"
+          rows="3"
+          class="w-full resize-none p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Write your reason here..."
+      ></textarea>
     </div>
 
 </template>
