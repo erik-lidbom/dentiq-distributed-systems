@@ -23,6 +23,10 @@
               </div>
             </div>
           </div>
+  <!-- Conditional if no available doctors -->
+  <div v-if="availableDoctors.length === 0" class="text-gray-500 text-center px-10 py-20">
+    <p>Sorry, no doctors are currently available for appointments. Please try again later.</p>
+  </div>
     <!-- Step 1: Select Doctor and Language -->
     <div class="flex flex-row space-x-2 w-full max-h-fit" v-if="step === 1">
       <!-- Doctors -->
@@ -47,6 +51,20 @@
           </div>
         </div>
       </div>
+
+      <!-- Language -->
+      <div class="w-full flex flex-col h-fit max-h-[400px] justify-start space-y-2">
+        <h3 class="text-lg font-medium text-dentiq-muted-darkest">
+          Select Language <span class="text-dentiq-muted-semiLight">*</span>
+        </h3>
+        <div
+            v-for="language in allLanguages"
+            :key="language"
+            class="flex items-center px-4 min-h-[65px] max-h-[65px] border rounded-lg cursor-pointer hover:bg-dentiq-muted-lightest"
+            :class="{ 'border-blue-500 bg-blue-50': selectedLanguage === language }"
+            @click="selectLanguage(language)"
+        >
+          <p class="font-medium text-lg">{{ language }}</p>
         </div>
         <!--    Body     -->
         <div class="flex flex-wrap w-full bg p-7">
