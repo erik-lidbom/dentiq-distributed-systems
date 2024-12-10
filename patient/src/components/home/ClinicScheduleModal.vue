@@ -188,6 +188,11 @@ const hasUpcomingAvailability = (doctor: Dentist) => {
   const today = new Date();
   return doctor.availability.some((slot) => new Date(slot.date) >= today);
 };
+
+// Available Doctors
+const availableDoctors = computed(() =>
+    props.clinic.dentists.filter(hasUpcomingAvailability)
+);
 const calendarDates = computed(() => {
   const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
   const today = new Date();
