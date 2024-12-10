@@ -183,6 +183,11 @@ const reason = ref<string>("");
 // Languages
 const allLanguages = computed(() => ["Any Language", ...props.clinic.languages]);
 
+// Doctor Availability
+const hasUpcomingAvailability = (doctor: Dentist) => {
+  const today = new Date();
+  return doctor.availability.some((slot) => new Date(slot.date) >= today);
+};
 const calendarDates = computed(() => {
   const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
   const today = new Date();
