@@ -1,32 +1,16 @@
 <template>
-    <div class="flex bg-white w-[75vw] md:min-w-[600px] max-w-[700px] min-h-[75vh]">
-      <div class="flex flex-col w-full">
-        <!--    Header     -->
-        <div class="flex w-full space-x-3 items-center bg-dentiq-muted-lighter max-h-[165px] p-[20px]">
-          <div class="size-32 border-4 border-white rounded-3xl bg-dentiq-muted-light overflow-hidden">
-            <img
-                :src="clinic.image || defaultPlaceholder"
-                alt="Clinic Placeholder Image"
-                class="w-full h-full object-cover"
-            />
-          </div>
-          <div class="space-y-3">
-            <h2 class="text-dentiq-h4 font-semibold text-black">{{clinic.name}}</h2>
-            <div class="flex flex-col font-light space-y-1">
-              <div class="flex justify-center items-center space-x-3 w-fit">
-                <font-awesome-icon :icon="faBuilding" class="text-dentiq-muted-darker" />
-                <h4 class="text-dentiq-body-large text-dentiq-muted-darkest">{{clinic.address}}</h4>
-              </div>
-              <div class="flex justify-center items-center space-x-3 w-fit">
-                <font-awesome-icon :icon="faPhone" class="text-dentiq-muted-darker" />
-                <h4 class="text-dentiq-body-large text-dentiq-muted-darkest">{{clinic.phone}}</h4>
-              </div>
-            </div>
-          </div>
   <!-- Conditional if no available doctors -->
   <div v-if="availableDoctors.length === 0" class="text-gray-500 text-center px-10 py-20">
     <p>Sorry, no doctors are currently available for appointments. Please try again later.</p>
   </div>
+
+  <div v-else class="p-8 flex flex-col items-end space-y-4">
+    <!-- Progress Bar -->
+    <div class="w-[95%] flex self-start justify-between items-center mb-4">
+      <div v-for="n in 3" :key="n" class="flex-1 h-2 mx-1 rounded-full"
+           :class="{'bg-blue-500': step >= n, 'bg-gray-300': step < n}"></div>
+    </div>
+
     <!-- Step 1: Select Doctor and Language -->
     <div class="flex flex-row space-x-2 w-full max-h-fit" v-if="step === 1">
       <!-- Doctors -->
