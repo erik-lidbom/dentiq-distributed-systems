@@ -201,6 +201,13 @@ const canProceed = computed(() => {
   if (step.value === 3) return !!reason.value || true; // Reason is optional
   return false;
 });
+
+const step = ref(1);
+
+const isSelectedDate = (date: number) => {
+  return selectedDate.value === date && currentMonth.value === getMonth(new Date()) && currentYear.value === getYear(new Date());
+};
+
 // Calendar Logic
 const currentMonth = ref(getMonth(new Date()));
 const currentYear = ref(getYear(new Date()));
@@ -212,6 +219,64 @@ const timeSlots = computed(() => {
     console.log("No doctor or date selected");
     return [];
   }
+
+  // Construct the full date context with month and year
+  const selectedFullDate = new Date(
+      currentYear.value,
+      currentMonth.value,
+      selectedDate.value
+  );
+
+  console.log("Selected full date:", selectedFullDate);
+
+  // Find the availability for the selected date
+  const availability = selectedDoctor.value.availability.find(
+      (slot) => new Date(slot.date).toDateString() === selectedFullDate.toDateString()
+  );
+
+  console.log("Matching availability:", availability);
+
+  return availability ? availability.times : [];
+});
+
+const hasNextMonth = ref(computed(() => {
+  const { month: maxMonth, year: maxYear } = latestAvailableMonthYear.value;
+  return currentYear.value < maxYear || (currentYear.value === maxYear && currentMonth.value < maxMonth);
+}));
+
+const nextMonth = () => {
+  const { month: maxMonth, year: maxYear } = latestAvailableMonthYear.value;
+  if (currentYear.value < maxYear || (currentYear.value === maxYear && currentMonth.value < maxMonth)) {
+    if (currentMonth.value === 11) {
+      currentMonth.value = 0;
+      currentYear.value += 1;
+    } else {
+      currentMonth.value += 1;
+    }
+    // Reset the selected date
+    selectedDate.value = null;
+    console.log("Navigated to next month:", currentMonth.value, currentYear.value);
+  } else {
+    hasNextMonth.value = false;
+  }
+};
+
+const prevMonth = () => {
+  const today = new Date();
+  const currentDateMonth = today.getMonth();
+  const currentDateYear = today.getFullYear();
+  if (currentYear.value > currentDateYear || (currentYear.value === currentDateYear && currentMonth.value > currentDateMonth)) {
+    if (currentMonth.value === 0) {
+      currentMonth.value = 11;
+      currentYear.value -= 1;
+    } else {
+      currentMonth.value -= 1;
+    }
+    // Reset the selected date
+    selectedDate.value = null;
+    console.log("Navigated to previous month:", currentMonth.value, currentYear.value);
+  }
+};
 
 const calendarDates = computed(() => {
   const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
