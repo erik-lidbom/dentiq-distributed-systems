@@ -23,6 +23,30 @@
               </div>
             </div>
           </div>
+    <!-- Step 1: Select Doctor and Language -->
+    <div class="flex flex-row space-x-2 w-full max-h-fit" v-if="step === 1">
+      <!-- Doctors -->
+      <div class="w-full flex flex-col justify-start h-fit max-h-[400px] space-y-2 overflow-y-scroll">
+        <h3 class="text-lg font-medium text-dentiq-muted-darkest">
+          Select Doctor <span class="text-dentiq-muted-semiLight">*</span>
+        </h3>
+        <div
+            v-for="doctor in availableDoctors"
+            :key="doctor.id"
+            class="flex items-center px-4 min-h-[65px] max-h-[65px] border rounded-xl cursor-pointer hover:bg-dentiq-muted-lightest"
+            :class="{
+            'border-blue-500 bg-blue-50': selectedDoctor?.id === doctor.id,
+            'cursor-not-allowed text-dentiq-muted-light': !hasUpcomingAvailability(doctor)
+          }"
+            @click="hasUpcomingAvailability(doctor) && selectDoctor(doctor)"
+            :aria-disabled="!hasUpcomingAvailability(doctor)"
+        >
+          <div>
+            <h4 class="font-medium text-lg">{{ doctor.name }}</h4>
+            <p class="text-sm text-gray-500">{{ doctor.speciality }}</p>
+          </div>
+        </div>
+      </div>
         </div>
         <!--    Body     -->
         <div class="flex flex-wrap w-full bg p-7">
