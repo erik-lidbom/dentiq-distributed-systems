@@ -50,25 +50,36 @@
         >
           <p class="font-medium text-lg">{{ language }}</p>
         </div>
-        <!--    Body     -->
-        <div class="flex flex-wrap w-full bg p-7">
-          <!--    Section/Doctors      -->
-          <div class="w-1/2 space-y-5 ">
-            <h5 class="text-dentiq-body-large font-semibold text-dentiq-muted-darkest" >Doctors</h5>
-            <!--     List of Dentists       -->
-            <div class="space-y-3 max-h-[140px] overflow-y-scroll">
-              <!--    Dentist Info       -->
-              <div v-for="dentist in clinic.dentists" :key="dentist.id" class="flex items center space-x-3">
-                <div class="flex flex-row space-x-2 justify-center items-center">
-                  <img src="/images/users/user-avatar.svg" alt="Dentist Placeholder" class="w-11 h-11 rounded-full bg-dentiq-muted-lightest border-2 border-dentiq-muted-light" />
-                  <div class="space-y-1">
-                    <h6 class="text-dentiq-body">{{dentist.name}}</h6>
-                    <p class="text-dentiq-body-small text-dentiq-muted-darker bg-dentiq-muted-lighter px-2 py-1 rounded-lg">{{dentist.speciality}}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Select Date and Time -->
+    <div class="flex flex-col space-y-4 w-full max-h-fit" v-if="step === 2">
+      <h3 class="text-lg font-medium text-dentiq-muted-darkest mb-4">
+        Select Date <span class="text-dentiq-muted-semiLight">*</span>
+      </h3>
+      <div class="flex justify-between items-center">
+        <button @click="prevMonth" class="text-gray-500 hover:text-black text-lg font-normal">←</button>
+        <h4 class="font-medium text-dentiq-muted-darkest text-md" :class="hasNextMonth ? '' : 'absolute left-[40%]' ">{{ formattedMonth }}</h4>
+        <button @click="nextMonth" :class="hasNextMonth ? 'block' : 'hidden'" class="text-gray-500 hover:text-black text-lg font-normal">→</button>
+      </div>
+      <div class="grid grid-cols-7 gap-2 text-center">
+        <span v-for="day in days" :key="day" class="font-normal text-dentiq-muted-default">{{ day }}</span>
+        <button
+            v-for="date in calendarDates"
+            :key="date.day"
+            class="py-2 px-4 text-sm rounded-lg cursor-pointer"
+            :class="{
+            'bg-blue-500 text-white': isSelectedDate(date.day),
+            'text-dentiq-muted-dark bg-dentiq-muted-lighter cursor-not-allowed': date.isPastDate || !date.isSlotAvailable,
+            'hover:bg-gray-200': !date.isPastDate && date.isSlotAvailable && !isSelectedDate(date.day),
+          }"
+            @click="!date.isPastDate && date.isSlotAvailable && selectDate(date.day)"
+            :disabled="date.isPastDate || !date.isSlotAvailable"
+        >
+          {{ date.day }}
+        </button>
+      </div>
 
           <!--    Section/Languages      -->
 
@@ -89,6 +100,20 @@
         </div>
       </div>
     </div>
+      <h4 class="text-lg font-medium text-dentiq-muted-darkest">Select Time <span class="text-dentiq-muted-semiLight">*</span></h4>
+      <div class="flex flex-wrap gap-2">
+        <div
+            v-for="time in timeSlots"
+            :key="time"
+            class="py-2 px-4 border rounded-lg cursor-pointer text-center"
+            :class="{ 'bg-blue-500 text-white': isSelectedTime(time), 'hover:bg-gray-200': !isSelectedTime(time) }"
+            @click="selectTime(time)"
+        >
+          {{ time }}
+        </div>
+      </div>
+    </div>
+
 </template>
 
 <script setup lang="ts">
