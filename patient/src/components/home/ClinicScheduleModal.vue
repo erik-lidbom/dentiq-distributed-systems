@@ -108,6 +108,25 @@
       ></textarea>
     </div>
 
+    <!-- Navigation Buttons -->
+    <div class="flex min-w-full" :class="step < 2 ? 'justify-end' : 'justify-between'">
+      <button
+          v-if="step > 1"
+          class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300"
+          @click="goStepBack"
+      >
+        Previous
+      </button>
+      <button
+          class="px-6 py-3  self-end text-white font-medium rounded-lg"
+          :class="!canProceed ? 'bg-dentiq-muted-light' : 'bg-blue-500 hover:bg-blue-600'"
+          :disabled="!canProceed"
+          @click="step === 3 ? submit : step++"
+      >
+        {{ step === 3 ? "Submit" : "Next" }}
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
