@@ -201,6 +201,18 @@ const canProceed = computed(() => {
   if (step.value === 3) return !!reason.value || true; // Reason is optional
   return false;
 });
+// Calendar Logic
+const currentMonth = ref(getMonth(new Date()));
+const currentYear = ref(getYear(new Date()));
+const days = ref(["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]);
+
+
+const timeSlots = computed(() => {
+  if (!selectedDoctor.value || selectedDate.value === null) {
+    console.log("No doctor or date selected");
+    return [];
+  }
+
 const calendarDates = computed(() => {
   const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
   const today = new Date();
