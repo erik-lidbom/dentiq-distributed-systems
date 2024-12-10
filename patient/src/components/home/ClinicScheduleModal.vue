@@ -193,6 +193,14 @@ const hasUpcomingAvailability = (doctor: Dentist) => {
 const availableDoctors = computed(() =>
     props.clinic.dentists.filter(hasUpcomingAvailability)
 );
+
+// Validation
+const canProceed = computed(() => {
+  if (step.value === 1) return selectedDoctor.value && selectedLanguage.value;
+  if (step.value === 2) return selectedDate.value && selectedTime.value;
+  if (step.value === 3) return !!reason.value || true; // Reason is optional
+  return false;
+});
 const calendarDates = computed(() => {
   const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
   const today = new Date();
