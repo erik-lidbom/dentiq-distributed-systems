@@ -167,8 +167,6 @@ const props = defineProps({
   },
 });
 
-// Props
-const clinic = props.clinic;
 const goStepBack = () => {
   if (step.value > 1){
     step.value--;
@@ -181,6 +179,9 @@ const selectedDoctor = ref<Dentist | null>(null);
 const selectedDate = ref<number | null>(null);
 const selectedTime = ref<string | null>(null);
 const reason = ref<string>("");
+
+// Languages
+const allLanguages = computed(() => ["Any Language", ...props.clinic.languages]);
 
 const calendarDates = computed(() => {
   const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
