@@ -133,17 +133,37 @@
 import { faPhone, faBuilding } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { defineProps } from "vue";
+// Define Types
+interface Availability {
+  date: string;
+  times: string[];
+}
 
-const defaultPlaceholder = new URL(
-    "/images/clinics/clinic-placeholder.svg",
-    import.meta.url
-).href;
+interface Dentist {
+  id: string;
+  name: string;
+  speciality: string;
+  languages: string[];
+  availability: Availability[];
+  image?: string;
+}
 
 let props = defineProps({
     clinic: {
         type: Object,
         required: true,
     },
+interface Clinic {
+  id: number;
+  name: string;
+  address: string;
+  phone: string;
+  services: string[];
+  firstAvailableTime: string;
+  languages: string[];
+  dentists: Dentist[];
+}
+
 });
 
 // Props
