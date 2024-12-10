@@ -130,9 +130,9 @@
 </template>
 
 <script setup lang="ts">
-import { faPhone, faBuilding } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { defineProps } from "vue";
+import { ref, computed } from "vue";
+import { getMonth, getYear } from "date-fns";
+
 // Define Types
 interface Availability {
   date: string;
@@ -148,11 +148,6 @@ interface Dentist {
   image?: string;
 }
 
-let props = defineProps({
-    clinic: {
-        type: Object,
-        required: true,
-    },
 interface Clinic {
   id: number;
   name: string;
@@ -164,9 +159,90 @@ interface Clinic {
   dentists: Dentist[];
 }
 
+// Props
+const props = defineProps({
+  clinic: {
+    type: Object as () => Clinic,
+    required: true,
+  },
 });
 
 // Props
 const clinic = props.clinic;
+const goStepBack = () => {
+  if (step.value > 1){
+    step.value--;
+  }
+};
 
+
+const calendarDates = computed(() => {
+  const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return Array.from({ length: daysInMonth }, (_, i) => {
+    const date = new Date(currentYear.value, currentMonth.value, i + 1);
+    const isPastDate = date < today;
+
+    const isSlotAvailable = selectedDoctor.value
+        ? selectedDoctor.value.availability.some(
+            (availability) => new Date(availability.date).toDateString() === date.toDateString()
+        )
+        : false;
+
+    return { day: i + 1, isPastDate, isSlotAvailable };
+  });
+});
+
+
+
+const formattedMonth = computed(() => {
+  const date = new Date(currentYear.value, currentMonth.value);
+  return date.toLocaleString("default", { month: "long", year: "numeric" });
+});
+
+
+// Handlers
+const selectDoctor = (doctor: Dentist) => {
+  selectedDoctor.value = doctor;
+  selectedDate.value = null;
+  selectedTime.value = null;
+};
+const selectLanguage = (language: string) => (selectedLanguage.value = language);
+const selectDate = (date: number) => {
+  selectedDate.value = date;
+  selectedTime.value = null; // Reset time when a new date is selected
+  console.log("Selected Date:", selectedDate.value, "Selected Time Slots:", timeSlots.value);
+};
+const selectTime = (time: string) => (selectedTime.value = time);
+
+const isSelectedTime = (time: string) => selectedTime.value === time;
+
+const latestAvailableMonthYear = computed(() => {
+  if (!selectedDoctor.value) return { month: currentMonth.value, year: currentYear.value };
+
+  const allDates = selectedDoctor.value.availability.map((a) => new Date(a.date));
+  if (allDates.length === 0) return { month: currentMonth.value, year: currentYear.value };
+
+  const latestDate = allDates.reduce((latest, current) => (current > latest ? current : latest));
+  return {
+    month: latestDate.getMonth(),
+    year: latestDate.getFullYear(),
+  };
+});
+
+
+
+
+const submit = () => console.log(
+    { selectedDoctor, selectedLanguage, selectedDate, selectedTime, reason }
+);
 </script>
+
+<style scoped>
+
+button:hover {
+  opacity: 0.9;
+}
+</style>
