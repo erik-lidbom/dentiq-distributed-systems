@@ -41,7 +41,6 @@ describe("API for APPOINTMENT-SERVICE", () => {
 
       const message = response.body.message;
       createdAppointmentId = message.split(":")[1]?.trim();
-      console.log("Created appointmentID:", createdAppointmentId);
       expect(response.body.message).toMatch(
         `Appointment successfully created with id: ${createdAppointmentId}`
       );
@@ -86,7 +85,6 @@ describe("API for APPOINTMENT-SERVICE", () => {
    *  - bookAppointment(500) => db down
    */
   describe("PATCH /api/bookAppointment", () => {
-    console.log("Is ID STILL HERE? ID: ", createdAppointmentId);
     it("should book appointment with valid data", async () => {
       const response = await request.patch("/api/bookAppointment").send({
         patientId: "1",
@@ -133,14 +131,12 @@ describe("API for APPOINTMENT-SERVICE", () => {
     it('should return status 500 unexpected error', async () => {
         await Appointment.findByIdAndUpdate(createdAppointmentId, { status: 'unbooked' });
         const randomId = new Types.ObjectId().toHexString();
-        console.log("Testing with ID: ", createdAppointmentId, " and patientId: ", randomId)
         jest.spyOn(Appointment.prototype, "save").mockRejectedValueOnce(new Error("Database error"));
         const response = await request.patch("/api/bookAppointment").send({
             patientId: randomId,
             appointmentId: createdAppointmentId
         });
 
-        console.log("THE MESSAGE OF STATUS: ", response.body);
         expect(response.status).toBe(500);
 
         expect(response.body).toHaveProperty("message");
@@ -203,7 +199,6 @@ describe("API for APPOINTMENT-SERVICE", () => {
             status: 'unbooked'
         });
         jest.spyOn(Appointment, "deleteOne").mockRejectedValueOnce(new Error("Database error"));
-        console.log('WTF IS THIS: ', testAppointment._id);
         const response = await request.delete('/api/deleteAppointment').send({
             appointmentId: testAppointment._id.toHexString()
         });
