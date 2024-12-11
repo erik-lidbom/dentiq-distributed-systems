@@ -25,7 +25,9 @@ app.get("/", (req, res) => {
   res.send("BASIC MQTT + EXPRESS + NODE + TS SETUP");
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`[SERVER]: Server is running at http://localhost:${port}`);
   console.log("-------------------------------------------------------")
 });
+
+export { app, server }

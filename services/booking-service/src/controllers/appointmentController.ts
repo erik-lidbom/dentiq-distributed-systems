@@ -3,6 +3,7 @@ import { Appointment } from '../models/appointmentModel'
 import mqttClient from '../mqtt/mqtt'
 import { TOPICS } from '../mqtt/topics'
 import { v4 as uuidv4 } from "uuid";
+import mongoose from "mongoose";
 
 export const createAppointment = async (
     req: Request, 
@@ -16,19 +17,19 @@ export const createAppointment = async (
             return;
         }
 
-        const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.DENTIST_CREATE_APP,
-            JSON.stringify({ correlationId, dentistId }),
-            {qos: 2}
-        );
-
-        const validateDentist = await validateId(correlationId, TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF);
-
-        if(!validateDentist) {
-            res.status(400).json({ message: "Could not validate dentistId." });
-            return;
-        }
+        //const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
+        //mqttClient.publish(
+        //    TOPICS.APPOINTMENT.DENTIST_CREATE_APP,
+        //    JSON.stringify({ correlationId, dentistId }),
+        //    {qos: 2}
+        //);
+//
+        //const validateDentist = await validateId(correlationId, TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF);
+//
+        //if(!validateDentist) {
+        //    res.status(400).json({ message: "Could not validate dentistId." });
+        //    return;
+        //}
 
         const newAppointment = new Appointment({
             dentistId,
@@ -96,7 +97,11 @@ export const bookAppointment = async (req: Request, res: Response, next: NextFun
             res.status(400).json({ message: "Missing required field(s)."});
             return;
         };
-
+        
+        if(!mongoose.Types.ObjectId.isValid(appointmentId)) {
+            res.status(404).json({ message: "Appointment could not be found." });
+            return;
+        }
         const appointment = await Appointment.findById(appointmentId);
 
         if (!appointment) {
@@ -112,20 +117,20 @@ export const bookAppointment = async (req: Request, res: Response, next: NextFun
         appointment.status = "booked";
         appointment.patientId = patientId;
 
-        const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
-
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.PATIENT_BOOKING,
-            JSON.stringify({ correlationId, patientId }),
-            {qos: 2}
-        );
-
-        const validatePatient = await validateId(correlationId, TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION);
-        
-        if(!validatePatient) {
-            res.status(400).json({ message: "Could not validate dentistId." });
-            return;
-        }
+        //const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
+//
+        //mqttClient.publish(
+        //    TOPICS.APPOINTMENT.PATIENT_BOOKING,
+        //    JSON.stringify({ correlationId, patientId }),
+        //    {qos: 2}
+        //);
+//
+        //const validatePatient = await validateId(correlationId, TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION);
+        //
+        //if(!validatePatient) {
+        //    res.status(400).json({ message: "Could not validate dentistId." });
+        //    return;
+        //}
 
         const bookedAppointment = await appointment.save();
 
@@ -179,7 +184,7 @@ export const deleteAppointment = async (req: Request, res: Response, next: NextF
         JSON.stringify(notificationPayload)
     );
 
-    res.status(200).json({ message: "Appointment deleted: ", appointment })
+    res.status(200).json({ message: `Appointment deleted with id: ${appointmentId}` });
     } catch (error) {
         console.error("[ERROR] Could not delete appointment", error);
         next(error);
