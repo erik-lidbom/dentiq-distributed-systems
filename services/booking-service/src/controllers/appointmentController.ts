@@ -55,6 +55,10 @@ export const createAppointment = async (
         res.status(201).json({ message: `Appointment successfully created with id: ${savedAppointment._id}` })
 
     } catch (error) {
+        res.status(500).json({
+            message: 'An unexpected error occured, please try again',
+            error: error
+        })
         console.error("[ERROR] Could not create appointment: ", error)
         next(error);
     }
