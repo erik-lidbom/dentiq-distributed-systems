@@ -1,9 +1,11 @@
 import express from 'express';
-import routingController from '../controllers/routingController';
+import { routingController, aggregateClinics } from '../controllers/routingController';
 import authMiddleware from '../middleware/authMiddleware';
 import { rateLimiter } from '../middleware/rateLimiter';
 
 const router = express.Router();
+
+router.get("/clinics", aggregateClinics);
 
 // Dynamic route to handle optional path
 router.all(
