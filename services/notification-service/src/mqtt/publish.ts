@@ -1,12 +1,17 @@
-import { NotificationDocument } from "../models/model";
+import { Notification, NotificationDocument } from "../models/model";
 import { client } from "./mqtt";
+
+type PublishInput = {
+  message: string;
+  createdAt: Date;
+};
 
 /*
  * Publishes all the messages parallel. The method retrieves the message and timestamp *field that will be sent to the client
  */
 export const publishToAllTopics = async (
   topics: string[],
-  notificationDocument: NotificationDocument
+  notificationDocument: PublishInput
 ): Promise<void> => {
   try {
     const { message, createdAt } = notificationDocument;
@@ -23,7 +28,7 @@ export const publishToAllTopics = async (
 };
 
 // Method to publish a notification
-const publishNotification = async (
+export const publishNotification = async (
   topic: string,
   message: any
 ): Promise<void> => {
