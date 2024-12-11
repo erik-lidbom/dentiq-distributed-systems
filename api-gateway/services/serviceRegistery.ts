@@ -14,21 +14,21 @@ interface Service {
 }
 
 const services: Record<string, Service> = {
-  patient: {
-    name: "patient",
+  dentist: {
+    name: "dentist",
     host: "http://localhost",
-    port: 3001,
-    url: "http://localhost:3001/api/patient",
+    port: 3002,
+    url: "http://localhost:3001/api/dentist/",
     rateLimit: {
       windowMs: 60000,
       max: 20
     }
   },
-  dentist: {
-    name: "dentist",
+  patient: {
+    name: "patient",
     host: "http://localhost",
-    port: 3002,
-    url: "http://localhost:3002/api/dentist",
+    port: 3001,
+    url: "http://localhost:3002/api/patient/",
     rateLimit: {
       windowMs: 60000,
       max: 20
@@ -38,7 +38,7 @@ const services: Record<string, Service> = {
     name: "authentication",
     host: "http://localhost",
     port: 3003,
-    url: "http://localhost:3003/api/auth",
+    url: "http://localhost:3003/api/auth/",
     rateLimit: {
       windowMs: 60000,
       max: 10
@@ -48,7 +48,7 @@ const services: Record<string, Service> = {
     name: "logging",
     host: "http://localhost",
     port: 3004,
-    url: "http://localhost:3004/api/logging",
+    url: "http://localhost:3004/api/logging/",
     rateLimit: {
       windowMs: 60000,
       max: 50
@@ -58,7 +58,7 @@ const services: Record<string, Service> = {
     name: "booking",
     host: "http://localhost",
     port: 3005,
-    url: "http://localhost:3005/api/appointments",
+    url: "http://localhost:3005/api/appointments/",
     rateLimit: {
       windowMs: 60000,
       max: 25
