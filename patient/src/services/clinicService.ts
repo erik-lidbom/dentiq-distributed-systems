@@ -1,4 +1,3 @@
-
 // TODO: Replace this with the API gateway URL
 const BASE_URL = "http://localhost:3000/api/clinics";
 

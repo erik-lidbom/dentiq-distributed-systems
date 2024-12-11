@@ -60,8 +60,8 @@
       </h3>
       <div class="flex justify-between items-center">
         <button @click="prevMonth" class="text-gray-500 hover:text-black text-lg font-normal">←</button>
-        <h4 class="font-medium text-dentiq-muted-darkest text-md" :class="hasNextMonth ? '' : 'absolute left-[40%]' ">{{ formattedMonth }}</h4>
-        <button @click="nextMonth" :class="hasNextMonth ? 'block' : 'hidden'" class="text-gray-500 hover:text-black text-lg font-normal">→</button>
+        <h4 class="font-medium text-dentiq-muted-darkest text-md" :class="hasNextMonth() ? '' : 'absolute left-[40%]' ">{{ formattedMonth }}</h4>
+        <button @click="nextMonth" :class="hasNextMonth() ? 'block' : 'hidden'" class="text-gray-500 hover:text-black text-lg font-normal">→</button>
       </div>
       <div class="grid grid-cols-7 gap-2 text-center">
         <span v-for="day in days" :key="day" class="font-normal text-dentiq-muted-default">{{ day }}</span>
@@ -239,10 +239,10 @@ const timeSlots = computed(() => {
   return availability ? availability.times : [];
 });
 
-const hasNextMonth = ref(computed(() => {
+const hasNextMonth = ref(() => {
   const { month: maxMonth, year: maxYear } = latestAvailableMonthYear.value;
   return currentYear.value < maxYear || (currentYear.value === maxYear && currentMonth.value < maxMonth);
-}));
+});
 
 const nextMonth = () => {
   const { month: maxMonth, year: maxYear } = latestAvailableMonthYear.value;
@@ -340,6 +340,8 @@ const latestAvailableMonthYear = computed(() => {
 const submit = () => console.log(
     { selectedDoctor, selectedLanguage, selectedDate, selectedTime, reason }
 );
+
+
 </script>
 
 <style scoped>
