@@ -17,20 +17,6 @@ export const createAppointment = async (
             return;
         }
 
-        //const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
-        //mqttClient.publish(
-        //    TOPICS.APPOINTMENT.DENTIST_CREATE_APP,
-        //    JSON.stringify({ correlationId, dentistId }),
-        //    {qos: 2}
-        //);
-//
-        //const validateDentist = await validateId(correlationId, TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF);
-//
-        //if(!validateDentist) {
-        //    res.status(400).json({ message: "Could not validate dentistId." });
-        //    return;
-        //}
-
         const newAppointment = new Appointment({
             dentistId,
             start_time,
@@ -64,48 +50,17 @@ export const createAppointment = async (
     }
 };
 
-const validateId = (correlationId: string, validationTopic: string) => { // Handshake method, can be used for both createAppointment
-    return new Promise<boolean>((resolve, reject) => {                   // and bookAppointment
-        const timeout = setTimeout(() => {
-            mqttClient.removeListener('message', payloadHandler) // we clean up the listener to reduce mem leaks
-            reject(new Error("Could not validate dentist in time."));
-        }, 5000);
-
-        const payloadHandler = (topic: string, payload: Buffer) => {
-            if (topic === validationTopic) {
-                try {
-                    const payloadMsg = Buffer.isBuffer(payload) ? JSON.parse(payload.toString()) : payload;
-                    if (payloadMsg.correlationId === correlationId) {
-                        clearTimeout(timeout); // Clear the timeout
-                        mqttClient.removeListener('message', payloadHandler); // we clean up the listener to reduce mem leaks
-                        resolve(payloadMsg.status); // Resolve the promise
-                    }
-                } catch (error) {
-                    mqttClient.removeListener('message', payloadHandler); // Clean up listener on parse error
-                    clearTimeout(timeout); // Clear the timeout
-                    reject(new Error("Failed to parse validation response."));
-                }
-            }
-        };
-
-        mqttClient.on('message', payloadHandler); // Add the listener
-    });
-};
-
 
 export const bookAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { patientId, appointmentId } = req.body;
 
         if (!patientId || !appointmentId) {
+            console.log("KANOOON");
             res.status(400).json({ message: "Missing required field(s)."});
             return;
         };
-        
-        if(!mongoose.Types.ObjectId.isValid(appointmentId)) {
-            res.status(404).json({ message: "Appointment could not be found." });
-            return;
-        }
+
         const appointment = await Appointment.findById(appointmentId);
 
         if (!appointment) {
@@ -120,21 +75,6 @@ export const bookAppointment = async (req: Request, res: Response, next: NextFun
 
         appointment.status = "booked";
         appointment.patientId = patientId;
-
-        //const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
-//
-        //mqttClient.publish(
-        //    TOPICS.APPOINTMENT.PATIENT_BOOKING,
-        //    JSON.stringify({ correlationId, patientId }),
-        //    {qos: 2}
-        //);
-//
-        //const validatePatient = await validateId(correlationId, TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION);
-        //
-        //if(!validatePatient) {
-        //    res.status(400).json({ message: "Could not validate dentistId." });
-        //    return;
-        //}
 
         const bookedAppointment = await appointment.save();
 
@@ -152,6 +92,10 @@ export const bookAppointment = async (req: Request, res: Response, next: NextFun
 
         res.status(200).json({ message: `Appointment successfully booked with id: ${bookedAppointment._id}` })
     } catch (error) {
+        res.status(500).json({
+            message: 'An unexpected error occured, please try again',
+            error: error
+        })
         console.error("[ERROR] Could not create appointment: ", error)
         next(error);
     }
@@ -170,11 +114,11 @@ export const deleteAppointment = async (req: Request, res: Response, next: NextF
     
 
     if(!appointment) {
-        res.status(404).json({ message: "Appointment not found."});
+        res.status(404).json({ message: `Appointment with id: ${appointmentId} not found`});
         return;
     }
 
-    const deletedAppointment = await Appointment.deleteOne(appointment._id);
+    const deletedAppointment = await Appointment.deleteOne({ _id: appointment._id });
 
     const notificationPayload = {
         dentistId: appointment.dentistId,
@@ -190,14 +134,17 @@ export const deleteAppointment = async (req: Request, res: Response, next: NextF
 
     res.status(200).json({ message: `Appointment deleted with id: ${appointmentId}` });
     } catch (error) {
+        res.status(500).json({
+            message: 'An unexpected error occured, please try again',
+            error: error
+        })
         console.error("[ERROR] Could not delete appointment", error);
-        next(error);
     }
 }
 
 export const getAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { appointmentId } = req.body;
+        const { appointmentId } = req.query;
 
         if (!appointmentId) {
             res.status(400).json({ message: "Missing required field." });
@@ -214,8 +161,11 @@ export const getAppointment = async (req: Request, res: Response, next: NextFunc
         res.status(200).json({ message: "Appointment: ", appointment });
 
     } catch (error) {
+        res.status(500).json({
+            message: 'An unexpected error occured, please try again',
+            error: error
+        })
         console.error("[ERROR] Could not fetch appointment: ", error);
-        next(error);
     }
 };
 
@@ -252,8 +202,11 @@ export const cancelAppointment = async (req: Request, res: Response, next: NextF
 
         res.status(200).json({ message: `Appointment with ID successfully canceled: ${appointment._id}` })
 
-    } catch (err) {
-        console.error("[ERROR] Could not cancel appointment: ", err);
-        next(err);
+    } catch (error) {
+        res.status(500).json({
+            message: 'An unexpected error occured, please try again',
+            error: error
+        })
+        console.error("[ERROR] Could not fetch appointment: ", error)
     }
 }
