@@ -1,6 +1,6 @@
 stages:
   - build
-#  - test // this is to be added later
+  - test
 
 install_and_build_services:
   stage: build
@@ -42,16 +42,16 @@ install_and_build_services:
     paths:
       - services/**/dist
 
-#test_services: // will be used later
-#  stage: test
-#  image: node:18
-#  tags:
-#    - docker
-#  script:
-#    - set -e
-#    - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
-#    ## Running tests for each service
-#    - for SERVICE in "${SERVICES[@]}"; do
-#        echo "Testing $SERVICE"
-#        npm test --prefix services/$SERVICE
-#      done
+test_services: // will be used later
+  stage: test
+  image: node:18
+  tags:
+    - docker
+  script:
+    - set -e
+    - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
+    ## Running tests for each service
+    - for SERVICE in "${SERVICES[@]}"; do
+        echo "Testing $SERVICE"
+        npm test --prefix services/$SERVICE
+      done
