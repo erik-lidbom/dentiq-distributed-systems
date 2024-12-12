@@ -36,7 +36,7 @@
 
                 <!-- Cancel Button -->
                 <div class="flex items-center">
-                    <button class="bg-red-500 px-5 py-2 rounded-lg text-white mr-3">Cancel</button>
+                    <button class="bg-red-500 px-5 py-2 rounded-lg text-white mr-3" @click="cancelAppointment(index)">Cancel</button>
                 </div>
                 
             </div>
@@ -46,9 +46,17 @@
 </template>
 
 <script setup lang="ts">
-const appointments = [
+
+import { ref } from 'vue'; // Updates page automatically 
+
+const appointments = ref([
   { date: 'Dec 27', time: '09:00', location: 'Clinic Blue', patient: 'Erik Lidbom' },
   { date: 'Dec 28', time: '11:00', location: 'Clinic Red', patient: 'Nabil Al Sayed' },
-  { date: 'Dec 29', time: '12:00', location: 'Clinic Yellow', patient: 'Utkarsh Singh' },
-];
+  { date: 'Dec 29', time: '12:00', location: 'Clinic Yellow', patient: 'Utkarsh Singh' }, 
+]);
+
+const cancelAppointment = (index: number) => {  // Removes appointment at given index
+    appointments.value.splice(index,1)
+};
+
 </script>
