@@ -18,6 +18,13 @@ afterAll(async () => {
   jest.resetAllMocks();
 });
 
+const EXAMPLE_APPOINTMENT = {
+  dentistId: "erik123@gmail.com",
+  start_time: "this is a mock message",
+  end_time: "appointmentService",
+};
+
+
 /**
  * Tests for creating appointments, including the following:
  * positives:
@@ -29,13 +36,14 @@ afterAll(async () => {
 describe("API for APPOINTMENT-SERVICE", () => {
 
   describe("POST /api/appointments", () => {
-    it("should return status 200 if appointment is created", async () => {
+    it("should return status 201 if appointment is created", async () => {
+
       const response = await request.post("/api/appointments").send({
         dentistId: "1",
         start_time: "1",
         end_time: "2",
       });
-
+      jest.spyOn(Appointment.prototype, 'save').mockResolvedValue(response);
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty("message");
 
