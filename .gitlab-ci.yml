@@ -1,0 +1,56 @@
+stages:
+  - build
+  - test
+
+install_and_build_services:
+  stage: build
+  image: node:18
+  tags:
+    - docker
+  cache:
+    paths:
+      - services/**/node_modules
+  script:
+    - set -e
+    - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
+    - MONGODB_URIS=("MONGODB_APPOINTMENT_URI" "MONGODB_NOTIFICATION_URI" "MONGODB_DENTIST_URI" "MONGODB_PATIENT_URI")
+    - MONGODB_PORTS=("APPOINTMENT_PORT" "NOTIFICATION_PORT" "DENTIST_PORT" "PATIENT_PORT")
+    ## Creating .env and inserting CI/CD variables
+    - for i in ${!SERVICES[@]}; do
+        SERVICE=${SERVICES[$i]};
+        MONGODB_URI=${!MONGODB_URIS[$i]};
+        PORT=${!MONGODB_PORTS[$i]};
+        echo "Creating .env and inserting values for $SERVICE";
+        echo "MONGODB_URI=$MONGODB_URI" > services/$SERVICE/.env;
+        echo "PORT=$PORT" >> services/$SERVICE/.env;
+        echo "MQTT_HOST=$MQTT_HOST" >> services/$SERVICE/.env;
+        echo "MQTT_PORT=$MQTT_PORT" >> services/$SERVICE/.env;
+        echo "MQTT_PROTOCOL=$MQTT_PROTOCOL" >> services/$SERVICE/.env;
+        echo "MQTT_USERNAME=$MQTT_USERNAME" >> services/$SERVICE/.env;
+        echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> services/$SERVICE/.env;
+      done
+
+    ## Install and build services
+    - for SERVICE in "${SERVICES[@]}"; do
+        echo "Installing dependencies for $SERVICE";
+        npm ci --prefix services/$SERVICE --cache .npm --prefer-offline;
+        echo "Building $SERVICE";
+        npm run build --prefix services/$SERVICE;
+      done
+
+  artifacts:
+    paths:
+      - services/**/dist
+
+test_appointment_service:
+  stage: test
+  image: node:18
+  tags:
+    - docker
+  cache:
+    paths:
+      - services/booking-service/node_modules
+  script:
+    - set -e
+    - echo "Testing appointment-service..."
+    - npm test --prefix services/booking-service
