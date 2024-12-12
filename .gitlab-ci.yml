@@ -42,7 +42,7 @@ install_and_build_services:
     paths:
       - services/**/dist
 
-test_services: // will be used later
+test_services:
   stage: test
   image: node:18
   tags:
