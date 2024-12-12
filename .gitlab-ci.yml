@@ -47,11 +47,14 @@ test_services:
   image: node:18
   tags:
     - docker
+  cache:
+    patchs:
+      - services/**/node_modules
   script:
     - set -e
     - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
     ## Running tests for each service
     - for SERVICE in "${SERVICES[@]}"; do
-        echo "Testing $SERVICE"
-        npm test --prefix services/$SERVICE
+        echo "Testing $SERVICE";
+        npm test --prefix services/$SERVICE;
       done
