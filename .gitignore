@@ -101,7 +101,7 @@ yarn.lock
 *.test.js
 *.test.ts
 !app.test.ts
-jest.config.js
+!jest.config.js
 coverage/
 
 # Miscellaneous
