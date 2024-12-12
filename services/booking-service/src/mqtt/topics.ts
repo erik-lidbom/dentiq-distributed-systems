@@ -5,6 +5,8 @@ export const TOPICS = {
         PATIENT_CANCEL_SLOT: "dentiq/appointmentService/notificationService/cancelSlot",
         APP_CANCEL_CONF: "dentiq/appointmentService/notificationService/cancelSlot",
 
+        PATIENT_BOOKING_REQ: "dentiq/patientClient/appointmentService/bookSlot",
+        DENTIST_CREATE_APP_REQ: "dentiq/dentistClient/appointmentService/addSlots",
         DENTIST_CREATE_APP: "dentiq/appointmentService/dentistService/addSlot",
         DENTIST_AWAIT_CONF: "dentiq/dentistService/appointmentService/addSlot/status",
         PATIENT_AWAIT_CONFIRMATION: "dentiq/patientService/appointmentService/bookSlot/status",
