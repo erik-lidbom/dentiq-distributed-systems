@@ -4,165 +4,151 @@ import mqttClient from '../mqtt/mqtt'
 import { TOPICS } from '../mqtt/topics'
 import { v4 as uuidv4 } from "uuid";
 
-export const createAppointment = async (
-    req: Request, 
-    res: Response, 
-    next: NextFunction): Promise<void> => {
+export type NotificationPayload = {
+    patientId?: string | null,
+    dentistId: string,
+    senderService: string,
+    message: string
+    typeOfNotification?: string
+};
+
+export type Message_Status_Message = {
+    status: number,
+    message: string,
+    notificationPayload?: NotificationPayload
+}
+
+export const createAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
     try {
-        const { dentistId, start_time, end_time } = req.body;
+        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+        const { dentistId, date, start_times } = payload;
+;
+        if(!dentistId || !date || !Array.isArray(start_times)) {
+            const resPayload = {
+                status: 404,
+                message: 'Missing required field(s).'
+            }
+            return resPayload;
+        };
 
-        if (!dentistId || !start_time || !end_time) {
-            res.status(400).json({ message: "Missing required field(s)." });
-            return;
-        }
-
-        const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.DENTIST_CREATE_APP,
-            JSON.stringify({ correlationId, dentistId }),
-            {qos: 2}
-        );
-
-        const validateDentist = await validateId(correlationId, TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF);
-
-        if(!validateDentist) {
-            res.status(400).json({ message: "Could not validate dentistId." });
-            return;
-        }
-
-        const newAppointment = new Appointment({
+        const newAppointment = new Appointment ({
             dentistId,
-            start_time,
-            end_time,
-            status: "unbooked"
+            date,
+            start_times,
+            status: 'unbooked'
         });
 
         const savedAppointment = await newAppointment.save();
 
         const notificationPayload = {
             dentistId: savedAppointment.dentistId,
-            senderService: "AppointmentService",
-            message: `${savedAppointment.start_time} - ${savedAppointment.end_time}`
+            senderService: 'AppointmentService',
+            message: `${savedAppointment.start_times}`,
+            typeOfNotification: 'AppointmentCreated'
         };
-        console.log(JSON.stringify(notificationPayload))
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.APPOINTMENT_CREATED,
-            JSON.stringify(notificationPayload),
-            {qos: 0}
-        );
 
-        res.status(201).json({ message: `Appointment successfully created with id: ${savedAppointment._id}` })
+        const resPayload = {
+            status: 201,
+            message: `Appointment successfully created with id: ${savedAppointment._id}`,
+            notificationPayload: notificationPayload
+        }
+
+        return resPayload;
 
     } catch (error) {
-        console.error("[ERROR] Could not create appointment: ", error)
-        next(error);
-    }
-};
-
-const validateId = (correlationId: string, validationTopic: string) => { // Handshake method, can be used for both createAppointment
-    return new Promise<boolean>((resolve, reject) => {                   // and bookAppointment
-        const timeout = setTimeout(() => {
-            mqttClient.removeListener('message', payloadHandler) // we clean up the listener to reduce mem leaks
-            reject(new Error("Could not validate dentist in time."));
-        }, 5000);
-
-        const payloadHandler = (topic: string, payload: Buffer) => {
-            if (topic === validationTopic) {
-                try {
-                    const payloadMsg = Buffer.isBuffer(payload) ? JSON.parse(payload.toString()) : payload;
-                    if (payloadMsg.correlationId === correlationId) {
-                        clearTimeout(timeout); // Clear the timeout
-                        mqttClient.removeListener('message', payloadHandler); // we clean up the listener to reduce mem leaks
-                        resolve(payloadMsg.status); // Resolve the promise
-                    }
-                } catch (error) {
-                    mqttClient.removeListener('message', payloadHandler); // Clean up listener on parse error
-                    clearTimeout(timeout); // Clear the timeout
-                    reject(new Error("Failed to parse validation response."));
-                }
-            }
+        const resPayload = {
+            status: 500,
+            message: 'Internal server error, please try again later'
         };
+        console.log('Error: ', error)
 
-        mqttClient.on('message', payloadHandler); // Add the listener
-    });
-};
-
-
-export const bookAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { patientId, appointmentId } = req.body;
-
-        if (!patientId || !appointmentId) {
-            res.status(400).json({ message: "Missing required field(s)."});
-            return;
-        };
-
-        const appointment = await Appointment.findById(appointmentId);
-
-        if (!appointment) {
-            res.status(404).json({ message: "Appointment could not be found." })
-            return;
-        }
-
-        if (appointment.status !== "unbooked") {
-            res.status(400).json({ message: "Appointment already booked. "});
-            return;
-        }
-
-        appointment.status = "booked";
-        appointment.patientId = patientId;
-
-        const correlationId = uuidv4(); // randomly generated correlation ID, has to match from dentistService
-
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.PATIENT_BOOKING,
-            JSON.stringify({ correlationId, patientId }),
-            {qos: 2}
-        );
-
-        const validatePatient = await validateId(correlationId, TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION);
-        
-        if(!validatePatient) {
-            res.status(400).json({ message: "Could not validate dentistId." });
-            return;
-        }
-
-        const bookedAppointment = await appointment.save();
-
-        const notificationPayload = { 
-            dentistId: bookedAppointment.dentistId,
-            patientId: bookedAppointment.patientId,
-            message: `${bookedAppointment.start_time} - ${bookedAppointment.end_time}`,
-            senderService: "AppointmentService"
-        }
-
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.APPOINTMENT_BOOKED, 
-            JSON.stringify(notificationPayload)
-        );
-
-        res.status(200).json({ message: `Appointment successfully booked with id: ${bookedAppointment._id}` })
-    } catch (error) {
-        console.error("[ERROR] Could not create appointment: ", error)
-        next(error);
+        return resPayload;
     }
 }
 
-export const deleteAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const bookAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
     try {
-    const { appointmentId } = req.body;
+        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+        const { patientId, appointmentId } = payload;
+
+        if(!patientId || !appointmentId) {
+            const resPayload = {
+                status: 400,
+                message: 'Missing required field(s).'
+            };
+            return resPayload;
+        }
+
+        const appointment = await Appointment.findById(appointmentId);
+
+        if(!appointment) {
+            const resPayload = {
+                status: 404,
+                message: 'Appointment could not be found.'
+            };
+            return resPayload;
+        }
+
+        if(appointment.status !== 'unbooked') {
+            const resPayload = {
+                status: 400,
+                message: 'Appointment already booked. '
+            };
+            return resPayload;
+        };
+
+        appointment.status = 'booked';
+        appointment.patientId = patientId;
+        
+        const bookedAppointment = await appointment.save();
+
+        const notificationPayload = {
+            dentistId: bookedAppointment.dentistId,
+            patientId: bookedAppointment.patientId,
+            senderService: "AppointmentService",
+            message: `${bookedAppointment.start_times}`,
+            typeOfNotification: 'AppointmentCreated'
+        };
+
+        const resPayload = {
+            status: 200,
+            message: `Appointment successfully booked with id: ${bookedAppointment._id}`,
+            notificationPayload: notificationPayload
+        };
+
+        return resPayload;
+    } catch (error) {
+        const resPayload = {
+            status: 500,
+            message: 'Internal server error, please try again later.'
+        };
+        console.log("Error: ", error)
+        return resPayload;
+    }
+};
+
+export const deleteAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
+    try {
+        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+        const { appointmentId } = payload
 
     if (!appointmentId) {
-        res.status(400).json({ message: "Missing required field."});
-        return;
+        const resPayload = {
+            status: 400,
+            message: 'Missing required field.'
+        }
+        return resPayload;
     }
 
     const appointment = await Appointment.findById(appointmentId);
     
 
     if(!appointment) {
-        res.status(404).json({ message: "Appointment not found."});
-        return;
+        const resPayload = {
+            status: 404,
+            message: `Appointment with id ${appointmentId} not found.`
+        };
+        return resPayload;
     }
 
     const deletedAppointment = await Appointment.deleteOne(appointment._id);
@@ -170,81 +156,113 @@ export const deleteAppointment = async (req: Request, res: Response, next: NextF
     const notificationPayload = {
         dentistId: appointment.dentistId,
         patientId: appointment.patientId,
-        message: `${appointment.start_time} - ${appointment.end_time}`,
+        message: `${appointment.start_times}`,
         senderService: "AppointmentService"
     }
 
-    mqttClient.publish(
-        TOPICS.APPOINTMENT.DENTIST_DELETE_SLOT, 
-        JSON.stringify(notificationPayload)
-    );
+    const resPayload = {
+        status: 200,
+        message: `Appointment with ID ${appointment._id} successfully deleted.`,
+        notificationPayload: notificationPayload
+    };
 
-    res.status(200).json({ message: "Appointment deleted: ", appointment })
+    return resPayload;
     } catch (error) {
-        console.error("[ERROR] Could not delete appointment", error);
-        next(error);
-    }
-}
+        const resPayload = {
+            status: 500,
+            message: 'Internal server error, please try again later.'
+        };
+        console.log("Error: ", error);
+        return resPayload;
+    };
+};
 
-export const getAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
     try {
-        const { appointmentId } = req.body;
+        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+
+        const { appointmentId } = payload;
 
         if (!appointmentId) {
-            res.status(400).json({ message: "Missing required field." });
-            return;
+            const resPayload = {
+                status: 400,
+                message: 'Missing required field.'
+            };
+            return resPayload;
         }
 
         const appointment = await Appointment.findById(appointmentId);
 
         if(!appointment) {
-            res.status(404).json({ message: `Could not find appointment with ID: ${appointmentId}` });
-            return;
+            const resPayload = {
+                status: 404,
+                message: `Could not find appointment with ID: ${appointmentId}`
+            };
+            return resPayload;
         }
 
-        res.status(200).json({ message: "Appointment: ", appointment });
+        const resPayload = {
+            status: 200,
+            message: `Appointment: ${appointment}`
+        };
+        return resPayload;
 
     } catch (error) {
-        console.error("[ERROR] Could not fetch appointment: ", error);
-        next(error);
+        const resPayload = {
+            status: 500,
+            message: 'Internal server error, please try again later.'
+        };
+        console.log("Error: ", error);
+        return resPayload;
     }
 };
 
-export const cancelAppointment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const cancelAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
     try {
-        const { appointmentId } = req.body;
+        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+        const { appointmentId } = payload;
 
         if(!appointmentId) {
-            res.status(400).json({ message: "Missing required field." });
-            return;
+            const resPayload = {
+                status: 400,
+                message: 'Missing required field.'
+            };
+            
+            return resPayload;
         };
 
         const appointment = await Appointment.findById(appointmentId);
 
         if(!appointment) {
-            res.status(404).json({ message: `Could not find appointment with ID: ${appointmentId}` })
-            return;
+            const resPayload = {
+                status: 404,
+                message: `Could not find appointment with ID: ${appointmentId}`
+            };
+            return resPayload;
         };
 
         const notificationPayload = {
             dentistId: appointment.dentistId,
             patientId: appointment.patientId,
-            message: `${appointment.start_time} - ${appointment.end_time}`,
+            message: `${appointment.start_times}`,
             senderService: "AppointmentService"
         }
 
         appointment.patientId = null;
         const updatedAppointment = await appointment.save()
     
-        mqttClient.publish(
-            TOPICS.APPOINTMENT.PATIENT_CANCEL_SLOT, 
-            JSON.stringify(notificationPayload)
-        );
-
-        res.status(200).json({ message: `Appointment with ID successfully canceled: ${appointment._id}` })
-
-    } catch (err) {
-        console.error("[ERROR] Could not cancel appointment: ", err);
-        next(err);
+        const resPayload = {
+            status: 200,
+            message: `Appointment with ID: ${appointment._id} successfully cancelled.`,
+            notificationPayload: notificationPayload
+        }
+        return resPayload;
+    } catch (error) {
+        const resPayload = {
+            status: 500,
+            message: 'Internal server error, please try again later.'
+        };
+        console.log("Error: ", error)
+        return resPayload;
     }
 }
