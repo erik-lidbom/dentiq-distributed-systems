@@ -1,4 +1,3 @@
-
 <template>
     <div class="lg:min-h-full w-full lg:w-1/3 flex-col justify-center pb-4">
         <h2 class="pt-4 text-dentiq-h2 text-center">My Appointments</h2>
@@ -36,27 +35,36 @@
 
                 <!-- Cancel Button -->
                 <div class="flex items-center">
-                    <button class="bg-red-500 px-5 py-2 rounded-lg text-white mr-3" @click="cancelAppointment(index)">Cancel</button>
+                    <button class="bg-red-500 px-5 py-2 rounded-lg text-white mr-3" @click="showCancelPopup">Cancel</button>
                 </div>
                 
             </div>
         </div>
+        <CancelPopup :visible="cancelPopupVisible" />
     </div>
     
 </template>
 
 <script setup lang="ts">
 
-import { ref } from 'vue'; // Updates page automatically 
+    import { ref } from 'vue'; // Updates page automatically 
+    import CancelPopup from '@/components/CancelPopup.vue';
 
-const appointments = ref([
-  { date: 'Dec 27', time: '09:00', location: 'Clinic Blue', patient: 'Erik Lidbom' },
-  { date: 'Dec 28', time: '11:00', location: 'Clinic Red', patient: 'Nabil Al Sayed' },
-  { date: 'Dec 29', time: '12:00', location: 'Clinic Yellow', patient: 'Utkarsh Singh' }, 
-]);
+    const appointments = ref([
+    { date: 'Dec 27', time: '09:00', location: 'Clinic Blue', patient: 'Erik Lidbom' },
+    { date: 'Dec 28', time: '11:00', location: 'Clinic Red', patient: 'Nabil Al Sayed' },
+    { date: 'Dec 29', time: '12:00', location: 'Clinic Yellow', patient: 'Utkarsh Singh' }, 
+    ]);
 
-const cancelAppointment = (index: number) => {  // Removes appointment at given index
-    appointments.value.splice(index,1)
-};
+    const cancelAppointment = (index: number) => {  // Removes appointment at given index
+        appointments.value.splice(index,1)
+    };
+
+    const cancelPopupVisible = ref(false); // Controls popop visibility
+
+    // Show popup
+    const showCancelPopup = () => {
+        cancelPopupVisible.value = true;
+    }
 
 </script>
