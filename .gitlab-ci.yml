@@ -48,7 +48,7 @@ test_services:
   tags:
     - docker
   cache:
-    patchs:
+    paths:
       - services/**/node_modules
   script:
     - set -e
