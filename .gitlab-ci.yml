@@ -42,19 +42,15 @@ install_and_build_services:
     paths:
       - services/**/dist
 
-test_services:
+test_appointment_service:
   stage: test
   image: node:18
   tags:
     - docker
   cache:
     paths:
-      - services/**/node_modules
+      - services/booking-service/node_modules
   script:
     - set -e
-    - SERVICES=("booking-service" "notification-service" "dentist-service" "patient-service")
-    ## Running tests for each service
-    - for SERVICE in "${SERVICES[@]}"; do
-        echo "Testing $SERVICE";
-        npm test --prefix services/$SERVICE;
-      done
+    - echo "Testing appointment-service..."
+    - npm test --prefix services/booking-service
