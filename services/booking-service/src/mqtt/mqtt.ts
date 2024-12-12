@@ -2,12 +2,12 @@ import mqtt, { MqttClient, IClientOptions } from "mqtt";
 import dotenv from "dotenv";
 import { TOPICS } from "./topics";
 import {
+  createAppointment,
   bookAppointment,
   cancelAppointment,
   deleteAppointment,
   Message_Status_Message,
 } from "../controllers/appointmentController";
-import { createAppointment } from "../controllers/appointmentController";
 
 dotenv.config();
 
@@ -26,8 +26,10 @@ mqttClient.on("connect", () => {
 
   mqttClient.subscribe(
     [
-      TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF,
-      TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION,
+      TOPICS.APPOINTMENT.DENTIST_CREATE_APP_REQ,
+      TOPICS.APPOINTMENT.DENTIST_REMOVE_SLOT_REQ,
+      TOPICS.APPOINTMENT.PATIENT_BOOKING_REQ,
+      TOPICS.APPOINTMENT.PATIENT_BOOKING_CANCEL_REQ
     ],
     (err) => {
       if (err) {
@@ -38,8 +40,11 @@ mqttClient.on("connect", () => {
       } else {
         console.log(
           "[MQTT]: Subscribed to topic(s)",
-          TOPICS.APPOINTMENT.APPOINTMENT_CREATED,
-          TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION
+          TOPICS.APPOINTMENT.DENTIST_CREATE_APP_REQ,
+          TOPICS.APPOINTMENT.DENTIST_REMOVE_SLOT_REQ,
+          TOPICS.APPOINTMENT.PATIENT_BOOKING_REQ,
+          TOPICS.APPOINTMENT.PATIENT_BOOKING_CANCEL_REQ
+
         );
         console.log("-------------------------------------------------------");
       }
@@ -47,7 +52,11 @@ mqttClient.on("connect", () => {
   );
 });
 
-mqttClient.on("message", (topic, message) => {
+mqttClient.on("message", async (topic, message) => {
+  const messageAndTopic = await appendToDatabase(topic, message);
+
+  const topicsAndMessage = await whereToPublish(messageAndTopic)
+  await publishMessage(topicsAndMessage);
   console.log(`[MQTT]: Message recieved from ${topic}:`, message.toString());
 });
 
@@ -60,7 +69,7 @@ const appendToDatabase = async (
   let result;
   switch (topic) {
     case TOPICS.APPOINTMENT.DENTIST_CREATE_APP_REQ:
-      result = await createAppointment(message); // -> publish to broker
+      result = await createAppointment(message); 
       break;
     case TOPICS.APPOINTMENT.DENTIST_REMOVE_SLOT_REQ:
       result = await deleteAppointment(message);
