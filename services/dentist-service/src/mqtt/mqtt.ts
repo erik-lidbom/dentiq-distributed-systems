@@ -51,7 +51,9 @@ mqttClient.on("message", async (topic, message) => {
       message.toString()
     );
     // Validate and parse the message
-    const payload = JSON.parse(message.toString());
+    const payload = Buffer.isBuffer(message)
+      ? JSON.parse(message.toString())
+      : message;
     const { correlationId } = payload;
 
     //Retrieve thhe response topic and status
