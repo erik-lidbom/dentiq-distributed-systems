@@ -19,7 +19,7 @@ if (
 const mqttOptions: IClientOptions = {
   host: process.env.MQTT_HOST,
   port: parseInt(process.env.MQTT_PORT || "1883", 10),
-  protocol: "mqtt", // Use "mqtts" if your broker requires SSL
+  protocol: "mqtt",
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
 };
