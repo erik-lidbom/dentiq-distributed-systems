@@ -40,7 +40,7 @@
                 
             </div>
         </div>
-        <CancelPopup :visible="cancelPopupVisible" />
+        <CancelPopup :visible="cancelPopupVisible" @close="closeCancelPopup" />
     </div>
     
 </template>
@@ -66,5 +66,10 @@
     const showCancelPopup = () => {
         cancelPopupVisible.value = true;
     }
+
+    const closeCancelPopup = () => {
+        cancelPopupVisible.value = false;
+    };
+
 
 </script>

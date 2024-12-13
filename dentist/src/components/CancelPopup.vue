@@ -1,6 +1,7 @@
 <template>
     <div v-if="visible" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white w-2/5 h-4/5 rounded-lg">
+        <div class="bg-white w-2/5 h-4/5 rounded-lg relative">
+            <i class="pi pi-times text-gray-500 text-xl absolute top-4 right-4 cursor-pointer" @click="closePopup"></i>
             <div class="mt-7 flex flex-col items-center justify-center w-full h-auto px-5 pb-5">
                 <!-- Icon Section -->
                 <div class="flex mb-30">
@@ -28,10 +29,20 @@
   
 <script setup lang="ts">
 
-    import { defineProps } from 'vue';
+    import { defineProps, defineEmits } from 'vue';
     
     defineProps({
         visible: Boolean, // Determines if the box is shown
     });
+
+    // Define emits
+    const emit = defineEmits<{
+        (event: 'close'): void;
+    }>();
+
+    const closePopup = () => {
+        emit('close');  // Emit event to parent component to close the popup
+    };
+
 
 </script>
