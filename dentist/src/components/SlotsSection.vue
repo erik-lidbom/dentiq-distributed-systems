@@ -36,10 +36,10 @@
 </template>
 
 <script setup>
-  //Imports for calendar
-  import { ref, computed } from 'vue';
-  import Datepicker from 'vue3-datepicker';
-  import 'vue3-datepicker';
+//Imports for calendar
+import { ref, computed } from 'vue';
+import Datepicker from 'vue3-datepicker';
+import 'vue3-datepicker';
 
 // State for the date picker
   const showCalendar = ref(false); // Controls the visibility of the calendar

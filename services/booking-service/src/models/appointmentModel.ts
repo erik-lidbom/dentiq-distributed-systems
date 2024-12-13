@@ -1,4 +1,4 @@
-import mongoose, { Model, Schema } from "mongoose";
+import mongoose, { Model, Schema } from 'mongoose';
 
 export interface IAppointment {
     patientId: string | null;
@@ -21,6 +21,6 @@ export const appointmentSchema = new Schema<IAppointment>({
 });
 
 export const Appointment: Model<IAppointment> = mongoose.model<IAppointment>(
-    "Appointment",
-    appointmentSchema
+  'Appointment',
+  appointmentSchema
 );

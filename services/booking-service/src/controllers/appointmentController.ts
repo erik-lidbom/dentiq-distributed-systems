@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { Appointment } from '../models/appointmentModel'
-import mqttClient from '../mqtt/mqtt'
-import { TOPICS } from '../mqtt/topics'
-import { v4 as uuidv4 } from "uuid";
+import { Request, Response, NextFunction } from 'express';
+import { Appointment } from '../models/appointmentModel';
+import mqttClient from '../mqtt/mqtt';
+import { TOPICS } from '../mqtt/topics';
+import { v4 as uuidv4 } from 'uuid';
 
 export type NotificationPayload = {
     patientId?: string | null,
@@ -38,7 +38,7 @@ export const createAppointment = async (message: Buffer): Promise<Message_Status
             status: 'unbooked'
         });
 
-        const savedAppointment = await newAppointment.save();
+    const savedAppointment = await newAppointment.save();
 
         const notificationPayload = {
             dentistId: savedAppointment.dentistId,
@@ -79,7 +79,7 @@ export const bookAppointment = async (message: Buffer): Promise<Message_Status_M
             return resPayload;
         }
 
-        const appointment = await Appointment.findById(appointmentId);
+    const appointment = await Appointment.findById(appointmentId);
 
         if(!appointment) {
             const resPayload = {
@@ -191,7 +191,7 @@ export const getAppointment = async (message: Buffer): Promise<Message_Status_Me
             return resPayload;
         }
 
-        const appointment = await Appointment.findById(appointmentId);
+    const appointment = await Appointment.findById(appointmentId);
 
         if(!appointment) {
             const resPayload = {
@@ -231,7 +231,7 @@ export const cancelAppointment = async (message: Buffer): Promise<Message_Status
             return resPayload;
         };
 
-        const appointment = await Appointment.findById(appointmentId);
+    const appointment = await Appointment.findById(appointmentId);
 
         if(!appointment) {
             const resPayload = {

@@ -1,6 +1,12 @@
-import express, { Express, Router } from "express";
+import express, { Express, Router } from 'express';
 const router = express.Router();
-import { createAppointment, deleteAppointment, getAppointment, bookAppointment, cancelAppointment } from "../controllers/appointmentController";
+import {
+  createAppointment,
+  deleteAppointment,
+  getAppointment,
+  bookAppointment,
+  cancelAppointment,
+} from '../controllers/appointmentController';
 
 //outer.post("/", createAppointment); // Create an appointment
 //outer.delete("/", deleteAppointment); // Delete an appointment
