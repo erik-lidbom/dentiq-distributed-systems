@@ -48,7 +48,7 @@
     <button
       v-if="isMobile && !showFilter"
       @click="toggleFilter"
-      class="fixed bottom-9 h-[48px] w-[100px] left-1/2 transform -translate-x-1/2 bg-dentiq-button-primary text-white font-bold py-2 px-6 rounded-lg z-50"
+      class="fixed bottom-9 h-[48px] w-[100px] left-1/2 transform -translate-x-1/2 bg-dentiq-button-primary text-white font-bold py-2 px-6 rounded-lg z-40"
     >
       Filter
     </button>
