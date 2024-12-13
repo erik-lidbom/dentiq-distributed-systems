@@ -9,18 +9,28 @@
                 </div>
 
                 <!-- Titles Section -->
-                <div class="w-full text-center my-6">
+                <div class="w-4/5 text-center my-6">
                     <h1 class="text-dentiq-h2"> Are you sure? </h1>
-                    <p class="text-dentiq-body text-gray-700"> This action will cancel the booking and notify the patient. The cancelation cannot be undone. Please type in the name of the patient to confirm.</p>
+                    <p class="text-dentiq-body text-gray-700"> This action will cancel the booking and notify the patient. The cancelation cannot be undone.</p>
                 </div>
                 
                 <!-- Type Name Section --> 
-                <div class="w-full text-gray-700 pb-3">
-                    <label for="patient_name" class="mb-2 text-dentiq-body italic"> Name: Erik Lidbom</label>
-                    <input type="text" id="confirm_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" placeholder="Type here ..." required />
+                <div class="w-4/5 text-gray-700 pb-3 text-center">
+                    <label for="confirm_text" class="mb-2 text-dentiq-body"> Please type 'DentiQ' to confirm the cancelation.</label>
+                    <input 
+                        type="text" 
+                        id="confirm_dentiq" 
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg w-full p-2.5" 
+                        placeholder="Type here ..." 
+                        v-model="confirmationText" 
+                        required 
+                    />
                 </div>
 
-                <button class="bg-red-500 px-5 py-2 rounded-lg text-white"> Confirm Cancellation </button>
+                <button 
+                    class="w-4/5 bg-red-500 px-5 py-2 rounded-lg text-white"
+                    :disabled="confirmationText !== 'DentiQ'"
+                    @click="confirmCancellation"> Confirm Cancellation </button>
 
             </div>
         </div>
@@ -29,7 +39,9 @@
   
 <script setup lang="ts">
 
-    import { defineProps, defineEmits } from 'vue';
+    import { ref, defineProps, defineEmits } from 'vue';
+
+    const confirmationText = ref('');
     
     defineProps({
         visible: Boolean, // Determines if the box is shown
@@ -38,11 +50,15 @@
     // Define emits
     const emit = defineEmits<{
         (event: 'close'): void;
+        (event: 'cancelAppointment'): void;
     }>();
 
     const closePopup = () => {
         emit('close');  // Emit event to parent component to close the popup
     };
 
-
+    const confirmCancellation = () => {
+        emit('cancelAppointment'); // Emit event to parent component to cancel the appointment
+        closePopup();
+    };
 </script>
