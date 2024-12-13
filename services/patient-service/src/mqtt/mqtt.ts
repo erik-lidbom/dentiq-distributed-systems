@@ -1,5 +1,5 @@
-import mqtt, { MqttClient, IClientOptions } from "mqtt";
-import dotenv from "dotenv";
+import mqtt, { MqttClient, IClientOptions } from 'mqtt';
+import dotenv from 'dotenv';
 dotenv.config();
 
 // Validate required environment variables
@@ -11,7 +11,7 @@ if (
   !process.env.PATIENT_TOPIC
 ) {
   throw new Error(
-    "Missing required MQTT environment variables. Check your .env file."
+    'Missing required MQTT environment variables. Check your .env file.'
   );
 }
 
@@ -21,38 +21,38 @@ const mqttConnOptions: IClientOptions = {
   port: parseInt(process.env.MQTT_PORT, 10) || 8883,
   protocol: 'mqtts',
   username: process.env.MQTT_USERNAME,
-  password: process.env.MQTT_PASSWORD
+  password: process.env.MQTT_PASSWORD,
 };
 
 // Create MQTT client
 const mqttClient: MqttClient = mqtt.connect(mqttConnOptions);
 
 // On successful connection
-mqttClient.on("connect", () => {
-  console.log("[MQTT]: Successfully connected to the broker!");
+mqttClient.on('connect', () => {
+  console.log('[MQTT]: Successfully connected to the broker!');
 
   // Subscribe to patient topic
   const topics = [process.env.PATIENT_TOPIC!];
   mqttClient.subscribe(topics, (err) => {
     if (err) {
       console.error(
-        "[MQTT]: Could not establish subscription connections:",
+        '[MQTT]: Could not establish subscription connections:',
         err
       );
     } else {
-      console.log("[MQTT]: Subscribed to topics:", topics.join(", "));
-      console.log("-------------------------------------------------------");
+      console.log('[MQTT]: Subscribed to topics:', topics.join(', '));
+      console.log('-------------------------------------------------------');
     }
   });
 });
 
 // Handle incoming messages
-mqttClient.on("message", (topic, message) => {
+mqttClient.on('message', (topic, message) => {
   try {
     let payload;
 
     // Check the type of the incoming message
-    if (typeof message === "string") {
+    if (typeof message === 'string') {
       // If the message is a string, try parsing as JSON
       try {
         payload = JSON.parse(message);
@@ -80,7 +80,7 @@ mqttClient.on("message", (topic, message) => {
       console.log(`[MQTT]: Unknown topic (${topic}). Message:`, payload);
     }
   } catch (err) {
-    console.error("[MQTT]: Error processing received message:", err);
+    console.error('[MQTT]: Error processing received message:', err);
   }
 });
 

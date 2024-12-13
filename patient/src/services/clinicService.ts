@@ -1,5 +1,4 @@
-// TODO: Replace this with the API gateway URL
-const BASE_URL = "http://localhost:3000/api/clinics";
+const BASE_URL = 'http://localhost:3000/api/clinics';
 
 /**
  * Fetch clinics from the API gateway
@@ -12,9 +11,9 @@ export async function fetchClinics() {
     const url = BASE_URL;
 
     const response = await fetch(url, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
@@ -23,10 +22,10 @@ export async function fetchClinics() {
     }
 
     const data = await response.json();
-    console.log("Clinics fetched successfully:", data);
+    console.log('Clinics fetched successfully:', data);
     return data;
   } catch (error) {
-    console.error("Error fetching clinics:", error);
+    console.error('Error fetching clinics:', error);
     throw error;
   }
 }
