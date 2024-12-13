@@ -2,7 +2,8 @@
   <!-- Conditional if no available doctors -->
   <div
     v-if="availableDoctors.length === 0"
-    class="text-gray-500 text-center px-10 py-20"
+    class="text-gray-500 text-center"
+    :class="isMobile ? 'px-5 py-50' : 'px-10 py-20'"
   >
     <p>
       Sorry, no doctors are currently available for appointments. Please try
@@ -10,7 +11,10 @@
     </p>
   </div>
 
-  <div v-else class="p-8 flex flex-col items-end space-y-4">
+  <div v-else 
+    class="flex flex-col items-end space-y-4"
+    :class="isMobile ? 'px-2 py-16' : 'p-2'"
+  >
     <!-- Progress Bar -->
     <div class="w-[95%] flex self-start justify-between items-center mb-4">
       <div
@@ -31,63 +35,68 @@
       <div
         class="w-full flex flex-col justify-start h-fit max-h-[290px] overflow-scroll space-y-2 overflow-y-scroll"
       >
-        <h3 class="text-lg font-medium text-dentiq-muted-darkest">
+        <h3 class="sm:text-lg font-medium text-dentiq-muted-darkest">
           Select Doctor <span class="text-dentiq-muted-semiLight">*</span>
         </h3>
-        <div
-          v-for="doctor in availableDoctors"
-          :key="doctor.id"
-          class="flex items-center px-4 min-h-[65px] max-h-[65px] border rounded-xl cursor-pointer hover:bg-blue-50"
-          :class="{
-            'border-blue-500 bg-blue-50': selectedDoctor?.id === doctor.id,
-            'cursor-not-allowed text-dentiq-muted-light':
-              !hasUpcomingAvailability(doctor),
-          }"
-          @click="hasUpcomingAvailability(doctor) && selectDoctor(doctor)"
-          :aria-disabled="!hasUpcomingAvailability(doctor)"
-        >
-          <div>
-            <h4 class="font-medium text-lg">{{ doctor.name }}</h4>
-            <p class="text-sm text-gray-500">{{ doctor.speciality }}</p>
+        <div class="max-h-[240px] space-y-2 overflow-y-scroll">
+          <div
+            v-for="doctor in availableDoctors"
+            :key="doctor.id"
+            class="flex flex-col items-start justify-center px-4 min-h-[65px] max-h-[65px] border rounded-xl cursor-pointer hover:bg-blue-50"
+            :class="{
+              'border-blue-500 bg-blue-50': selectedDoctor?.id === doctor.id,
+              'cursor-not-allowed text-dentiq-muted-light':
+                !hasUpcomingAvailability(doctor),
+            }"
+            @click="hasUpcomingAvailability(doctor) && selectDoctor(doctor)"
+            :aria-disabled="!hasUpcomingAvailability(doctor)"
+          >
+            <div>
+        </div>
+            <h4 class="font-medium text-sm sm:text-lg">{{ doctor.name }}</h4>
+            <p class="text-xs sm:text-sm text-gray-500">{{ doctor.speciality }}</p>
           </div>
         </div>
       </div>
 
       <!-- Language -->
       <div
-        class="w-full flex flex-col h-fit max-h-[290px] justify-start space-y-2 overflow-scroll"
+        class="w-full flex flex-col h-fit justify-start space-y-2"
       >
-        <h3 class="text-lg font-medium text-dentiq-muted-darkest">
+        <h3 class="sm:text-lg font-medium text-dentiq-muted-darkest">
           Select Language <span class="text-dentiq-muted-semiLight">*</span>
         </h3>
-        <div
-          v-for="language in allLanguages"
-          :key="language"
-          class="flex items-center px-4 min-h-[65px] max-h-[65px] border rounded-lg cursor-pointer hover:bg-blue-50"
-          :class="{
-            'border-blue-500 bg-blue-50': selectedLanguage === language,
-          }"
-          @click="selectLanguage(language)"
-        >
-          <p class="font-medium text-lg">{{ language }}</p>
+        <div class="max-h-[240px] space-y-2 overflow-y-scroll">
+          <div
+            v-for="language in allLanguages"
+            :key="language"
+            class="flex items-center px-4 min-h-[65px] max-h-[65px] border rounded-lg cursor-pointer hover:bg-blue-50"
+            :class="{
+              'border-blue-500 bg-blue-50': selectedLanguage === language,
+            }"
+            @click="selectLanguage(language)"
+          >
+            <p class="font-medium text-sm sm:text-lg">{{ language }}</p>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Step 2: Select Date and Time -->
     <div class="flex flex-col space-y-4 w-full max-h-fit" v-if="step === 2">
-      <h3 class="text-lg font-medium text-dentiq-muted-darkest mb-4">
+      <h3 class="sm:text-lg font-medium text-dentiq-muted-darkest mb-4">
         Select Date <span class="text-dentiq-muted-semiLight">*</span>
       </h3>
       <div class="flex justify-between items-center">
         <button
           @click="prevMonth"
           class="text-gray-500 hover:text-black text-lg font-normal"
+          :class="isCurrentMonth ? 'invisible' : ''"
         >
           ←
         </button>
         <h4
-          class="font-medium text-dentiq-muted-darkest text-md"
+          class="font-medium text-dentiq-muted-darkest text-sm sm:text-base"
           :class="hasNextMonth() ? '' : 'absolute left-[40%]'"
         >
           {{ formattedMonth }}
@@ -104,13 +113,13 @@
         <span
           v-for="day in days"
           :key="day"
-          class="font-normal text-dentiq-muted-default"
+          class="font-normal text-dentiq-muted-default text-sm sm:text-lg flex justify-center items-center"
           >{{ day }}</span
         >
         <button
           v-for="date in calendarDates"
           :key="date.day"
-          class="py-2 px-4 text-sm rounded-lg cursor-pointer"
+          class="py-2 px-4 text-xs sm:text-sm rounded-lg cursor-pointer flex justify-center items-center"
           :class="{
             'bg-blue-500 text-white': isSelectedDate(date.day),
             'text-dentiq-muted-dark bg-dentiq-muted-lighter cursor-not-allowed':
@@ -136,7 +145,7 @@
         <div
           v-for="time in timeSlots"
           :key="time"
-          class="py-2 px-4 border rounded-lg cursor-pointer text-center"
+          class="py-2 px-4 border rounded-lg cursor-pointer text-center text-sm sm:text-base"
           :class="{
             'bg-blue-500 text-white': isSelectedTime(time),
             'hover:bg-blue-50': !isSelectedTime(time),
@@ -202,7 +211,7 @@
 
     <!-- Navigation Buttons -->
     <div
-      class="min-w-full"
+      class="min-w-full text-sm sm:text-base"
       :class="{
         'justify-end': step < 2,
         'justify-between': step >= 2 && step <= 3,
@@ -234,7 +243,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted, onMounted } from 'vue';
 import { getMonth, getYear } from 'date-fns';
 import { postAppointment } from '@/services/appointmentService';
 
@@ -292,6 +301,30 @@ const resetToFirstStep = () => {
   selectedTime.value = null;
   reason.value = '';
 };
+
+// Reactive state for screen size
+const isMobile = ref(window.innerWidth < 768);
+
+// Update `isMobile` value on window resize
+const updateIsMobile = () => {
+  isMobile.value = window.innerWidth < 768;
+};
+
+// Listen for resize events
+onMounted(() => {
+  window.addEventListener('resize', updateIsMobile);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateIsMobile);
+});
+
+// Check if the current month is the selected month
+const isCurrentMonth = computed(() => {
+  const today = new Date();
+  return currentYear.value === today.getFullYear() && currentMonth.value === today.getMonth();
+});
+
 
 // State
 const selectedLanguage = ref<string | null>('Any Language');
