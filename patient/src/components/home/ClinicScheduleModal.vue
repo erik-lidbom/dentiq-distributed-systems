@@ -53,7 +53,7 @@
           <button
             v-for="doctor in availableDoctors"
             :key="doctor.id"
-            class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-2 focus:ring-blue-500 hover:bg-blue-50"
+            class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-1 focus:ring-blue-500 hover:bg-blue-50"
             :class="{
               'border-blue-500 bg-blue-50': selectedDoctor?.id === doctor.id,
               'cursor-not-allowed text-dentiq-muted-light':
@@ -87,7 +87,7 @@
           <button
             v-for="language in allLanguages"
             :key="language"
-            class="flex items-center px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-lg focus:ring-2 focus:ring-blue-500 hover:bg-blue-50"
+            class="flex items-center px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-lg focus:ring-1 focus:ring-blue-500 hover:bg-blue-50"
             :class="{
               'border-blue-500 bg-blue-50': selectedLanguage === language,
             }"
@@ -144,7 +144,7 @@
         <button
           v-for="date in calendarDates"
           :key="date.day"
-          class="py-2 px-4 text-xs sm:text-sm rounded-lg focus:ring-2 focus:ring-blue-500 flex justify-center items-center"
+          class="py-2 px-4 text-xs sm:text-sm rounded-lg focus:ring-1 focus:ring-blue-500 flex justify-center items-center"
           :class="{
             'bg-blue-500 text-white': isSelectedDate(date.day),
             'text-dentiq-muted-dark bg-dentiq-muted-lighter cursor-not-allowed':
@@ -194,7 +194,7 @@
       <textarea
         v-model="reason"
         rows="3"
-        class="w-full resize-none p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="w-full resize-none p-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
         placeholder="Write your reason here..."
       ></textarea>
     </div>
@@ -250,14 +250,14 @@
     >
       <button
         v-if="step > 1"
-        class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-blue-500"
+        class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:ring-1 focus:ring-blue-500"
         @click="goStepBack"
         aria-label="Go to previous step"
       >
         Previous
       </button>
       <button
-        class="px-6 py-3 self-end text-white font-medium rounded-lg focus:ring-2 focus:ring-blue-500"
+        class="px-6 py-3 self-end text-white font-medium rounded-lg focus:ring-1 focus:ring-blue-500"
         :class="
           !canProceed
             ? 'bg-dentiq-muted-light'
