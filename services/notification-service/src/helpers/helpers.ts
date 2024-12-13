@@ -1,5 +1,5 @@
-import { NotificationDocument } from "../models/model";
-import { TOPICS } from "../mqtt/topics";
+import { NotificationDocument } from '../models/model';
+import { TOPICS } from '../mqtt/topics';
 
 export const createPublishTopics = (
   topic: string,

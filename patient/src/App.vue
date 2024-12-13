@@ -14,5 +14,5 @@
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router';
-import GlobalNav from './components/GlobalNav.vue';
+import GlobalNav from './components/shared/Header.vue';
 </script>

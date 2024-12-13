@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import { Dentist } from "../models/dentistSchema";
-import { publishMessage } from "../mqtt/publish";
+import { Request, Response, NextFunction } from 'express';
+import { Dentist } from '../models/dentistSchema';
+import { publishMessage } from '../mqtt/publish';
 
 // Helper function to handle errors
 const handleError = (error: any, res: Response): void => {
@@ -11,7 +11,7 @@ const handleError = (error: any, res: Response): void => {
     });
   } else {
     res.status(500).json({
-      message: "An unexpected error occurred.",
+      message: 'An unexpected error occurred.',
       error: error.message,
     });
   }
@@ -36,7 +36,7 @@ export const createDentist = async (
 
     // Validate required fields
     if (!personnummer || !firstName || !lastName || !password || !email) {
-      res.status(400).json({ message: "Missing required field(s)." });
+      res.status(400).json({ message: 'Missing required field(s).' });
       return;
     }
 
@@ -54,7 +54,7 @@ export const createDentist = async (
 
     // Publish message to HiveMQ
     const message = {
-      type: "dentist",
+      type: 'dentist',
       dentistId: savedDentist._id,
       personnummer,
       firstName,
@@ -67,9 +67,9 @@ export const createDentist = async (
 
     res
       .status(201)
-      .json({ message: "New dentist registered", dentist: savedDentist });
+      .json({ message: 'New dentist registered', dentist: savedDentist });
   } catch (error) {
-    console.error("[ERROR] Could not create dentist: ", error);
+    console.error('[ERROR] Could not create dentist: ', error);
     handleError(error, res);
   }
 };
@@ -84,20 +84,20 @@ export const deleteDentist = async (
     const { dentistId } = req.body;
 
     if (!dentistId) {
-      res.status(400).json({ message: "Missing required field: dentistId." });
+      res.status(400).json({ message: 'Missing required field: dentistId.' });
       return;
     }
 
     const deletedDentist = await Dentist.findByIdAndDelete(dentistId);
 
     if (!deletedDentist) {
-      res.status(404).json({ message: "Dentist not found." });
+      res.status(404).json({ message: 'Dentist not found.' });
       return;
     }
 
-    res.status(200).json({ message: "Dentist deleted", dentistId });
+    res.status(200).json({ message: 'Dentist deleted', dentistId });
   } catch (error) {
-    console.error("[ERROR] Could not delete dentist: ", error);
+    console.error('[ERROR] Could not delete dentist: ', error);
     handleError(error, res);
   }
 };
@@ -112,22 +112,22 @@ export const getDentist = async (
     const { dentistId } = req.query;
 
     if (!dentistId) {
-      res.status(400).json({ message: "Missing required field: dentistId." });
+      res.status(400).json({ message: 'Missing required field: dentistId.' });
       return;
     }
 
     const dentist = await Dentist.findById(dentistId).populate(
-      "appointments clinics"
+      'appointments clinics'
     );
 
     if (!dentist) {
-      res.status(404).json({ message: "Dentist not found." });
+      res.status(404).json({ message: 'Dentist not found.' });
       return;
     }
 
     res.status(200).json(dentist);
   } catch (error) {
-    console.error("[ERROR] Could not fetch dentist: ", error);
+    console.error('[ERROR] Could not fetch dentist: ', error);
     handleError(error, res);
   }
 };
@@ -142,24 +142,24 @@ export const patchDentist = async (
     const { dentistId, updates } = req.body;
 
     if (!dentistId || !updates) {
-      res.status(400).json({ message: "Missing required field(s)." });
+      res.status(400).json({ message: 'Missing required field(s).' });
       return;
     }
 
     const updatedDentist = await Dentist.findByIdAndUpdate(dentistId, updates, {
       new: true,
-    }).populate("appointments clinics");
+    }).populate('appointments clinics');
 
     if (!updatedDentist) {
-      res.status(404).json({ message: "Dentist not found." });
+      res.status(404).json({ message: 'Dentist not found.' });
       return;
     }
 
     res
       .status(200)
-      .json({ message: "Dentist updated", dentist: updatedDentist });
+      .json({ message: 'Dentist updated', dentist: updatedDentist });
   } catch (error) {
-    console.error("[ERROR] Could not update dentist: ", error);
+    console.error('[ERROR] Could not update dentist: ', error);
     handleError(error, res);
   }
 };
@@ -174,17 +174,17 @@ export const queryDentists = async (
     const filters = req.body.filters || {};
 
     const dentists = await Dentist.find(filters).populate(
-      "appointments clinics"
+      'appointments clinics'
     );
 
     if (!dentists || dentists.length === 0) {
-      res.status(404).json({ message: "No dentists found." });
+      res.status(404).json({ message: 'No dentists found.' });
       return;
     }
 
     res.status(200).json(dentists);
   } catch (error) {
-    console.error("[ERROR] Could not query dentists: ", error);
+    console.error('[ERROR] Could not query dentists: ', error);
     handleError(error, res);
   }
 };

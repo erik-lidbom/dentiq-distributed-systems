@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document } from 'mongoose';
 
 export interface Notification {
   email?: string;
@@ -32,11 +32,11 @@ const notificationSchema = new mongoose.Schema(
     },
     message: {
       type: String,
-      required: [true, "message is required"],
+      required: [true, 'message is required'],
     },
     senderService: {
       type: String,
-      required: [true, "senderService is required"],
+      required: [true, 'senderService is required'],
     },
     patientId: {
       type: String,
@@ -51,7 +51,7 @@ const notificationSchema = new mongoose.Schema(
 );
 
 const Notification = mongoose.model<NotificationDocument>(
-  "Notification",
+  'Notification',
   notificationSchema
 );
 

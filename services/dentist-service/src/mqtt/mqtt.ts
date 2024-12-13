@@ -1,8 +1,8 @@
-import mqtt, { MqttClient, IClientOptions } from "mqtt";
-import dotenv from "dotenv";
-import { subscribeTopics } from "./subscribe";
-import { publishMessage } from "./publish";
-import { getStatus, retrievePublishTopics } from "./helpers";
+import mqtt, { MqttClient, IClientOptions } from 'mqtt';
+import dotenv from 'dotenv';
+import { subscribeTopics } from './subscribe';
+import { publishMessage } from './publish';
+import { getStatus, retrievePublishTopics } from './helpers';
 dotenv.config();
 
 // Validate required environment variables
@@ -13,7 +13,7 @@ if (
   !process.env.MQTT_PASSWORD
 ) {
   throw new Error(
-    "Missing required MQTT environment variables. Check your .env file."
+    'Missing required MQTT environment variables. Check your .env file.'
   );
 }
 
@@ -21,7 +21,7 @@ if (
 const mqttConnOptions: IClientOptions = {
   host: process.env.MQTT_HOST,
   port: parseInt(process.env.MQTT_PORT, 10) || 8883,
-  protocol: "mqtts",
+  protocol: 'mqtts',
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
 };
@@ -30,21 +30,21 @@ const mqttConnOptions: IClientOptions = {
 export const mqttClient: MqttClient = mqtt.connect(mqttConnOptions);
 
 // On successful connection
-mqttClient.on("connect", async () => {
-  console.log("[MQTT]: Successfully connected to the broker!");
+mqttClient.on('connect', async () => {
+  console.log('[MQTT]: Successfully connected to the broker!');
 
   // Subscribes to all topics
   await subscribeTopics();
 });
 
 // Handle connection errors
-mqttClient.on("error", (err) => {
-  console.error("[MQTT]: Connection error:", err);
+mqttClient.on('error', (err) => {
+  console.error('[MQTT]: Connection error:', err);
   mqttClient.end();
 });
 
 // Handle incoming messages
-mqttClient.on("message", async (topic, message) => {
+mqttClient.on('message', async (topic, message) => {
   try {
     console.log(
       `[MQTT]: Raw message received from ${topic}:`,
@@ -68,12 +68,12 @@ mqttClient.on("message", async (topic, message) => {
       responsePayload
     );
   } catch (err) {
-    console.error("[MQTT]: Error processing message:", err);
+    console.error('[MQTT]: Error processing message:', err);
 
     const errorResponse = {
-      correlationId: "unknown",
+      correlationId: 'unknown',
       status: false,
-      error: "Invalid message format",
+      error: 'Invalid message format',
     };
   }
 });
