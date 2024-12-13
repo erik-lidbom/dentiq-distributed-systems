@@ -3,7 +3,11 @@ import axios from 'axios';
 import { getService } from '../services/serviceRegistery';
 import { ServiceError } from '../utils/customError'; // Custom Error Classes
 
-const routingController = async (req: Request, res: Response, next: NextFunction) => {
+const routingController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { serviceName, path } = req.params;
     const service = getService(serviceName);
@@ -21,14 +25,26 @@ const routingController = async (req: Request, res: Response, next: NextFunction
 
     // Append query parameters if present
     const queryString = Object.entries(req.query)
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`)
+      .map(
+        ([key, value]) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`
+      )
       .join('&');
 
     if (queryString) {
       targetUrl += `?${queryString}`;
     }
 
-    console.log(`[INFO]: Forwarding request ${req.method} ${req.url} to: ${targetUrl}`);
+    console.log(
+      `[INFO]: Forwarding request ${req.method} ${req.url} to: ${targetUrl}`
+    );
+
+    // TODO: Remove line 42-47 when connected with the real services
+    const data = req.body || {};
+    return res
+      .status(200)
+      .json({ message: `Request forwarded to ${serviceName}`, data });
+    // remove till this line
 
     // Forward the request to the target service
     const response = await axios({
@@ -53,78 +69,84 @@ const routingController = async (req: Request, res: Response, next: NextFunction
       );
     }
 
-    console.error(`[ERROR]: Internal error in routingController: ${error.message}`);
+    console.error(
+      `[ERROR]: Internal error in routingController: ${error.message}`
+    );
     next(new ServiceError('Internal Server Error', 500));
   }
 };
 
-const aggregateClinics = async (req: Request, res: Response, next: NextFunction) => {
+const aggregateClinics = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     // Mock data for dentists
     const mockDentists = [
       {
-        id: "1",
-        firstName: "Nabil",
-        lastName: "Al Sayed",
-        speciality: "Prosthodontist",
-        languages: ["English", "Svenska", "العربية"],
+        id: '1',
+        firstName: 'Nabil',
+        lastName: 'Al Sayed',
+        speciality: 'Prosthodontist',
+        languages: ['English', 'Svenska', 'العربية'],
         availability: [
-          { date: "2024-11-10", times: ["09:30 AM", "10:30 AM", "11:30 AM"] },
-          { date: "2024-11-12", times: ["10:00 AM", "11:00 AM", "01:00 PM"] },
+          { date: '2024-12-29', times: ['09:30 AM', '10:30 AM', '11:30 AM'] },
+          { date: '2025-01-12', times: ['10:00 AM', '11:00 AM', '01:00 PM'] },
         ],
         clinics: [
           {
-            id: "1",
-            name: "Dentiq Clinic",
+            id: '1',
+            name: 'Dentiq Clinic',
             lat: 57.7089,
             lng: 11.9746,
-            address: "123 Main St, Gothenburg",
-            phone: "031 123 456",
-            services: ["Prosthodontist", "Pediatric Dentist"],
+            address: '123 Main St, Gothenburg',
+            phone: '031 123 456',
+            services: ['Prosthodontist', 'Pediatric Dentist'],
           },
         ],
       },
       {
-        id: "2",
-        firstName: "Erik",
-        lastName: "Lidbom",
-        speciality: "Pediatric Dentist",
-        languages: ["English", "Italian", "Mandarin"],
+        id: '2',
+        firstName: 'Erik',
+        lastName: 'Lidbom',
+        speciality: 'Pediatric Dentist',
+        languages: ['English', 'Italian', 'Mandarin'],
         availability: [
-          { date: "2024-11-11", times: ["09:00 AM", "10:30 AM", "11:30 AM"] },
-          { date: "2024-12-13", times: ["10:00 AM", "12:30 PM"] },
+          { date: '2024-12-28', times: ['09:00 AM', '10:30 AM', '11:30 AM'] },
+          { date: '2024-12-15', times: ['10:00 AM', '12:30 PM'] },
         ],
         clinics: [
           {
-            id: "1",
-            name: "Dentiq Clinic",
+            id: '1',
+            name: 'Dentiq Clinic',
             lat: 57.7089,
             lng: 11.9746,
-            address: "123 Main St, Gothenburg",
-            phone: "031 123 456",
-            services: ["Prosthodontist", "Pediatric Dentist"],
+            address: '123 Main St, Gothenburg',
+            phone: '031 123 456',
+            services: ['Prosthodontist', 'Pediatric Dentist'],
           },
         ],
       },
       {
-        id: "3",
-        firstName: "Lilly",
-        lastName: "Hier",
-        speciality: "General Dentistry",
-        languages: ["English", "Svenska", "Spanish", "Portuguese"],
+        id: '3',
+        firstName: 'Lilly',
+        lastName: 'Hier',
+        speciality: 'General Dentistry',
+        languages: ['English', 'Svenska', 'Spanish', 'Portuguese'],
         availability: [
-          { date: "2024-11-11", times: ["09:00 AM", "10:30 AM", "11:30 AM"] },
-          { date: "2024-12-18", times: ["10:00 AM", "12:30 PM"] },
+          { date: '2024-01-03', times: ['09:00 AM', '10:30 AM', '11:30 AM'] },
+          { date: '2024-12-18', times: ['10:00 AM', '12:30 PM'] },
         ],
         clinics: [
           {
-            id: "2",
-            name: "Smile Dental",
+            id: '2',
+            name: 'Smile Dental',
             lat: 57.7001,
             lng: 11.9668,
-            address: "456 Elm St, Gothenburg",
-            phone: "031 654 321",
-            services: ["Oral Surgeon", "Dentist", "Prosthodontist"],
+            address: '456 Elm St, Gothenburg',
+            phone: '031 654 321',
+            services: ['Oral Surgeon', 'Dentist', 'Prosthodontist'],
           },
         ],
       },
@@ -144,7 +166,7 @@ const aggregateClinics = async (req: Request, res: Response, next: NextFunction)
             address: clinic.address,
             phone: clinic.phone,
             services: clinic.services || [],
-            firstAvailableTime: null, 
+            firstAvailableTime: null,
             languages: new Set(),
             dentists: [],
           };
@@ -159,7 +181,9 @@ const aggregateClinics = async (req: Request, res: Response, next: NextFunction)
         });
 
         // Add dentist languages to the clinic languages set
-        dentist.languages?.forEach((lang) => clinicsMap[clinic.id].languages.add(lang));
+        dentist.languages?.forEach((lang) =>
+          clinicsMap[clinic.id].languages.add(lang)
+        );
 
         // Compute the first available time for the clinic
         dentist.availability?.forEach((availability) => {
@@ -184,7 +208,7 @@ const aggregateClinics = async (req: Request, res: Response, next: NextFunction)
     res.status(200).json(clinics);
   } catch (error: any) {
     console.error(`[ERROR]: Failed to aggregate clinics - ${error.message}`);
-    next(new ServiceError("Failed to aggregate clinics", 500));
+    next(new ServiceError('Failed to aggregate clinics', 500));
   }
 };
 
