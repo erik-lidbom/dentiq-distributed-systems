@@ -14,10 +14,14 @@
     <!-- Progress Bar -->
     <div class="w-[95%] flex self-start justify-between items-center mb-4">
       <div
-        v-for="n in 3"
+        v-for="n in 4"
         :key="n"
         class="flex-1 h-2 mx-1 rounded-full"
-        :class="{ 'bg-blue-500': step >= n, 'bg-gray-300': step < n }"
+        :class="{
+          'bg-green-600': isSuccess,
+          'bg-blue-500': step >= n,
+          'bg-gray-300': step < n,
+        }"
       ></div>
     </div>
 
