@@ -20,7 +20,7 @@ export default {
             secondary: '#46BCEC',
             primary: '#1565C0',
             selected: '#46BCEC40',
-            beige: '#F7F6F2'
+            beige: '#F7F6F2',
           },
           button: {
             primary: '#1565C0',
@@ -52,11 +52,20 @@ export default {
         'dentiq-h2': ['28px', { lineHeight: '36px', fontWeight: '600' }],
         'dentiq-h3': ['24px', { lineHeight: '32px', fontWeight: '600' }],
         'dentiq-h4': ['20px', { lineHeight: '28px', fontWeight: '500' }],
-        'dentiq-body-large': ['18px', { lineHeight: '26px', fontWeight: '400' }],
+        'dentiq-body-large': [
+          '18px',
+          { lineHeight: '26px', fontWeight: '400' },
+        ],
         'dentiq-body': ['16px', { lineHeight: '24px', fontWeight: '400' }],
-        'dentiq-body-small': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'dentiq-body-small': [
+          '14px',
+          { lineHeight: '20px', fontWeight: '400' },
+        ],
         'dentiq-caption': ['12px', { lineHeight: '16px', fontWeight: '400' }],
-        'dentiq-caption-small': ['10px', { lineHeight: '14px', fontWeight: '400' }],
+        'dentiq-caption-small': [
+          '10px',
+          { lineHeight: '14px', fontWeight: '400' },
+        ],
       },
       fontFamily: {
         archivoBlack: ['Archivo Black', 'sans-serif'],

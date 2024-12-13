@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
-import Notification, { NotificationDocument } from "../models/model";
+import { Request, Response } from 'express';
+import Notification, { NotificationDocument } from '../models/model';
 
 /**
  * This file contains all the necessary methods for a notification service
@@ -16,14 +16,14 @@ export const httpCreateNotification = async (
   try {
     await createNotification(req.body);
     res.status(201).json({
-      message: "Notification created successfully!",
+      message: 'Notification created successfully!',
     });
   } catch (error: unknown) {
-    console.error("Error creating notification:", error);
+    console.error('Error creating notification:', error);
     if (error instanceof Error) {
       res.status(500).json({ error: error.message });
     } else {
-      res.status(500).json({ error: "An unknown error occurred" });
+      res.status(500).json({ error: 'An unknown error occurred' });
     }
   }
 };
