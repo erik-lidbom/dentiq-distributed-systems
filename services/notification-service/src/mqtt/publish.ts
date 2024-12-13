@@ -1,5 +1,5 @@
-import { NotificationDocument } from "../models/model";
-import { client } from "./mqtt";
+import { NotificationDocument } from '../models/model';
+import { client } from './mqtt';
 
 /*
  * Publishes all the messages parallel. The method retrieves the message and timestamp *field that will be sent to the client
@@ -29,13 +29,13 @@ const publishNotification = async (
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (!client.connected) {
-      console.log("MQTT client not connected.");
+      console.log('MQTT client not connected.');
       client.reconnect();
-      return reject(new Error("MQTT client not connected"));
+      return reject(new Error('MQTT client not connected'));
     }
     client.publish(topic, message, { qos: 2 }, (error) => {
       if (error) {
-        console.error("MQTT Publish error:", error);
+        console.error('MQTT Publish error:', error);
         return reject(error);
       }
       console.log(`MQTT message published to ${topic}`);

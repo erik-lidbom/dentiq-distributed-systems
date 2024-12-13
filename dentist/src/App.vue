@@ -16,5 +16,4 @@
 import { RouterView } from 'vue-router';
 import GlobalNav from './components/GlobalNav.vue';
 import 'primeicons/primeicons.css';
-
 </script>
