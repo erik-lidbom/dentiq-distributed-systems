@@ -272,10 +272,25 @@ const props = defineProps({
   },
 });
 
+// Method to step back
 const goStepBack = () => {
   if (step.value > 1) {
     step.value--;
   }
+};
+
+// Redirect to Bookings
+const redirectToBookings = () => {
+  window.location.href = '/bookings';
+};
+
+// Reset to First Step
+const resetToFirstStep = () => {
+  step.value = 1;
+  selectedDoctor.value = null;
+  selectedDay.value = null;
+  selectedTime.value = null;
+  reason.value = '';
 };
 
 // State
@@ -357,6 +372,7 @@ const handleSteps = () => {
     step.value++;
   } else {
     submit();
+    step.value++;
   }
 };
 
@@ -393,7 +409,6 @@ const formattedMonth = computed(() => {
 
 // Get the first upcoming available month and year for a doctor
 const getEarliestAvailableMonthYear = (doctor: Dentist) => {
-  
   // Get today's date
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Normalize time to avoid mismatches
@@ -471,7 +486,6 @@ const selectDoctor = (doctor: Dentist) => {
   selectedMonth.value = month;
   selectedYear.value = year;
 };
-
 const selectLanguage = (language: string) =>
   (selectedLanguage.value = language);
 const selectDate = (date: number) => {
@@ -479,8 +493,9 @@ const selectDate = (date: number) => {
   selectedTime.value = null; // Reset time when a new date is selected
 };
 const selectTime = (time: string) => (selectedTime.value = time);
-
 const isSelectedTime = (time: string) => selectedTime.value === time;
+const isSuccess = ref(false);
+const submissionMessage = ref('');
 
 const latestAvailableMonthYear = computed(() => {
   if (!selectedDoctor.value)
@@ -502,7 +517,7 @@ const latestAvailableMonthYear = computed(() => {
 });
 
 // Submit the appointment
-const submit = () => {
+const submit = async () => {
   const appointment = {
     clinic: props.clinic.name,
     doctor: selectedDoctor.value,
@@ -513,8 +528,22 @@ const submit = () => {
     reason: reason.value,
   };
 
-  postAppointment(appointment);
-  console.log('Appointment submitted:', appointment);
+  try {
+    await postAppointment(appointment);
+
+    // Success
+    isSuccess.value = true;
+    submissionMessage.value = `Your booking for ${selectedTime.value} on ${selectedDay.value}/${
+      selectedMonth.value + 1
+    }/${selectedYear.value} with Dr. ${
+      selectedDoctor.value.name
+    } at ${props.clinic.name} has been confirmed! 🎉`;
+  } catch (error) {
+    // Failure
+    isSuccess.value = false;
+    submissionMessage.value = 'Failed to submit the booking. Please try again.';
+    console.error('Error submitting booking:', error);
+  }
 };
 </script>
 
