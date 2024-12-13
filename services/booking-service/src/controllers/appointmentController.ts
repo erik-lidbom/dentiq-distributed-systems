@@ -69,7 +69,7 @@ export const createAppointment = async (message: Buffer): Promise<Message_Status
 export const bookAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
-        const { patientId, appointmentId } = payload;
+        const { patientId, appointmentId, reason_for_visit } = payload;
 
         if(!patientId || !appointmentId) {
             const resPayload = {

@@ -106,18 +106,23 @@ const whereToPublish = async (
     if (typeOfNotification) {
       switch (typeOfNotification) {
         case "AppointmentCreated":
-          topics.push(TOPICS.APPOINTMENT.APPOINTMENT_CREATED);
+          // dentist create app -> dentiq/appointmentService/API_GATEWAY/createAppointment
+          topics = [TOPICS.APPOINTMENT.DENTIST_CREATE_APP_GATEWAY, TOPICS.APPOINTMENT.APPOINTMENT_CREATED]
           break;
         case "AppointmentBooked":
-          topics.push(TOPICS.APPOINTMENT.APPOINTMENT_BOOKED);
+          // dentiq/appointmentService/API_GATEWAY/bookAppointment
+          topics = [TOPICS.APPOINTMENT.PATIENT_BOOK_APP_GATEWAY, TOPICS.APPOINTMENT.APPOINTMENT_BOOKED]
           break;
         case "AppointmentDeleted":
-          topics.push(TOPICS.APPOINTMENT.DENTIST_DELETE_SLOT);
+          // dentiq/appointmentService/API_GATEWAY/deleteAppointment
+          topics = [TOPICS.APPOINTMENT.DENTIST_DELETE_APP_GATEWAY, TOPICS.APPOINTMENT.DENTIST_DELETE_SLOT]
           break;
         case "AppointmentCancelled":
-          topics.push(TOPICS.APPOINTMENT.PATIENT_CANCEL_SLOT);
+          // dentiq/appointmentService/API_GATEWAY/cancelAppointment
+          topics = [TOPICS.APPOINTMENT.PATIENT_CANCEL_APP_GATEWAY, TOPICS.APPOINTMENT.PATIENT_CANCEL_SLOT]
           break;
         default:
+          
           break;
       }
     }

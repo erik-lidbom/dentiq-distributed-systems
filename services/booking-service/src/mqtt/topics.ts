@@ -1,20 +1,27 @@
 export const TOPICS = {
     APPOINTMENT: {
-        PATIENT_BOOKING: "dentiq/appointmentService/patientService/bookSlot",
-        DENTIST_DELETE_SLOT: "dentiq/appointmentService/notificationService/deleteSlot",
-        PATIENT_CANCEL_SLOT: "dentiq/appointmentService/notificationService/cancelSlot",
-        APP_CANCEL_CONF: "dentiq/appointmentService/notificationService/cancelSlot",
 
-        PATIENT_BOOKING_REQ: "dentiq/patientClient/appointmentService/bookSlot",
-        PATIENT_BOOKING_CANCEL_REQ: "dentiq/patientClient/appointmentService/cancelSlot",
-        DENTIST_CREATE_APP_REQ: "dentiq/dentistClient/appointmentService/addSlots",
-        DENTIST_REMOVE_SLOT_REQ: "dentiq/dentistClient/appointmentService/removeSlot",
-        DENTIST_CREATE_APP: "dentiq/appointmentService/dentistService/addSlot",
-        DENTIST_AWAIT_CONF: "dentiq/dentistService/appointmentService/addSlot/status",
-        PATIENT_AWAIT_CONFIRMATION: "dentiq/patientService/appointmentService/bookSlot/status",
+
+        // GATEWAY NEEDS TO PUBLISH TO THE FOLLOWING:
+        PATIENT_BOOKING_REQ: "dentiq/patientClient/appointmentService/bookSlot", // PATIENT WANTS TO BOOK
+        PATIENT_BOOKING_CANCEL_REQ: "dentiq/patientClient/appointmentService/cancelSlot", // PATIENT WANTS TO CANCEL APPOINTMENT
+        DENTIST_CREATE_APP_REQ: "dentiq/dentistClient/appointmentService/addSlots", // DENTIST WANTS TO CREATE APPOINTMENT
+        DENTIST_REMOVE_SLOT_REQ: "dentiq/dentistClient/appointmentService/removeSlot", // DENTIST WANT TO CANCEL APPOINTMENT
+
+        // NOTIFICATION NEEDS TO LISTEN TO THE FOLLOWING:
         APPOINTMENT_BOOKED: "dentiq/appointmentService/notificationService/bookedSlot",
         APPOINTMENT_CREATED: "dentiq/appointmentService/notificationService/addSlots",
-        RESPOND_TO_GATEWAY: "dentiq/appointmentService/API_GATEWAY"
+        DENTIST_DELETE_SLOT: "dentiq/appointmentService/notificationService/deleteSlot",
+        PATIENT_CANCEL_SLOT: "dentiq/appointmentService/notificationService/cancelSlot",
+
+        // TBD
+        RESPOND_TO_GATEWAY: "dentiq/appointmentService/API_GATEWAY",
+
+        // GATEWAY NEEDS TO LISTEN TO THE FOLLOWING:
+        DENTIST_CREATE_APP_GATEWAY: "dentiq/appointmentService/API_GATEWAY/createAppointment",
+        DENTIST_DELETE_APP_GATEWAY: "dentiq/appointmentService/API_GATEWAY/deleteAppointment",
+        PATIENT_BOOK_APP_GATEWAY: "dentiq/appointmentService/API_GATEWAY/bookAppointment",
+        PATIENT_CANCEL_APP_GATEWAY: "dentiq/appointmentService/API_GATEWAY/cancelAppointment"
     },
     NOTIFICATION: {
         SLOT_UPDATE: "dentiq/notificationService/patientClient/slotUpdate",
