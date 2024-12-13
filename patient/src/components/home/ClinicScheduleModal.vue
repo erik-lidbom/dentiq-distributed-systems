@@ -16,7 +16,12 @@
     :class="isMobile ? 'px-2 py-16' : 'p-2'"
   >
     <!-- Progress Bar -->
-    <div class="w-[95%] flex self-start justify-between items-center mb-4">
+    <div 
+      class="w-[95%] flex self-start justify-between items-center mb-4"
+      aria-valuemax="4"
+      aria-label="Booking progress"
+      :aria-valuenow="step"
+    >
       <div
         v-for="n in 4"
         :key="n"
@@ -30,60 +35,76 @@
     </div>
 
     <!-- Step 1: Select Doctor and Language -->
-    <div class="flex flex-row space-x-2 w-full max-h-fit" v-if="step === 1">
+    <div
+      class="flex flex-row space-x-2 w-full max-h-fit"
+      aria-labelledby="step1-heading"
+      v-if="step === 1"
+    >
       <!-- Doctors -->
       <div
-        class="w-full flex flex-col justify-start h-fit max-h-[290px] overflow-scroll space-y-2 overflow-y-scroll"
+        class="w-full flex flex-col justify-start h-fit max-h-[290px] overflow-y-auto space-y-2"
+        aria-label="Available doctors"
+        role="listbox"
       >
-        <h3 class="sm:text-lg font-medium text-dentiq-muted-darkest">
+        <h3 id="step1-heading" class="sm:text-lg font-medium text-dentiq-muted-darkest">
           Select Doctor <span class="text-dentiq-muted-semiLight">*</span>
         </h3>
-        <div class="max-h-[240px] space-y-2 overflow-y-scroll">
-          <div
+        <div class="max-h-[240px] space-y-2">
+          <button
             v-for="doctor in availableDoctors"
             :key="doctor.id"
-            class="flex flex-col items-start justify-center px-4 min-h-[65px] max-h-[65px] border rounded-xl cursor-pointer hover:bg-blue-50"
+            class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-2 focus:ring-blue-500 hover:bg-blue-50"
             :class="{
               'border-blue-500 bg-blue-50': selectedDoctor?.id === doctor.id,
               'cursor-not-allowed text-dentiq-muted-light':
                 !hasUpcomingAvailability(doctor),
             }"
-            @click="hasUpcomingAvailability(doctor) && selectDoctor(doctor)"
+            :aria-label="`Select ${doctor.name}, specialty: ${doctor.speciality}`"
             :aria-disabled="!hasUpcomingAvailability(doctor)"
+            :aria-selected="selectedDoctor?.id === doctor.id"
+            role="option"
+            tabindex="0"
+            @click="hasUpcomingAvailability(doctor) && selectDoctor(doctor)"
           >
             <div>
-        </div>
-            <h4 class="font-medium text-sm sm:text-lg">{{ doctor.name }}</h4>
-            <p class="text-xs sm:text-sm text-gray-500">{{ doctor.speciality }}</p>
-          </div>
+              <h4 class="font-medium text-sm sm:text-lg">{{ doctor.name }}</h4>
+              <p class="text-xs sm:text-sm text-gray-500">{{ doctor.speciality }}</p>
+            </div>
+          </button>
         </div>
       </div>
 
       <!-- Language -->
       <div
-        class="w-full flex flex-col h-fit justify-start space-y-2"
+        class="w-full flex flex-col justify-start h-fit space-y-2"
+        aria-label="Available languages"
+        role="listbox"
       >
         <h3 class="sm:text-lg font-medium text-dentiq-muted-darkest">
           Select Language <span class="text-dentiq-muted-semiLight">*</span>
         </h3>
-        <div class="max-h-[240px] space-y-2 overflow-y-scroll">
-          <div
+        <div class="max-h-[240px] space-y-2 overflow-y-auto">
+          <button
             v-for="language in allLanguages"
             :key="language"
-            class="flex items-center px-4 min-h-[65px] max-h-[65px] border rounded-lg cursor-pointer hover:bg-blue-50"
+            class="flex items-center px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-lg focus:ring-2 focus:ring-blue-500 hover:bg-blue-50"
             :class="{
               'border-blue-500 bg-blue-50': selectedLanguage === language,
             }"
+            :aria-label="`Select ${language} language`"
+            :aria-selected="selectedLanguage === language"
+            role="option"
+            tabindex="0"
             @click="selectLanguage(language)"
           >
             <p class="font-medium text-sm sm:text-lg">{{ language }}</p>
-          </div>
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Step 2: Select Date and Time -->
-    <div class="flex flex-col space-y-4 w-full max-h-fit" v-if="step === 2">
+    <section class="flex flex-col space-y-4 w-full max-h-fit" v-if="step === 2" aria-label="Select date and time">
       <h3 class="sm:text-lg font-medium text-dentiq-muted-darkest mb-4">
         Select Date <span class="text-dentiq-muted-semiLight">*</span>
       </h3>
@@ -92,6 +113,7 @@
           @click="prevMonth"
           class="text-gray-500 hover:text-black text-lg font-normal"
           :class="isCurrentMonth ? 'invisible' : ''"
+          :aria-hidden="isCurrentMonth"
         >
           ←
         </button>
@@ -105,21 +127,24 @@
           @click="nextMonth"
           :class="hasNextMonth() ? 'block' : 'hidden'"
           class="text-gray-500 hover:text-black text-lg font-normal"
+          aria-label="Navigate to next month"
         >
           →
         </button>
       </div>
+      
       <div class="grid grid-cols-7 gap-2 text-center">
         <span
           v-for="day in days"
           :key="day"
           class="font-normal text-dentiq-muted-default text-sm sm:text-lg flex justify-center items-center"
+          aria-hidden="true"
           >{{ day }}</span
         >
         <button
           v-for="date in calendarDates"
           :key="date.day"
-          class="py-2 px-4 text-xs sm:text-sm rounded-lg cursor-pointer flex justify-center items-center"
+          class="py-2 px-4 text-xs sm:text-sm rounded-lg focus:ring-2 focus:ring-blue-500 flex justify-center items-center"
           :class="{
             'bg-blue-500 text-white': isSelectedDate(date.day),
             'text-dentiq-muted-dark bg-dentiq-muted-lighter cursor-not-allowed':
@@ -133,6 +158,7 @@
             !date.isPastDate && date.isSlotAvailable && selectDate(date.day)
           "
           :disabled="date.isPastDate || !date.isSlotAvailable"
+          aria-label="Select date"
         >
           {{ date.day }}
         </button>
@@ -142,8 +168,9 @@
         Select Time <span class="text-dentiq-muted-semiLight">*</span>
       </h4>
       <div class="flex flex-wrap gap-2">
-        <div
+        <button
           v-for="time in timeSlots"
+
           :key="time"
           class="py-2 px-4 border rounded-lg cursor-pointer text-center text-sm sm:text-base"
           :class="{
@@ -151,11 +178,12 @@
             'hover:bg-blue-50': !isSelectedTime(time),
           }"
           @click="selectTime(time)"
+          aria-label="Select Time"
         >
           {{ time }}
-        </div>
+        </button>
       </div>
-    </div>
+    </section>
 
     <!-- Step 3: Reason for Visit -->
     <div class="flex flex-col w-full max-h-fit space-y-4" v-if="step === 3">
@@ -218,16 +246,18 @@
         hidden: step > 3,
         flex: step <= 3,
       }"
+      aria-label="Navigation buttons"
     >
       <button
         v-if="step > 1"
-        class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300"
+        class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-blue-500"
         @click="goStepBack"
+        aria-label="Go to previous step"
       >
         Previous
       </button>
       <button
-        class="px-6 py-3 self-end text-white font-medium rounded-lg"
+        class="px-6 py-3 self-end text-white font-medium rounded-lg focus:ring-2 focus:ring-blue-500"
         :class="
           !canProceed
             ? 'bg-dentiq-muted-light'
@@ -235,6 +265,7 @@
         "
         :disabled="!canProceed"
         @click="handleSteps()"
+        aria-label="Go to next step or Submit"
       >
         {{ step === 3 ? 'Submit' : 'Next' }}
       </button>
