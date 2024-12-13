@@ -6,10 +6,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 export type NotificationPayload = {
     patientId?: string | null,
-    dentistId: string,
-    senderService: string,
-    message: string
-    typeOfNotification?: string
+    dentistId?: string,
+    senderService?: string,
+    message?: string
+    typeOfNotification?: string,
+    error?: boolean
 };
 
 export type Message_Status_Message = {
@@ -26,7 +27,11 @@ export const createAppointment = async (message: Buffer): Promise<Message_Status
         if(!dentistId || !date || !Array.isArray(start_times)) {
             const resPayload = {
                 status: 404,
-                message: 'Missing required field(s).'
+                message: 'Missing required field(s).',
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentCreated',
+                  error: true
+                }
             }
             return resPayload;
         };
@@ -58,7 +63,11 @@ export const createAppointment = async (message: Buffer): Promise<Message_Status
     } catch (error) {
         const resPayload = {
             status: 500,
-            message: 'Internal server error, please try again later'
+            message: 'Internal server error, please try again later',
+            notificationPayload: {
+              typeOfNotification: 'AppointmentCreated',
+              error: true
+            }
         };
         console.log('Error: ', error)
 
@@ -74,7 +83,11 @@ export const bookAppointment = async (message: Buffer): Promise<Message_Status_M
         if(!patientId || !appointmentId) {
             const resPayload = {
                 status: 400,
-                message: 'Missing required field(s).'
+                message: 'Missing required field(s).',
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentBooked',
+                  error: true
+                }
             };
             return resPayload;
         }
@@ -84,7 +97,11 @@ export const bookAppointment = async (message: Buffer): Promise<Message_Status_M
         if(!appointment) {
             const resPayload = {
                 status: 404,
-                message: 'Appointment could not be found.'
+                message: 'Appointment could not be found.',
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentBooked',
+                  error: true
+                }
             };
             return resPayload;
         }
@@ -92,7 +109,11 @@ export const bookAppointment = async (message: Buffer): Promise<Message_Status_M
         if(appointment.status !== 'unbooked') {
             const resPayload = {
                 status: 400,
-                message: 'Appointment already booked. '
+                message: 'Appointment already booked. ',
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentBooked',
+                  error: true
+                }
             };
             return resPayload;
         };
@@ -107,7 +128,7 @@ export const bookAppointment = async (message: Buffer): Promise<Message_Status_M
             patientId: bookedAppointment.patientId,
             senderService: "AppointmentService",
             message: `${bookedAppointment.start_times}`,
-            typeOfNotification: 'AppointmentCreated'
+            typeOfNotification: 'AppointmentBooked'
         };
 
         const resPayload = {
@@ -120,7 +141,11 @@ export const bookAppointment = async (message: Buffer): Promise<Message_Status_M
     } catch (error) {
         const resPayload = {
             status: 500,
-            message: 'Internal server error, please try again later.'
+            message: 'Internal server error, please try again later.',
+            notificationPayload: {
+              typeOfNotification: 'AppointmentBooked',
+              error: true
+            }
         };
         console.log("Error: ", error)
         return resPayload;
@@ -135,7 +160,11 @@ export const deleteAppointment = async (message: Buffer): Promise<Message_Status
     if (!appointmentId) {
         const resPayload = {
             status: 400,
-            message: 'Missing required field.'
+            message: 'Missing required field.',
+            notificationPayload: {
+              typeOfNotification: 'AppointmentDeleted',
+              error: true
+            }
         }
         return resPayload;
     }
@@ -146,7 +175,11 @@ export const deleteAppointment = async (message: Buffer): Promise<Message_Status
     if(!appointment) {
         const resPayload = {
             status: 404,
-            message: `Appointment with id ${appointmentId} not found.`
+            message: `Appointment with id ${appointmentId} not found.`,
+            notificationPayload: {
+              typeOfNotification: 'AppointmentDeleted',
+              error: true
+            }
         };
         return resPayload;
     }
@@ -157,7 +190,8 @@ export const deleteAppointment = async (message: Buffer): Promise<Message_Status
         dentistId: appointment.dentistId,
         patientId: appointment.patientId,
         message: `${appointment.start_times}`,
-        senderService: "AppointmentService"
+        senderService: 'AppointmentService',
+        typeOfNotification: 'AppointmentDeleted'
     }
 
     const resPayload = {
@@ -170,7 +204,11 @@ export const deleteAppointment = async (message: Buffer): Promise<Message_Status
     } catch (error) {
         const resPayload = {
             status: 500,
-            message: 'Internal server error, please try again later.'
+            message: 'Internal server error, please try again later.',
+            notificationPayload: {
+              typeOfNotification: 'AppointmentDeleted',
+              error: true
+            }
         };
         console.log("Error: ", error);
         return resPayload;
@@ -186,7 +224,11 @@ export const getAppointment = async (message: Buffer): Promise<Message_Status_Me
         if (!appointmentId) {
             const resPayload = {
                 status: 400,
-                message: 'Missing required field.'
+                message: 'Missing required field.',
+                notificationPayload: {
+                  typeOfNotification: 'GetAppointment',
+                  error: true
+                }
             };
             return resPayload;
         }
@@ -196,7 +238,11 @@ export const getAppointment = async (message: Buffer): Promise<Message_Status_Me
         if(!appointment) {
             const resPayload = {
                 status: 404,
-                message: `Could not find appointment with ID: ${appointmentId}`
+                message: `Could not find appointment with ID: ${appointmentId}`,
+                notificationPayload: {
+                  typeOfNotification: 'GetAppointment',
+                  error: true
+                }
             };
             return resPayload;
         }
@@ -210,7 +256,11 @@ export const getAppointment = async (message: Buffer): Promise<Message_Status_Me
     } catch (error) {
         const resPayload = {
             status: 500,
-            message: 'Internal server error, please try again later.'
+            message: 'Internal server error, please try again later.',
+            notificationPayload: {
+              typeOfNotification: 'GetAppointment',
+              error: true
+            }
         };
         console.log("Error: ", error);
         return resPayload;
@@ -225,7 +275,11 @@ export const cancelAppointment = async (message: Buffer): Promise<Message_Status
         if(!appointmentId) {
             const resPayload = {
                 status: 400,
-                message: 'Missing required field.'
+                message: 'Missing required field.',
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentCancelled',
+                  error: true
+                }
             };
             
             return resPayload;
@@ -236,7 +290,11 @@ export const cancelAppointment = async (message: Buffer): Promise<Message_Status
         if(!appointment) {
             const resPayload = {
                 status: 404,
-                message: `Could not find appointment with ID: ${appointmentId}`
+                message: `Could not find appointment with ID: ${appointmentId}`,
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentCancelled',
+                  error: true
+                }
             };
             return resPayload;
         };
@@ -245,7 +303,8 @@ export const cancelAppointment = async (message: Buffer): Promise<Message_Status
             dentistId: appointment.dentistId,
             patientId: appointment.patientId,
             message: `${appointment.start_times}`,
-            senderService: "AppointmentService"
+            senderService: "AppointmentService",
+            typeOfNotification: 'AppointmentCancelled'
         }
 
         appointment.patientId = null;
@@ -260,7 +319,11 @@ export const cancelAppointment = async (message: Buffer): Promise<Message_Status
     } catch (error) {
         const resPayload = {
             status: 500,
-            message: 'Internal server error, please try again later.'
+            message: 'Internal server error, please try again later.',
+            notificationPayload: {
+              typeOfNotification: 'AppointmentCancelled',
+              error: true
+            }
         };
         console.log("Error: ", error)
         return resPayload;
