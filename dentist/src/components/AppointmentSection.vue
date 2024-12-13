@@ -1,5 +1,5 @@
 <template>
-    <div class="lg:min-h-full w-full lg:w-1/3 flex-col justify-center pb-4">
+    <div class="h-auto lg:min-h-full w-full lg:w-1/3 flex-col justify-center pb-4">
         <h2 class="pt-4 text-dentiq-h2 text-center">My Appointments</h2>
         <div class="w-11/12 h-auto space-y-4 mt-6 mx-auto">
         <!-- Appointment Boxes -->
