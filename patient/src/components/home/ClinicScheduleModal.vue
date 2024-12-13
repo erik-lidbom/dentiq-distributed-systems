@@ -162,10 +162,53 @@
       ></textarea>
     </div>
 
+    <!-- Response Message with Success and go to bookings or Failure and retry  -->
+    <div
+      v-if="step === 4"
+      class="flex flex-col items-center self-center space-y-6 text-center"
+    >
+      <div>
+        <img
+          v-if="isSuccess"
+          src="/illustrations/success.png"
+          alt="Success"
+          class="w-50 h-50 mx-auto mb-4"
+        />
+      </div>
+      <h2
+        class="text-2xl font-bold"
+        :class="{ 'text-green-500': isSuccess, 'text-red-500': !isSuccess }"
+      >
+        {{ isSuccess ? 'Booking Confirmed!' : 'Booking Failed' }}
+      </h2>
+      <p class="text-gray-600">{{ submissionMessage }}</p>
+      <div v-if="isSuccess">
+        <button
+          @click="redirectToBookings"
+          class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Go to Bookings
+        </button>
+      </div>
+      <div v-else>
+        <button
+          @click="resetToFirstStep"
+          class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+
     <!-- Navigation Buttons -->
     <div
-      class="flex min-w-full"
-      :class="step < 2 ? 'justify-end' : 'justify-between'"
+      class="min-w-full"
+      :class="{
+        'justify-end': step < 2,
+        'justify-between': step >= 2 && step <= 3,
+        hidden: step > 3,
+        flex: step <= 3,
+      }"
     >
       <button
         v-if="step > 1"
