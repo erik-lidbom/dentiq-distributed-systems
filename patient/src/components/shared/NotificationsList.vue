@@ -22,15 +22,15 @@
       v-if="isOpen"
       class="absolute top-0 -right-24 min-[400px]:right-0 p-1 sm:w-72 w-[290px] bg-white shadow-md rounded-xl mt-16 z-50 overflow-hidden"
     >
-      <div class="divide-y divide-gray-200 max-h-[290px] overflow-y-auto">
+      <div class="divide-y divide-gray-200 max-h-[320px] overflow-y-auto">
         <div v-if="notifications.length > 0">
           <div
             v-for="notification in notifications"
             :key="notification.id"
             class="flex items-center justify-between p-4"
           >
-            <div class="w-full flex flex-col justify-center">
-              <p class="text-[15px] text-dentiq-muted-darkest">
+            <div class="max-w-full flex flex-col justify-center">
+              <p class="text-[15px] text-dentiq-muted-darkest truncate max-w-[225px] overflow-hidden">
                 {{ notification.message }}
               </p>
               <p class="text-[14px] text-dentiq-muted-default">
@@ -38,7 +38,7 @@
               </p>
             </div>
             <button
-              class="text-dentiq-muted-semiLight w-14 h-12 cursor-pointer hover:text-red-500 rounded-full"
+              class="text-dentiq-muted-semiLight max-w-full h-12 cursor-pointer hover:text-red-500 rounded-full"
               @click="deleteNotification(notification)"
             >
               <font-awesome-icon :icon="faTrash" class="text-sm" />
