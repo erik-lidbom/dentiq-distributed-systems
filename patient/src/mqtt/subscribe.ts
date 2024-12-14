@@ -18,6 +18,36 @@ export const subscribeTopics = async (): Promise<void> => {
         );
       }
     });
+    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT, (err) => {
+      if (err) {
+        console.error('[MQTT]: Subscription error:', err);
+        throw err;
+      } else {
+        console.log(
+          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT}`
+        );
+      }
+    });
+    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT, (err) => {
+      if (err) {
+        console.error('[MQTT]: Subscription error:', err);
+        throw err;
+      } else {
+        console.log(
+          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT}`
+        );
+      }
+    });
+    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT, (err) => {
+      if (err) {
+        console.error('[MQTT]: Subscription error:', err);
+        throw err;
+      } else {
+        console.log(
+          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT}`
+        );
+      }
+    });
   } catch (error) {
     console.error('[MQTT]: Error in subscribeTopics:', error);
     throw error;
