@@ -1,39 +1,41 @@
-import mqtt, { MqttClient } from 'mqtt';
+import mqtt, { type IClientOptions, type MqttClient } from 'mqtt';
 
-// Create an MQTT client
-const client: MqttClient = mqtt.connect('mqtt://127.0.0.1:1883');
+const mqttConnOptions: IClientOptions = {
+  protocol: 'wss',
+  host: '1171f0a21d314f5097e5278b94005ce9.s1.eu.hivemq.cloud',
+  port: 8884,
+  username: 'hivemq.webclient.1734134728690',
+  password: 'iDqw3l5:6Z4,EA?IVzx>',
+};
 
-const wildcardTopic = '/PatientInterface/Notification';
+export let client: MqttClient;
 
-// Connect to the MQTT broker
-client.on('connect', () => {
-  console.log('[Patient Interface]: Connected to MQTT broker');
-
-  // Subscribe to all topics
-  client.subscribe(wildcardTopic, (err: Error) => {
-    if (err) {
-      console.error(
-        `[Patient Interface]: Failed to subscribe to ${wildcardTopic}`,
-        err
-      );
-    } else {
-      console.log(
-        `[Patient Interface]: Subscribed to all topics using ${wildcardTopic}`
-      );
+export const mqttClient = {
+  setup: async (): Promise<void> => {
+    if (client) {
+      console.log('[MQTT]: Client already initialized');
+      return;
     }
-  });
-});
 
-// Listen for messages on any topic
-client.on('message', (topic, message) => {
-  console.log(`[Patient Interface]: Received message on topic "${topic}"`);
-  console.log(`[Patient Interface]: Message payload: ${message.toString()}`);
+    client = mqtt.connect(
+      `wss://${mqttConnOptions.host}:${mqttConnOptions.port}/mqtt`,
+      mqttConnOptions
+    );
 
-  // Add your custom handling logic here
-  // For example, save messages to a database or trigger specific workflows
-});
+    return new Promise((resolve, reject) => {
+      client.on('connect', () => {
+        console.log('[MQTT]: Connected to broker');
+        resolve();
+      });
 
-// Handle connection errors
-client.on('error', (err: Error) => {
-  console.error('[Patient Service]: MQTT connection error', err);
-});
+      client.on('error', (error) => {
+        console.error('[MQTT]: Client connection error:', error);
+        reject(error);
+      });
+
+      client.on('close', () => {
+        console.log('[MQTT]: Disconnected from broker');
+      });
+    });
+  },
+};
