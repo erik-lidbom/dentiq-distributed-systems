@@ -1,7 +1,8 @@
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
-import { TOPICS } from './topics';
-import { Dentist } from '../models/dentistSchema'; // Import Dentist model
+import { subscribeTopics } from './subscribe';
+import { publishMessage } from './publish';
+import { getStatus, retrievePublishTopics } from './helpers';
 dotenv.config();
 
 // Validate required environment variables
@@ -26,28 +27,14 @@ const mqttConnOptions: IClientOptions = {
 };
 
 // Create MQTT client
-const mqttClient: MqttClient = mqtt.connect(mqttConnOptions);
+export const mqttClient: MqttClient = mqtt.connect(mqttConnOptions);
 
 // On successful connection
-mqttClient.on('connect', () => {
+mqttClient.on('connect', async () => {
   console.log('[MQTT]: Successfully connected to the broker!');
 
-  // Subscribe to topics
-  const subscriptionTopics = [TOPICS.SUBSCRIBE.DENTIST_CREATE_APP];
-
-  mqttClient.subscribe(subscriptionTopics, (err) => {
-    if (err) {
-      console.error(
-        '[MQTT]: Could not establish subscription connections:',
-        err
-      );
-    } else {
-      console.log(
-        '[MQTT]: Subscribed to topics:',
-        subscriptionTopics.join(', ')
-      );
-    }
-  });
+  // Subscribes to all topics
+  await subscribeTopics();
 });
 
 // Handle connection errors
@@ -63,26 +50,18 @@ mqttClient.on('message', async (topic, message) => {
       `[MQTT]: Raw message received from ${topic}:`,
       message.toString()
     );
-
     // Validate and parse the message
-    const payload = JSON.parse(message.toString());
-    const { correlationId, dentistId } = payload;
+    const payload = Buffer.isBuffer(message)
+      ? JSON.parse(message.toString())
+      : message;
+    const { correlationId } = payload;
 
-    let responseTopic = '';
-    let status: boolean;
-
-    if (topic === TOPICS.SUBSCRIBE.DENTIST_CREATE_APP) {
-      responseTopic = TOPICS.PUBLISH.DENTIST_AWAIT_CONF;
-      //const exists = await Dentist.exists(JSON.parse(payload.dentistId));
-      const dentist = await Dentist.findById({ _id: payload.dentistId });
-      status = !!dentist;
-    } else {
-      console.warn(`[MQTT]: Unknown topic received: ${topic}`);
-      return;
-    }
+    //Retrieve thhe response topic and status
+    const responseTopic: string = retrievePublishTopics(topic);
+    const responseStatus: boolean = await getStatus(topic, payload);
 
     // Publish response
-    const responsePayload = { correlationId, status };
+    const responsePayload = { correlationId, responseStatus };
     publishMessage(responseTopic, responsePayload);
     console.log(
       `[MQTT]: Response published to ${responseTopic}:`,
@@ -98,21 +77,6 @@ mqttClient.on('message', async (topic, message) => {
     };
   }
 });
-
-// Publish a message helper function
-export const publishMessage = (topic: string, message: object): void => {
-  const payload = JSON.stringify(message);
-  mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
-    if (err) {
-      console.error(
-        `[MQTT]: Failed to publish message to topic ${topic}:`,
-        err
-      );
-    } else {
-      console.log(`[MQTT]: Message published to topic ${topic}:`, payload);
-    }
-  });
-};
 
 // Default export of the MQTT client
 export default mqttClient;

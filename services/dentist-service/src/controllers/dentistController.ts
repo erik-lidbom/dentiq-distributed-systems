@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Dentist } from '../models/dentistSchema';
-import { publishMessage } from '../mqtt/mqtt'; // Import MQTT helper function
+import { publishMessage } from '../mqtt/publish';
 
 // Helper function to handle errors
 const handleError = (error: any, res: Response): void => {
