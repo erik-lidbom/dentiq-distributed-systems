@@ -1,8 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
 import { Appointment } from '../models/appointmentModel';
-import mqttClient from '../mqtt/mqtt';
-import { TOPICS } from '../mqtt/topics';
-import { v4 as uuidv4 } from 'uuid';
+
 
 export type NotificationPayload = {
     patientId?: string | null,
@@ -13,13 +10,13 @@ export type NotificationPayload = {
     error?: boolean
 };
 
-export type Message_Status_Message = {
+export type ResponsePayload = {
     status: number,
     message: string,
     notificationPayload?: NotificationPayload
 }
 
-export const createAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
+export const createAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
         const { dentistId, date, start_times } = payload;
@@ -75,7 +72,7 @@ export const createAppointment = async (message: Buffer): Promise<Message_Status
     }
 }
 
-export const bookAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
+export const bookAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
         const { patientId, appointmentId, reason_for_visit } = payload;
@@ -152,7 +149,7 @@ export const bookAppointment = async (message: Buffer): Promise<Message_Status_M
     }
 };
 
-export const deleteAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
+export const deleteAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
         const { appointmentId } = payload
@@ -215,7 +212,7 @@ export const deleteAppointment = async (message: Buffer): Promise<Message_Status
     };
 };
 
-export const getAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
+export const getAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
 
@@ -267,7 +264,7 @@ export const getAppointment = async (message: Buffer): Promise<Message_Status_Me
     }
 };
 
-export const cancelAppointment = async (message: Buffer): Promise<Message_Status_Message> => {
+export const cancelAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
         const { appointmentId } = payload;
