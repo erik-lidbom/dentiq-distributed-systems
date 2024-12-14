@@ -139,4 +139,4 @@ test_appointment_service:
     - npm ci --cache .npm --prefer-offline
   script:
     - echo "Testing notification-service..."
-    - npm test
+    - jest --maxWorkers=2 --runInBand --detectOpenHandles --testTimeout=20000
