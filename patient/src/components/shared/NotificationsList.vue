@@ -125,12 +125,15 @@ onMounted(async () => {
     await mqttClient.setup();
 
     // Handle incoming messages
-    client.on('message', (topic, message) => {
-      if (topic === TOPICS.SUBSCRIBE.NOTIFICATION_CREATED) {
-        const payload = message.toString();
-        console.log(`[MQTT]: Received message on topic ${topic}:`, payload);
-        addNotification(payload);
-      }
+    client.on('message', (topic: string, message: any) => {
+      //Topic validate --> This method can later be refactored by logic determining what action should happen
+
+      const validatedTopic = validateTopic(topic);
+      if (!validatedTopic) return;
+
+      const payload = message.toString();
+      console.log(`[MQTT]: Received message on topic ${topic}:`, payload);
+      addNotification(payload);
     });
   } catch (error) {
     console.error('[MQTT]: Error during setup or subscription', error);
@@ -150,4 +153,13 @@ onUnmounted(() => {
     }
   });
 });
+
+const validateTopic = (topic: string): boolean => {
+  return (
+    topic === TOPICS.SUBSCRIBE.NOTIFICATION_CREATED ||
+    TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT ||
+    topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOTD ||
+    topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
+  );
+};
 </script>
