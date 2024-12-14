@@ -13,7 +13,7 @@ if (
   !process.env.MQTT_PASSWORD
 ) {
   throw new Error(
-    "Missing required MQTT environment variables. Check your .env file."
+    'Missing required MQTT environment variables. Check your .env file.'
   );
 }
 
@@ -23,15 +23,15 @@ const mqttConnOptions: IClientOptions = {
   port: parseInt(process.env.MQTT_PORT, 10) || 8883,
   protocol: 'mqtts',
   username: process.env.MQTT_USERNAME,
-  password: process.env.MQTT_PASSWORD
+  password: process.env.MQTT_PASSWORD,
 };
 
 // Create MQTT client
 const mqttClient: MqttClient = mqtt.connect(mqttConnOptions);
 
 // On successful connection
-mqttClient.on("connect", () => {
-  console.log("[MQTT]: Successfully connected to the broker!");
+mqttClient.on('connect', () => {
+  console.log('[MQTT]: Successfully connected to the broker!');
 
   // Subscribe to topics
   mqttClient.subscribe(TOPICS.SUBSCRIBE.PATIENT_BOOKING, (err) => {

@@ -15,6 +15,9 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.1",
     "@fortawesome/vue-fontawesome": "github:fortawesome/vue-fontawesome",
     "axios": "^1.7.8",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
+    "mqtt": "^5.10.3",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5",
     "vue3-google-map": "^0.21.0"

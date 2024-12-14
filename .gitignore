@@ -14,6 +14,9 @@ dist/
 build/
 out/
 
+# Mock Server
+Server/
+
 # Production files
 .env
 .env.*.local
@@ -28,12 +31,10 @@ out/
 *.iml
 *.iws
 *.ipr
-*.log
 .DS_Store
 
 # Operating System
 # macOS
-.DS_Store
 .AppleDouble
 .LSOverride
 Icon
@@ -91,6 +92,7 @@ journal/
 
 # Prettier files
 .prettier-cache
+.prettierrc
 
 # Package managers
 .pnpm-debug.log
@@ -111,7 +113,6 @@ coverage/
 .DS_Store
 
 # Environment files
-.env
 .env.local
 .env.development.local
 .env.test.local

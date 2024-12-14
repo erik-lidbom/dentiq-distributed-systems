@@ -4,7 +4,11 @@ import { User } from '../types';
 import { getService } from '../services/serviceRegistery';
 import { ServiceError } from '../utils/customError';
 
-const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers['authorization'];
 
   if (!authHeader) {
@@ -19,18 +23,24 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
   const authService = getService('auth');
 
   if (!authService) {
-    console.error(`[AUTH ERROR]: Authentication service not found in service registry`);
+    console.error(
+      `[AUTH ERROR]: Authentication service not found in service registry`
+    );
     return next(new ServiceError('Authentication service not available', 500));
   }
 
   try {
     // Validate token via the authentication service
-    const response = await axios.post(`${authService.url}/validate-token`, { token });
+    const response = await axios.post(`${authService.url}/validate-token`, {
+      token,
+    });
 
     if (response.data.valid) {
       // Attach user info to the request object for downstream use
       req.user = response.data.user as User;
-      console.log(`[AUTH SUCCESS]: User ${response.data.user.id} authenticated successfully`);
+      console.log(
+        `[AUTH SUCCESS]: User ${response.data.user.id} authenticated successfully`
+      );
       next();
     } else {
       console.error(`[AUTH ERROR]: Invalid token`);
@@ -51,7 +61,9 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
     }
 
     // Handle unexpected errors
-    console.error(`[AUTH ERROR]: Error validating token: ${(error as Error).message}`);
+    console.error(
+      `[AUTH ERROR]: Error validating token: ${(error as Error).message}`
+    );
     next(new ServiceError('Unauthorized', 401));
   }
 };

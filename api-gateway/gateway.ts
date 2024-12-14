@@ -1,10 +1,10 @@
-import express, { Express } from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import routes from "./routes/index";
+import express, { Express } from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import routes from './routes/index';
 import morgan from 'morgan';
-import { errorHandler } from "./middleware/errorHandler";
-import { initRateLimiters } from "./middleware/rateLimiter";
+import { errorHandler } from './middleware/errorHandler';
+import { initRateLimiters } from './middleware/rateLimiter';
 
 dotenv.config();
 
@@ -20,7 +20,7 @@ app.use(morgan('dev'));
 initRateLimiters();
 
 // Dynamic routes
-app.use("/api", routes);
+app.use('/api', routes);
 
 // Global Error Handler
 app.use(errorHandler);

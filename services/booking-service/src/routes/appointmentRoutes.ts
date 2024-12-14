@@ -1,12 +1,18 @@
-import express, { Express, Router } from "express";
+import express, { Express, Router } from 'express';
 const router = express.Router();
-import { createAppointment, deleteAppointment, getAppointment, bookAppointment, cancelAppointment } from "../controllers/appointmentController";
+import {
+  createAppointment,
+  deleteAppointment,
+  getAppointment,
+  bookAppointment,
+  cancelAppointment,
+} from '../controllers/appointmentController';
 
-router.post("/appointments", createAppointment); // Create an appointment
-router.delete("/deleteAppointment", deleteAppointment); // Delete an appointment
-router.get("/getAppointment", getAppointment); // Get an appointment
-// router.patch("/", patchAppointment); // Update an appointment
-router.patch("/bookAppointment", bookAppointment);
-router.patch("/cancelAppointment", cancelAppointment)
+//outer.post("/", createAppointment); // Create an appointment
+//outer.delete("/", deleteAppointment); // Delete an appointment
+//outer.get("/", getAppointment); // Get an appointment
+/// router.patch("/", patchAppointment); // Update an appointment
+//outer.patch("/", bookAppointment);
+//outer.patch("/", cancelAppointment)
 
 export default router;
