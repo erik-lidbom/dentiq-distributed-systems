@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "module": "commonjs",                                /* Specify what module code is generated. */
+    "outDir": "./dist",                                  /* Specify an output folder for all emitted files. */
+    "rootDir": "./src",                                  /* Specify the root directory of input files. */
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+    "strict": true,                                      /* Enable all strict type-checking options. */
+    "esModuleInterop": true,                             /* Emit __importStar and __importDefault helpers for compatibility with CommonJS and ES Modules. */
+    "skipLibCheck": true,                                /* Skip type checking for all declaration files. */
+    "moduleResolution": "node",                         /* Use Node.js module resolution strategy. */
+    "resolveJsonModule": true,                           /* Include modules that resolve JSON files. */
+    "noImplicitAny": false,                              /* Disable implicit `any` errors (optional). */
+    "allowSyntheticDefaultImports": true,               /* Allow default imports from modules without default exports. */
+    "types": ["node"],                                   /* Specify type definitions for Node.js. */
+    "lib": ["ES2020"],                                   /* Specify the libraries to include. */
+    "incremental": true                                  /* Enable incremental builds for faster recompilation. */
+  },
+  "include": ["src/**/*.ts"],                             /* Include all TypeScript files in the `src` folder. */
+  "exclude": ["node_modules", "dist"]                    /* Exclude the `node_modules` and `dist` folders. */
+}
