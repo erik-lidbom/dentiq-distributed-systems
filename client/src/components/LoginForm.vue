@@ -1,6 +1,6 @@
 <template>
     <div class="w-full lg:w-3/5 h-full flex flex-col justify-center items-center">
-        <div class="flex flex-col border border-green-400 w-3/5 h-auto">
+        <div class="flex flex-col w-3/5 h-auto">
             <!-- DentiQ logo + title --> 
             <div class="flex items-center justify-center gap-2 m-10">
                 <img src="../assets/dentiq_logo.svg" alt="Dentiq logo" class="w-[30px] h-auto" />
@@ -12,7 +12,7 @@
                 <p class="text-dentiqGray text-xl text-center"> Please log in to your account</p>
             </div>
             <!-- Fields section --> 
-            <form @submit.prevent="validateForm" div class="py-12 gap-2 flex flex-col w-full border">
+            <form @submit.prevent="validateForm" div class="py-12 gap-2 flex flex-col w-full">
                 <div class="w-full relative">
                     <font-awesome-icon icon='fa-solid fa-envelope' class="absolute lg:left-4 left-4 top-1/2 transform -translate-y-1/2 text-dentiqGray"/>
                     <input v-model="form.email" class="w-full rounded-2xl bg-dentiqLightGray lg:pl-12 pl-9 py-3 text-dentiqGray placeholder:text-dentiqGray bg-opacity-30" type="email" placeholder="Email" required />
@@ -23,7 +23,14 @@
                     <input v-model="form.password" class="w-full rounded-2xl bg-dentiqLightGray lg:pl-12 pl-9 py-3 text-dentiqGray placeholder:text-dentiqGray bg-opacity-30" type="password" placeholder="Password" required />
                     <p class="text-red-400 text-sm lg:px-9" v-if="errors.password">{{ errors.password }}</p>
                 </div>
-                <button type="submit" class="w-full rounded-xl bg-dentiqBtnBlue text-white font-thin py-3 hover:bg-opacity-30 transition-all duration-300 mt-10">Log In </button>
+                <!-- Button --> 
+                <div class="flex flex-col mt-10 gap-2">
+                    <p class="text-dentiq-gray text-dentiqGray text-right"> Forgot password?</p>
+                    <button type="submit" class="w-full rounded-xl bg-dentiqBtnBlue text-white font-thin py-3 hover:bg-opacity-30 transition-all duration-300">Log In </button>
+                    <router-link to="/" class="text-center text-dentiq-gray text-dentiqGray">New to DentiQ? Join now</router-link>
+                </div>
+
+                
             </form>  
         </div>
     </div>
