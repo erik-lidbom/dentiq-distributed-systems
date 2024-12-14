@@ -66,7 +66,6 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { mqttClient, client } from '@/mqtt/mqtt';
 import { TOPICS } from '@/mqtt/topics';
-import { subscribeTopics } from '@/mqtt/subscribe.ts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faBell, faTrash } from '@fortawesome/free-solid-svg-icons';
 
@@ -158,7 +157,7 @@ const validateTopic = (topic: string): boolean => {
   return (
     topic === TOPICS.SUBSCRIBE.NOTIFICATION_CREATED ||
     TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT ||
-    topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOTD ||
+    topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
     topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
   );
 };
