@@ -30,7 +30,9 @@
             class="flex items-center justify-between p-4"
           >
             <div class="max-w-full flex flex-col justify-center">
-              <p class="text-[15px] text-dentiq-muted-darkest truncate max-w-[225px] overflow-hidden">
+              <p
+                class="text-[15px] text-dentiq-muted-darkest truncate max-w-[225px] overflow-hidden"
+              >
                 {{ notification.message }}
               </p>
               <p class="text-[14px] text-dentiq-muted-default">
@@ -64,6 +66,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import { mqttClient, client } from '@/mqtt/mqtt';
 import { TOPICS } from '@/mqtt/topics';
+import { subscribeTopics } from '@/mqtt/subscribe.ts';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faBell, faTrash } from '@fortawesome/free-solid-svg-icons';
 
@@ -120,19 +123,6 @@ onMounted(async () => {
   try {
     console.log('[MQTT]: Initializing MQTT client...');
     await mqttClient.setup();
-
-    console.log(
-      `[MQTT]: Subscribing to ${TOPICS.SUBSCRIBE.NOTIFICATION_CREATED}`
-    );
-    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_CREATED, (err) => {
-      if (err) {
-        console.error('[MQTT]: Subscription error:', err);
-      } else {
-        console.log(
-          `[MQTT]: Successfully subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_CREATED}`
-        );
-      }
-    });
 
     // Handle incoming messages
     client.on('message', (topic, message) => {
