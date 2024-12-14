@@ -1,6 +1,11 @@
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
 import { TOPICS } from './topics';
+import { 
+  dispatchByTopic,
+  determinePublishTopics,
+  publishToDestinations,
+} from './filters';
 
 dotenv.config();
 
@@ -15,12 +20,14 @@ const mqttConnOptions: IClientOptions = {
 const mqttClient: MqttClient = mqtt.connect(mqttConnOptions);
 
 mqttClient.on('connect', () => {
-  console.log('[MQTT]: Successfully connected to the broker!');
+  console.log('[MQTT]: Connection established.');
 
   mqttClient.subscribe(
     [
-      TOPICS.APPOINTMENT.DENTIST_AWAIT_CONF,
-      TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION,
+      TOPICS.APPOINTMENT.DENTIST_CREATE_APP_REQ,
+      TOPICS.APPOINTMENT.DENTIST_REMOVE_SLOT_REQ,
+      TOPICS.APPOINTMENT.PATIENT_BOOKING_REQ,
+      TOPICS.APPOINTMENT.PATIENT_BOOKING_CANCEL_REQ,
     ],
     (err) => {
       if (err) {
@@ -30,18 +37,26 @@ mqttClient.on('connect', () => {
         );
       } else {
         console.log(
-          '[MQTT]: Subscribed to topic(s)',
-          TOPICS.APPOINTMENT.APPOINTMENT_CREATED,
-          TOPICS.APPOINTMENT.PATIENT_AWAIT_CONFIRMATION
+          '[MQTT]: Subscribing to the following topics:',
+          '\nDENTIQ CREATE APPOINTMENT, DENTIQ BOOK APPOINTMENT,\nDENTIQ DELETE APPOINTMENT & DENTIQ CANCEL APPOINTMENT'
         );
-        console.log('-------------------------------------------------------');
       }
     }
   );
 });
 
-mqttClient.on('message', (topic, message) => {
-  console.log(`[MQTT]: Message recieved from ${topic}:`, message.toString());
+mqttClient.on('message', async (topic, message) => {
+  try {
+    console.log(`[MQTT]: Message received from ${topic}:`, message.toString());
+
+    const responsePayload = await dispatchByTopic(topic, message)
+
+    const topicsAndMessage = await determinePublishTopics(responsePayload);
+    
+    await publishToDestinations(topicsAndMessage);
+  } catch (error) {
+    console.error(`[MQTT]: Error processing message from ${topic}:`, error);
+  }
 });
 
 export default mqttClient;
