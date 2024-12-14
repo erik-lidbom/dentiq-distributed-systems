@@ -1,4 +1,5 @@
 import mqtt, { type IClientOptions, type MqttClient } from 'mqtt';
+import { subscribeTopics } from './subscribe';
 
 const mqttConnOptions: IClientOptions = {
   protocol: 'wss',
@@ -21,6 +22,7 @@ export const mqttClient = {
       `wss://${mqttConnOptions.host}:${mqttConnOptions.port}/mqtt`,
       mqttConnOptions
     );
+    await subscribeTopics();
 
     return new Promise((resolve, reject) => {
       client.on('connect', () => {
