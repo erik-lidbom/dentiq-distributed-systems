@@ -40,7 +40,7 @@
             <count>1</count> 
         </topicGroup>
 
-        <!-- New Topic Group for Payment Service -->
+        <!-- New Topic Group for Appointment Service -->
         <topicGroup id="appointment-add-slots">
             <topicNamePattern>dentiq/dentistClient/appointmentService/addSlots</topicNamePattern>
             <count>1</count> 
