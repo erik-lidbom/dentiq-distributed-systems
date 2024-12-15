@@ -4,7 +4,7 @@ export interface IAppointment {
     patientId: string | null;
     dentistId: string;
     date: string;
-    start_times: string[];
+    start_time: string;
     reason_for_visit?: string;
     status: "unbooked" | "booked" | "cancelled";
   };
@@ -12,8 +12,8 @@ export interface IAppointment {
 export const appointmentSchema = new Schema<IAppointment>({
     patientId: { type: String, required: false, default: null},
     dentistId: { type: String, required: true},
-    start_times: { type: [String], required: true },
-    reason_for_visit: { type: String},
+    start_time: { type: String, required: true },
+    reason_for_visit: { type: String, required: false},
     status: {
         type: String,
         enum: ["unbooked", "booked", "cancelled"],
