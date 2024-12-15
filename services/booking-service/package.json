@@ -12,6 +12,7 @@
     "content-type": "^1.0.5",
     "cookie": "^0.7.1",
     "cookie-signature": "^1.0.6",
+    "cors": "^2.8.5",
     "debug": "^2.6.9",
     "define-data-property": "^1.1.4",
     "depd": "^2.0.0",
@@ -45,6 +46,7 @@
     "mime-types": "^2.1.35",
     "mongodb-memory-server": "^10.1.2",
     "mongoose": "^8.8.4",
+    "morgan": "^1.10.0",
     "mqtt": "^5.10.3",
     "ms": "^2.0.0",
     "negotiator": "^0.6.3",
@@ -74,6 +76,7 @@
     "vary": "^1.1.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.9.1",
