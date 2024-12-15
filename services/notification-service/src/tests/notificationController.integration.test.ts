@@ -1,7 +1,11 @@
-import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, describe, expect, it, jest } from "@jest/globals";
 import { createNotification } from "../controllers/controller"; // Adjust the path as necessary
+import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
+jest.setTimeout(30000);
+
+let mongoServer: MongoMemoryServer;
 /*
  * Tests for creating a notification and sotiring in database
  */
@@ -19,13 +23,16 @@ const TEST_DATA = Buffer.from(
 
 describe("Integration Test: createNotification", () => {
   beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create()
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri)
     // Connects to an in-memory MongoDB instance
-    await mongoose.connect("mongodb://localhost/test-db");
   });
 
   afterAll(async () => {
     // Disconnects from the database after running all tests
-    await mongoose.connection.close();
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it("should create and save a notification successfully", async () => {
