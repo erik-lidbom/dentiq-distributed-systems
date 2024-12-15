@@ -1,7 +1,7 @@
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
 import { TOPICS } from './topics';
-import { 
+import {
   dispatchByTopic,
   determinePublishTopics,
   publishToDestinations,
@@ -12,7 +12,6 @@ dotenv.config();
 const mqttConnOptions: IClientOptions = {
   host: process.env.MQTT_HOST,
   port: parseInt(process.env.MQTT_PORT || '8883', 10),
-  protocol: 'mqtts',
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
 };
@@ -49,10 +48,10 @@ mqttClient.on('message', async (topic, message) => {
   try {
     console.log(`[MQTT]: Message received from ${topic}:`, message.toString());
 
-    const responsePayload = await dispatchByTopic(topic, message)
+    const responsePayload = await dispatchByTopic(topic, message);
 
     const topicsAndMessage = await determinePublishTopics(responsePayload);
-    
+
     await publishToDestinations(topicsAndMessage);
   } catch (error) {
     console.error(`[MQTT]: Error processing message from ${topic}:`, error);

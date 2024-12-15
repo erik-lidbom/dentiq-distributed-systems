@@ -12,7 +12,6 @@ dotenv.config();
 const mqttConnOptions: IClientOptions = {
   host: process.env.MQTT_HOST,
   port: parseInt(process.env.MQTT_PORT || '8883', 10),
-  protocol: 'mqtts',
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
 };
