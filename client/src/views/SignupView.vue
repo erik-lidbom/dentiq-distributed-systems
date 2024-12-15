@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import SignupForm from '../components/SignupForm.vue'
-</script>
-
 <template>
   <main>
     <div class="w-full bg-custom-gradient h-screen flex">
@@ -12,17 +8,12 @@ import SignupForm from '../components/SignupForm.vue'
         </div>
         <SignupForm />
       </div>
-      <div class="lg:w-2/5 p-9 lg:block hidden">
-        <div
-          class="w-full h-full rounded-lg bg-[#081C3D] bg-opacity-20 flex flex-col items-center justify-center gap-12 px-10"
-        >
-          <img src="../assets/dentiq_logo.svg" alt="Dentiq logo" class="w-[250px] h-auto" />
-          <div class="flex flex-col items-center justify-center">
-            <p class="text-2xl font-bold text-white">Your Smile, Our Priority</p>
-            <p class="text-2xl font-bold text-white">Effortless Booking, Expert Care</p>
-          </div>
-        </div>
-      </div>
+      <DentiQBanner />
     </div>
   </main>
 </template>
+
+<script setup lang="ts">
+  import SignupForm from '../components/SignupForm.vue'
+  import DentiQBanner from '../components/DentiQBanner.vue'
+</script>
