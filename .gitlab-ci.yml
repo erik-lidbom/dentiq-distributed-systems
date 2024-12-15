@@ -1,0 +1,164 @@
+# GLOBAL VARIABLES
+variables:
+  APPOINTMENT_SERVICE_PATH: services/booking-service
+  NOTIFICATION_SERVICE_PATH: services/notification-service
+  DENTIST_SERVICE_PATH: services/dentist-service
+  PATIENT_SERVICE_PATH: services/patient-service
+  AUTHENTICATION_SERVICE_PATH: services/authentication-service
+  LOGGING_SERVICE_PATH: services/logging-service
+
+
+# Defining stages for the pipeline
+stages:
+  - build
+  - test
+
+# Building the appointment-service
+build-appointment-service:
+  stage: build
+  tags:
+    - docker
+  image: node:18
+  before_script:
+    - cd $APPOINTMENT_SERVICE_PATH
+    - npm ci --cache .npm --prefer-offline
+  script: 
+    ## CREATE .ENV AND INJECT VALUES
+    - echo "Creating .env files with correct values..."
+    - echo "MONGODB_URI=$MONGODB_APPOINTMENT_URI" > .env
+    - echo "PORT=$APPOINTMENT_PORT" >> .env
+    - echo "MQTT_HOST=$MQTT_HOST" >> .env
+    - echo "MQTT_PORT=$MQTT_PORT" >> .env
+    - echo "MQTT_PROTOCOL=$MQTT_PROTOCOL" >> .env
+    - echo "MQTT_USERNAME=$MQTT_USERNAME" >> .env
+    - echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> .env
+
+    ## BUILDING SERVICE
+    - echo "Building appointment-service..."
+    - npm run build
+
+  artifacts:
+    paths:
+      - services/**/dist
+
+# Building the notification-service
+build-notification-service:
+  stage: build
+  tags:
+    - docker
+  image: node:18
+  before_script:
+    - cd $NOTIFICATION_SERVICE_PATH
+    - npm ci --cache .npm --prefer-offline
+  script: 
+    ## CREATE .ENV AND INJECT VALUES
+    - echo "Creating .env files with correct values..."
+    - echo "MONGODB_URI=$MONGODB_APPOINTMENT_URI" > .env
+    - echo "PORT=$APPOINTMENT_PORT" >> .env
+    - echo "MQTT_HOST=$MQTT_HOST" >> .env
+    - echo "MQTT_PORT=$MQTT_PORT" >> .env
+    - echo "MQTT_PROTOCOL=$MQTT_PROTOCOL" >> .env
+    - echo "MQTT_USERNAME=$MQTT_USERNAME" >> .env
+    - echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> .env
+
+    ## BUILDING SERVICE
+    - echo "Building notification-service..."
+    - npm run build
+
+  artifacts:
+    paths:
+      - services/**/dist
+
+# Building the dentist-service
+build-dentist-service:
+  stage: build
+  tags:
+    - docker
+  image: node:18
+  before_script:
+    - cd $DENTIST_SERVICE_PATH
+    - npm ci --cache .npm --prefer-offline
+  script: 
+    ## CREATE .ENV AND INJECT VALUES
+    - echo "Creating .env files with correct values..."
+    - echo "MONGODB_URI=$MONGODB_APPOINTMENT_URI" > .env
+    - echo "PORT=$APPOINTMENT_PORT" >> .env
+    - echo "MQTT_HOST=$MQTT_HOST" >> .env
+    - echo "MQTT_PORT=$MQTT_PORT" >> .env
+    - echo "MQTT_PROTOCOL=$MQTT_PROTOCOL" >> .env
+    - echo "MQTT_USERNAME=$MQTT_USERNAME" >> .env
+    - echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> .env
+
+    ## BUILDING SERVICE
+    - echo "Building dentist-service..."
+    - npm run build
+
+  artifacts:
+    paths:
+      - services/**/dist
+
+# Building the patient-service
+build-patient-service:
+  stage: build
+  tags:
+    - docker
+  image: node:18
+  before_script:
+    - cd $PATIENT_SERVICE_PATH
+    - npm ci --cache .npm --prefer-offline
+  script: 
+    ## CREATE .ENV AND INJECT VALUES
+    - echo "Creating .env files with correct values..."
+    - echo "MONGODB_URI=$MONGODB_APPOINTMENT_URI" > .env
+    - echo "PORT=$APPOINTMENT_PORT" >> .env
+    - echo "MQTT_HOST=$MQTT_HOST" >> .env
+    - echo "MQTT_PORT=$MQTT_PORT" >> .env
+    - echo "MQTT_PROTOCOL=$MQTT_PROTOCOL" >> .env
+    - echo "MQTT_USERNAME=$MQTT_USERNAME" >> .env
+    - echo "MQTT_PASSWORD=$MQTT_PASSWORD" >> .env
+
+    ## BUILDING SERVICE
+    - echo "Building patient-service..."
+    - npm run build
+
+  artifacts:
+    paths:
+      - services/**/dist
+
+# Test appointment-service
+test_appointment_service:
+  stage: test
+  image: node:18
+  tags:
+    - docker
+  cache:
+    paths:
+      - services/booking-service/node_modules
+  before_script:
+    - cd $APPOINTMENT_SERVICE_PATH
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - echo "Testing appointment-service..."
+    - npm test
+
+# Test notification-service
+test_notification_service:
+  stage: test
+  image: node:18
+  services:
+    - name: hivemq/hivemq4
+      alias: hivemq
+  variables: 
+    HIVE_MQ_HOST: hivemq
+    HIVE_MQ_PORT: 1883
+  tags:
+    - docker
+  cache:
+    paths:
+      - services/notification-service/node_modules
+  before_script:
+    - cd $NOTIFICATION_SERVICE_PATH
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - echo "Testing notification-service..."
+    - npm test

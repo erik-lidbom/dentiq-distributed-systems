@@ -23,7 +23,7 @@ export const createAppointment = async (message: Buffer): Promise<ResponsePayloa
 ;
         if(!dentistId || !date || !Array.isArray(start_times)) {
             const resPayload = {
-                status: 404,
+                status: 400,
                 message: 'Missing required field(s).',
                 notificationPayload: {
                   typeOfNotification: 'AppointmentCreated',
@@ -32,26 +32,26 @@ export const createAppointment = async (message: Buffer): Promise<ResponsePayloa
             }
             return resPayload;
         };
-
-        const newAppointment = new Appointment ({
+        
+        const newAppointments = start_times.map((time) => ({
             dentistId,
             date,
-            start_times,
+            start_time: time,
             status: 'unbooked'
-        });
-
-    const savedAppointment = await newAppointment.save();
+        }))
+        
+        await Appointment.insertMany(newAppointments);
 
         const notificationPayload = {
-            dentistId: savedAppointment.dentistId,
+            dentistId: dentistId,
             senderService: 'AppointmentService',
-            message: `${savedAppointment.start_times}`,
+            message: `${start_times}`,
             typeOfNotification: 'AppointmentCreated'
         };
 
         const resPayload = {
             status: 201,
-            message: `Appointment successfully created with id: ${savedAppointment._id}`,
+            message: `Successfully created ${newAppointments.length} appointment(s).`,
             notificationPayload: notificationPayload
         }
 
@@ -75,7 +75,9 @@ export const createAppointment = async (message: Buffer): Promise<ResponsePayloa
 export const bookAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
-        const { patientId, appointmentId, reason_for_visit } = payload;
+
+        const { patientId, appointmentId } = payload;
+
 
         if(!patientId || !appointmentId) {
             const resPayload = {
@@ -106,7 +108,7 @@ export const bookAppointment = async (message: Buffer): Promise<ResponsePayload>
         if(appointment.status !== 'unbooked') {
             const resPayload = {
                 status: 400,
-                message: 'Appointment already booked. ',
+                message: 'Appointment already booked.',
                 notificationPayload: {
                   typeOfNotification: 'AppointmentBooked',
                   error: true
@@ -124,7 +126,7 @@ export const bookAppointment = async (message: Buffer): Promise<ResponsePayload>
             dentistId: bookedAppointment.dentistId,
             patientId: bookedAppointment.patientId,
             senderService: "AppointmentService",
-            message: `${bookedAppointment.start_times}`,
+            message: `${bookedAppointment.start_time}`,
             typeOfNotification: 'AppointmentBooked'
         };
 
@@ -181,12 +183,12 @@ export const deleteAppointment = async (message: Buffer): Promise<ResponsePayloa
         return resPayload;
     }
 
-    const deletedAppointment = await Appointment.deleteOne(appointment._id);
+    const deletedAppointment = await Appointment.deleteOne({ _id: appointment._id });
 
     const notificationPayload = {
         dentistId: appointment.dentistId,
         patientId: appointment.patientId,
-        message: `${appointment.start_times}`,
+        message: `${appointment.start_time}`,
         senderService: 'AppointmentService',
         typeOfNotification: 'AppointmentDeleted'
     }
@@ -211,6 +213,69 @@ export const deleteAppointment = async (message: Buffer): Promise<ResponsePayloa
         return resPayload;
     };
 };
+
+export const cancelAppointment = async (message: Buffer): Promise<ResponsePayload> => {
+    try {
+        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+        const { appointmentId } = payload;
+
+        if(!appointmentId) {
+            const resPayload = {
+                status: 400,
+                message: 'Missing required field.',
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentCancelled',
+                  error: true
+                }
+            };
+            
+            return resPayload;
+        };
+
+    const appointment = await Appointment.findById(appointmentId);
+
+        if(!appointment) {
+            const resPayload = {
+                status: 404,
+                message: `Could not find appointment with ID: ${appointmentId}`,
+                notificationPayload: {
+                  typeOfNotification: 'AppointmentCancelled',
+                  error: true
+                }
+            };
+            return resPayload;
+        };
+
+        const notificationPayload = {
+            dentistId: appointment.dentistId,
+            patientId: appointment.patientId,
+            message: `${appointment.start_time}`,
+            senderService: "AppointmentService",
+            typeOfNotification: 'AppointmentCancelled'
+        }
+
+        appointment.patientId = null;
+        const updatedAppointment = await appointment.save()
+    
+        const resPayload = {
+            status: 200,
+            message: `Appointment with ID: ${appointment._id} successfully cancelled.`,
+            notificationPayload: notificationPayload
+        }
+        return resPayload;
+    } catch (error) {
+        const resPayload = {
+            status: 500,
+            message: 'Internal server error, please try again later.',
+            notificationPayload: {
+              typeOfNotification: 'AppointmentCancelled',
+              error: true
+            }
+        };
+        console.log("Error: ", error)
+        return resPayload;
+    }
+}
 
 export const getAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
@@ -263,66 +328,3 @@ export const getAppointment = async (message: Buffer): Promise<ResponsePayload> 
         return resPayload;
     }
 };
-
-export const cancelAppointment = async (message: Buffer): Promise<ResponsePayload> => {
-    try {
-        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
-        const { appointmentId } = payload;
-
-        if(!appointmentId) {
-            const resPayload = {
-                status: 400,
-                message: 'Missing required field.',
-                notificationPayload: {
-                  typeOfNotification: 'AppointmentCancelled',
-                  error: true
-                }
-            };
-            
-            return resPayload;
-        };
-
-    const appointment = await Appointment.findById(appointmentId);
-
-        if(!appointment) {
-            const resPayload = {
-                status: 404,
-                message: `Could not find appointment with ID: ${appointmentId}`,
-                notificationPayload: {
-                  typeOfNotification: 'AppointmentCancelled',
-                  error: true
-                }
-            };
-            return resPayload;
-        };
-
-        const notificationPayload = {
-            dentistId: appointment.dentistId,
-            patientId: appointment.patientId,
-            message: `${appointment.start_times}`,
-            senderService: "AppointmentService",
-            typeOfNotification: 'AppointmentCancelled'
-        }
-
-        appointment.patientId = null;
-        const updatedAppointment = await appointment.save()
-    
-        const resPayload = {
-            status: 200,
-            message: `Appointment with ID: ${appointment._id} successfully cancelled.`,
-            notificationPayload: notificationPayload
-        }
-        return resPayload;
-    } catch (error) {
-        const resPayload = {
-            status: 500,
-            message: 'Internal server error, please try again later.',
-            notificationPayload: {
-              typeOfNotification: 'AppointmentCancelled',
-              error: true
-            }
-        };
-        console.log("Error: ", error)
-        return resPayload;
-    }
-}
