@@ -145,6 +145,12 @@ test_appointment_service:
 test_notification_service:
   stage: test
   image: node:18
+  services:
+    - name: hivemq/hivemq4
+      alias: hivemq
+  variables: 
+    HIVE_MQ_HOST: hivemq
+    HIVE_MQ_PORT: 1883
   tags:
     - docker
   cache:
