@@ -133,10 +133,10 @@ test_appointment_service:
     - docker
   cache:
     paths:
-      - services/notification-service/node_modules
+      - services/booking-service/node_modules
   before_script:
-    - cd $NOTIFICATION_SERVICE_PATH
+    - cd $APPOINTMENT_SERVICE_PATH
     - npm ci --cache .npm --prefer-offline
   script:
-    - echo "Testing notification-service..."
-    - jest --maxWorkers=2 --runInBand --detectOpenHandles --testTimeout=20000
+    - echo "Testing appointment-service..."
+    - npm test
