@@ -125,7 +125,7 @@ build-patient-service:
     paths:
       - services/**/dist
 
-# Unit test notification-service
+# Test appointment-service
 test_appointment_service:
   stage: test
   image: node:18
@@ -139,4 +139,20 @@ test_appointment_service:
     - npm ci --cache .npm --prefer-offline
   script:
     - echo "Testing appointment-service..."
+    - npm test
+
+# Test notification-service
+test_notification_service:
+  stage: test
+  image: node:18
+  tags:
+    - docker
+  cache:
+    paths:
+      - services/notification-service/node_modules
+  before_script:
+    - cd $NOTIFICATION_SERVICE_PATH
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - echo "Testing notification-service..."
     - npm test
