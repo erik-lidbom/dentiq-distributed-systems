@@ -100,8 +100,8 @@ yarn.lock
 .pnpm-lock.yaml
 
 # Testing
-*.test.js
-*.test.ts
+!test.js
+!test.ts
 !app.test.ts
 !jest.config.js
 coverage/
