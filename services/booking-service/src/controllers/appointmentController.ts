@@ -131,7 +131,7 @@ export const bookAppointment = async (
       dentistId: bookedAppointment.dentistId,
       patientId: bookedAppointment.patientId,
       senderService: 'AppointmentService',
-      message: `${bookedAppointment.start_time}`,
+      message: `${bookedAppointment.start_times}`,
       typeOfNotification: 'AppointmentBooked',
     };
 
@@ -198,7 +198,7 @@ export const deleteAppointment = async (
     const notificationPayload = {
       dentistId: appointment.dentistId,
       patientId: appointment.patientId,
-      message: `${appointment.start_time}`,
+      message: `${appointment.start_times}`,
       senderService: 'AppointmentService',
       typeOfNotification: 'AppointmentDeleted',
     };
@@ -263,7 +263,7 @@ export const cancelAppointment = async (
     const notificationPayload = {
       dentistId: appointment.dentistId,
       patientId: appointment.patientId,
-      message: `${appointment.start_time}`,
+      message: `${appointment.start_times}`,
       senderService: 'AppointmentService',
       typeOfNotification: 'AppointmentCancelled',
     };
