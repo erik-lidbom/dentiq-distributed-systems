@@ -5,6 +5,7 @@ import routes from './routes/index';
 import morgan from 'morgan';
 import { errorHandler } from './middleware/errorHandler';
 import { initRateLimiters } from './middleware/rateLimiter';
+import mqttClient from './mqtt/mqtt';
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
+// Initialize MQTT Connection
+mqttClient;
 // Initialize rate limiters
 initRateLimiters();
 

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { getService } from '../services/serviceRegistery';
 import { ServiceError } from '../utils/customError'; // Custom Error Classes
+import { publishAndSubscribe } from '../mqtt/mqtt';
 
 const routingController = async (
   req: Request,
@@ -38,9 +39,16 @@ const routingController = async (
     console.log(
       `[INFO]: Forwarding request ${req.method} ${req.url} to: ${targetUrl}`
     );
-
-    // TODO: Remove line 42-47 when connected with the real services
     const data = req.body || {};
+
+    //const mqttResponse: any = await publishAndSubscribe(
+    //  serviceName,
+    //  data,
+    //  10000
+    //);
+    //const parsedResponse = JSON.parse(mqttResponse);
+
+    // TODO: Remove the lines 42-47 when connected with the mqtt and uncomment the lines on row 44-51. Adjust the res status and message to the mqttResponse
     return res
       .status(200)
       .json({ message: `Request forwarded to ${serviceName}`, data });
@@ -63,7 +71,9 @@ const routingController = async (
       );
       return next(
         new ServiceError(
-          `Error from service ${req.params.serviceName}: ${error.response.data.message || 'Unknown error'}`,
+          `Error from service ${req.params.serviceName}: ${
+            error.response.data.message || 'Unknown error'
+          }`,
           error.response.status
         )
       );
