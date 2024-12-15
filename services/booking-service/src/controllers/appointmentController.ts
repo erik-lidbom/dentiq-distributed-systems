@@ -279,6 +279,15 @@ export const cancelAppointment = async (message: Buffer): Promise<ResponsePayloa
     }
 }
 
+export const getAppointments = async (req: Request, res: Response) => {
+  try {
+    const appointments = await Appointment.find();
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching appointments', error });
+  }
+};
+
 export const getAppointment = async (message: Buffer): Promise<ResponsePayload> => {
     try {
         const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
