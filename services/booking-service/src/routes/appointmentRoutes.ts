@@ -6,6 +6,7 @@ import {
   getAppointment,
   bookAppointment,
   cancelAppointment,
+  getAppointments,
 } from '../controllers/appointmentController';
 
 //outer.post("/", createAppointment); // Create an appointment
@@ -14,5 +15,7 @@ import {
 /// router.patch("/", patchAppointment); // Update an appointment
 //outer.patch("/", bookAppointment);
 //outer.patch("/", cancelAppointment)
+
+// router.get('/', getAppointments); // Get all appointments
 
 export default router;

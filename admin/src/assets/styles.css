@@ -1,0 +1,18 @@
+/* Importing the fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;700&display=swap');
+
+/* Set default font family, margin and height */
+body, html {
+    font-family: 'Inter', sans-serif;
+    height: 100%;
+    margin: 0;
+}
+
+/* Use Rubik for specific elements */
+h1, h2, h3, .rubik-text {
+    font-family: 'Rubik', sans-serif;
+}
+
+#app {
+    background-color: #ffffff;
+}
