@@ -4,8 +4,4 @@ This folder contains the `scenario.xsd` and an example scenario `scenario.xml`.
 
 The example scenario connects 10 clients which publish 10 messages each to an MQTT broker on localhost:1883.
 
-email?: string;
-message: string;
-senderService: string;
-patientId?: string;
-dentistId?: string;
+TODO --> UPDATE README of how to run the stress tests.
