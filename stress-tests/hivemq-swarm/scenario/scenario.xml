@@ -1,0 +1,152 @@
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="scenario.xsd">
+    <!-- Defines the MQTT Broker -->
+    <brokers>
+        <broker id="b1">
+            <address>localhost</address>
+            <port>1883</port>
+        </broker>
+    </brokers>
+
+    <!-- Defines the different Client Groups -->
+    <clientGroups>
+        <clientGroup id="notification-service">
+            <clientIdPattern>client-[0-9]{4}</clientIdPattern>
+            <count>10</count>  <!-- Represents the amount of clients to simulate -->
+        </clientGroup>
+    
+       <clientGroup id="appointment-service">
+            <clientIdPattern>client-[0-9]{4}</clientIdPattern>
+            <count>10</count>
+        </clientGroup>
+    </clientGroups>
+
+    <!-- Define Topic Groups -->
+    <topicGroups>
+        <topicGroup id="notification-add-slots">
+            <topicNamePattern>dentiq/appointmentService/notificationService/addSlots</topicNamePattern>
+            <count>1</count>  <!-- The amount of messages that should be published to a topic -->
+        </topicGroup>
+        <topicGroup id="notification-book-slots">
+            <topicNamePattern>dentiq/appointmentService/notificationService/bookedSlot</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="notification-cancel-slots">
+            <topicNamePattern>dentiq/appointmentService/notificationService/cancelSlot</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="notification-delete-slots">
+            <topicNamePattern>dentiq/appointmentService/notificationService/deleteSlot</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+
+        <!-- New Topic Group for Payment Service -->
+        <topicGroup id="appointment-add-slots">
+            <topicNamePattern>dentiq/dentistClient/appointmentService/addSlots</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="appointment-book-slot">
+            <topicNamePattern>dentiq/patientClient/appointmentService/bookSlot
+            </topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="appointment-remove-slot">
+            <topicNamePattern>dentiq/dentistClient/appointmentService/removeSlot
+            </topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="appointment-cancel-slot">
+            <topicNamePattern>dentiq/patientClient/appointmentService/cancelSlot
+            </topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+    </topicGroups>
+
+    <!-- Defines Scenario Stages -->
+    <stages>
+        <!-- Stage 1: Connects the clients to the broker -->
+        <stage id="s1">
+            <lifeCycle id="s1.l1" clientGroup="notification-service">
+                <connect broker="b1"/>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 2: Publishes the messages to the different topics in Notification Service -->
+        <stage id="s2">
+            <lifeCycle id="s2.l1" clientGroup="notification-service">
+                <publish 
+                    message='{"email": "eriktest@gmail.com", "message": "New added slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    topicGroup="notification-add-slots" 
+                    count="10"> <!-- How many messages in total that will be sent -->
+                </publish> 
+                <publish 
+                    message='{"email": "eriktest@gmail.com", "message": "New booked slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    topicGroup="notification-book-slots" 
+                    count="10">
+                </publish> 
+                <publish 
+                    message='{"email": "eriktest@gmail.com", "message": "Cancelled slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    topicGroup="notification-cancel-slots" 
+                    count="10">
+                </publish> 
+                <publish 
+                    message='{"email": "eriktest@gmail.com", "message": "Delete slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    topicGroup="notification-delete-slots" 
+                    count="10">
+                </publish> 
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 6: Disconnect clients for Notification Service -->
+        <stage id="s3">
+            <lifeCycle id="s3.l1" clientGroup="notification-service">
+                <disconnect/>
+            </lifeCycle>
+        </stage>
+
+      <stage id="s4">
+            <lifeCycle id="s4.l1" clientGroup="appointment-service">
+                <connect broker="b1"/>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 5: Publishes the messages to the different topics in Appointment Service -->
+        <stage id="s5">
+            <lifeCycle id="s5.l1" clientGroup="appointment-service">
+                <publish 
+                    message='{
+                        "dentistId": "1",
+                        "date": "jebait",
+                        "start_times": ["1"]
+                    }'
+                    topicGroup="appointment-add-slots" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{
+                            "patientId": "1",
+                            "appointmentId": "675da73e4a67d0ffb2a0746f"}'
+                    topicGroup="appointment-book-slot" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{"appointmentId": "675da73e4a67d0ffb2a0746f"}'
+                    topicGroup="appointment-remove-slot" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{"appointmentId": "675da73e4a67d0ffb2a0746f"}'
+                    topicGroup="appointment-cancel-slot" 
+                    count="5">
+                </publish>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 6: Disconnect clients for Appointment Service -->
+        <stage id="s6">
+            <lifeCycle id="s6.l1" clientGroup="appointment-service">
+                <disconnect/>
+            </lifeCycle>
+        </stage>
+    </stages>
+</scenario>
