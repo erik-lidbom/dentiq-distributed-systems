@@ -9,6 +9,6 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */,
     "moduleResolution": "Node",
     "lib": ["ES6"],
-    "types": []
+    "types": ["node"]
   }
 }

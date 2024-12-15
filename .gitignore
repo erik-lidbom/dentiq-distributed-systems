@@ -100,15 +100,25 @@ yarn.lock
 .pnpm-lock.yaml
 
 # Testing
-*.test.js
-*.test.ts
-jest.config.js
+!test.js
+!test.ts
+!app.test.ts
+!jest.config.js
+coverage/
 
 # Miscellaneous
 !README.md
+
+### Mac OS ###
+.DS_Store
 
 # Environment files
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# IDE and Editor Files
+.vscode/
+.idea/
+

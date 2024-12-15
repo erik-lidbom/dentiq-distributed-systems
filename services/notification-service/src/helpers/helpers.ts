@@ -1,9 +1,9 @@
-import { NotificationDocument } from '../models/model';
-import { TOPICS } from '../mqtt/topics';
+import { Notification } from "../models/model";
+import { TOPICS } from "../mqtt/topics";
 
 export const createPublishTopics = (
   topic: string,
-  data: NotificationDocument
+  data: Notification
 ): string[] => {
   let topics: string[] = [];
   switch (topic) {
