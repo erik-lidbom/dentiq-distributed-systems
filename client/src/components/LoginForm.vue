@@ -29,7 +29,7 @@
                     <button type="submit" class="w-full rounded-xl bg-dentiqBtnBlue text-white py-3 hover:bg-opacity-30 transition-all duration-300">Log In </button>
                     <div class="flex flex row gap-2">
                       <p class="text-dentiqGray">New to DentiQ? </p>
-                      <router-link to="/" class="text-dentiqLightBlue hover:text-opacity-30 transition-all duration-300"> Join now</router-link>
+                      <router-link to="/" class="relative text-dentiqLightBlue transition-all duration-300 hover:after:w-full after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-dentiqLightBlue after:transition-all after:duration-300"> Join now</router-link>
                     </div>
                     
                 </div>
