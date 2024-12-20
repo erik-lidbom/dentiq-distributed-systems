@@ -1,6 +1,14 @@
 import mqtt, { MqttClient, IClientOptions } from "mqtt";
 import dotenv from "dotenv";
-import { TOPICS } from "./topics"; // Import MQTT topics
+import { TOPICS } from "./topics";
+import {
+  validateCredentials,
+  generateAuthToken,
+  publishAuthResult,
+  validateAuthToken,
+  publishValidationResult,
+} from "../controllers/authController";
+
 dotenv.config();
 
 // Validate required environment variables
@@ -31,38 +39,45 @@ const mqttClient: MqttClient = mqtt.connect(mqttOptions);
 mqttClient.on("connect", () => {
   console.log("[MQTT]: Successfully connected to the broker!");
 
-  // Subscribe to relevant topics
-  mqttClient.subscribe(TOPICS.SUBSCRIBE.TOKEN_REVOKE, (err) => {
+  mqttClient.subscribe([TOPICS.SUBSCRIBE.LOGIN, TOPICS.SUBSCRIBE.AUTH_REQUEST], (err) => {
     if (err) {
-      console.error("[MQTT]: Could not establish subscription connections:", err);
+      console.error("[MQTT]: Could not establish subscription connections:", (err as Error).message);
     } else {
-      console.log(`[MQTT]: Subscribed to topic: ${TOPICS.SUBSCRIBE.TOKEN_REVOKE}`);
+      console.log(
+        `[MQTT]: Subscribed to topics: ${TOPICS.SUBSCRIBE.LOGIN}, ${TOPICS.SUBSCRIBE.AUTH_REQUEST}`
+      );
     }
   });
 });
 
-// Handle connection errors
-mqttClient.on("error", (err) => {
-  console.error("[MQTT]: Error connecting to broker:", err);
-  mqttClient.end();
-});
-
-// Handle incoming messages
+// Pipe-and-Filter Processing
 mqttClient.on("message", async (topic, message) => {
   try {
-    console.log(`[MQTT]: Raw message received from ${topic}:`, message.toString());
+    console.log(`[MQTT]: Message received on topic ${topic}:`, message.toString());
 
-    // Parse and validate the message payload
     const payload = JSON.parse(message.toString());
-    console.log(`[DEBUG]: Parsed payload:`, payload);
 
-    if (topic === TOPICS.SUBSCRIBE.TOKEN_REVOKE) {
-      console.log(`[INFO]: Token revocation request received:`, payload);
-    } else {
-      console.warn(`[MQTT]: Unknown topic received: ${topic}`);
+    if (topic === TOPICS.SUBSCRIBE.LOGIN) {
+      // Login Pipeline
+      const validated = await validateCredentials(payload);
+      const tokenGenerated = await generateAuthToken(validated);
+      await publishAuthResult(tokenGenerated);
+    } else if (topic === TOPICS.SUBSCRIBE.AUTH_REQUEST) {
+      // Token Validation Pipeline
+      const validatedToken = await validateAuthToken(payload);
+      await publishValidationResult(validatedToken);
     }
   } catch (err) {
-    console.error("[MQTT]: Error processing received message:", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    console.error("[MQTT]: Error processing message:", errorMessage);
+
+    // Handle validation errors
+    if (topic === TOPICS.SUBSCRIBE.AUTH_REQUEST) {
+      publishMessage(TOPICS.PUBLISH.AUTH_RESPONSE, {
+        success: false,
+        error: errorMessage,
+      });
+    }
   }
 });
 
@@ -71,7 +86,7 @@ export const publishMessage = (topic: string, message: object): void => {
   const payload = JSON.stringify(message);
   mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
     if (err) {
-      console.error(`[MQTT]: Failed to publish message to topic ${topic}:`, err);
+      console.error(`[MQTT]: Failed to publish message to topic ${topic}:`, (err as Error).message);
     } else {
       console.log(`[MQTT]: Message published to topic ${topic}:`, payload);
     }

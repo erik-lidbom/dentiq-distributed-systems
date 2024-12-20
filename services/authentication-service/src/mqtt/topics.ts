@@ -1,9 +1,11 @@
 export const TOPICS = {
-    SUBSCRIBE: {
-      TOKEN_REVOKE: "dentiq/authService/token/revoke",
-    },
-    PUBLISH: {
-      TOKEN_REVOKED_CONFIRMATION: "dentiq/authService/confirmation",
-    },
-  };
-  
+  SUBSCRIBE: {
+    LOGIN: "dentiq/authService/login",
+    AUTH_REQUEST: "dentiq/authService/request/validate-token", // New topic for token validation
+  },
+  PUBLISH: {
+    AUTH_SUCCESS: "dentiq/authService/login/success",
+    AUTH_FAILURE: "dentiq/authService/login/failure",
+    AUTH_RESPONSE: "dentiq/authService/response/validate-token", // Validation response
+  },
+};
