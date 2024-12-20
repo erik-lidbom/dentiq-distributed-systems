@@ -1,46 +1,60 @@
-import { Request, Response, NextFunction } from "express";
 import { generateToken, validateToken } from "../utils/tokenUtils";
+import { publishMessage } from "../mqtt/mqttClient";
 import { TOPICS } from "../mqtt/topics";
 
-export const login = (req: Request, res: Response, next: NextFunction): void => {
-  try {
-    const { username, password } = req.body;
+// Filter 1: Validate Credentials
+export const validateCredentials = async (payload: any): Promise<any> => {
+  const { username, password } = payload;
 
-    if (username === "test" && password === "password") {
-      const token = generateToken("12345");
-      res.status(200).json({ token });
-    } else {
-      res.status(401).json({ message: "Invalid username or password" });
-    }
-  } catch (error) {
-    next(error);
+  if (!username || !password) {
+    throw new Error("Missing username or password");
   }
+
+  //for testing purpose
+  const isValid = username === "test" && password === "password";
+  return { ...payload, isValid };
 };
 
-export const revokeToken = (req: Request, res: Response, next: NextFunction): void => {
-  try {
-    const { token } = req.body;
-
-    if (!token) {
-      res.status(400).json({ message: "Token is required" });
-    }
-  } catch (error) {
-    next(error);
+// Filter 2: Generate Token
+export const generateAuthToken = async (payload: any): Promise<any> => {
+  if (!payload.isValid) {
+    throw new Error("Invalid username or password");
   }
+  
+  //for testing purpose
+  const token = generateToken("12345"); 
+  return { ...payload, token };
 };
 
-export const validateTokenEndpoint = (req: Request, res: Response, next: NextFunction): void => {
-  try {
-    const { token } = req.body;
+// Filter 3: Publish Login Result
+export const publishAuthResult = async (payload: any): Promise<void> => {
+  const topic = payload.isValid
+    ? TOPICS.PUBLISH.AUTH_SUCCESS
+    : TOPICS.PUBLISH.AUTH_FAILURE;
 
-    const { valid, payload } = validateToken(token);
+  publishMessage(topic, {
+    success: payload.isValid,
+    token: payload.token || null,
+  });
+};
 
-    if (valid) {
-      res.status(200).json({ valid: true, user: payload });
-    } else {
-      res.status(401).json({ valid: false, message: "Invalid or expired token" });
-    }
-  } catch (error) {
-    next(error);
+// Filter 4: Validate Token
+export const validateAuthToken = async (payload: any): Promise<any> => {
+  const { token } = payload;
+
+  const { valid, payload: decoded } = validateToken(token);
+
+  if (!valid) {
+    throw new Error("Invalid or expired token");
   }
+
+  return { ...payload, valid, decoded };
+};
+
+// Publish Validation Result
+export const publishValidationResult = async (payload: any): Promise<void> => {
+  publishMessage(TOPICS.PUBLISH.AUTH_RESPONSE, {
+    success: payload.valid,
+    user: payload.decoded || null,
+  });
 };
