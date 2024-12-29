@@ -1,7 +1,7 @@
 {
   "name": "dentist-service",
   "version": "1.0.0",
-  "main": "dist/app.js",
+  "main": "dist/app.ts",
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
@@ -21,7 +21,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts"
+    "dev": "nodemon src/app.ts",
+    "seed": "node src/db/mock/seed.js"
   },
   "keywords": [],
   "author": "",
