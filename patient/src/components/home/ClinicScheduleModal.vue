@@ -57,7 +57,7 @@
           <button
             v-for="doctor in availableDoctors"
             :key="doctor._id"
-            class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-1 focus:ring-dentiq-background-primary hover:bg-blue-50"
+            class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-[0.5px] focus:ring-dentiq-background-secondary hover:bg-blue-50"
             :class="{
               'border-dentiq-background-primary bg-blue-50':
                 selectedDoctor?._id === doctor._id,
@@ -94,7 +94,7 @@
           <button
             v-for="language in allLanguages"
             :key="language"
-            class="flex items-center px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-lg focus:ring-1 focus:ring-dentiq-background-primary hover:bg-blue-50"
+            class="flex items-center px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-lg focus:ring-[0.5px] focus:ring-dentiq-background-secondary hover:bg-blue-50"
             :class="{
               'border-dentiq-background-primary bg-blue-50':
                 selectedLanguage === language,
@@ -156,7 +156,7 @@
         <button
           v-for="date in calendarDates"
           :key="date.day"
-          class="py-2 px-4 text-xs sm:text-sm rounded-lg focus:ring-1 focus:ring-dentiq-background-primary flex justify-center items-center"
+          class="py-2 px-4 text-xs sm:text-sm rounded-lg focus:ring-[0.5px] focus:ring-dentiq-background-secondary flex justify-center items-center"
           :class="{
             'bg-dentiq-background-secondary text-white': isSelectedDate(
               date.day
@@ -218,7 +218,7 @@
       <textarea
         v-model="reason"
         rows="3"
-        class="w-full resize-none p-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-dentiq-background-primary"
+        class="w-full resize-none p-4 border rounded-lg focus:outline-none focus:ring-[0.5px] focus:ring-dentiq-background-secondary"
         placeholder="Write your reason here..."
       ></textarea>
     </div>
@@ -274,14 +274,14 @@
     >
       <button
         v-if="step > 1"
-        class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:ring-1 focus:ring-dentiq-background-secondary"
+        class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 focus:ring-[0.5px] focus:ring-dentiq-background-secondary"
         @click="goStepBack"
         aria-label="Go to previous step"
       >
         Previous
       </button>
       <button
-        class="px-6 py-3 self-end text-white font-medium rounded-lg focus:ring-1 focus:ring-dentiq-background-primary"
+        class="px-6 py-3 self-end text-white font-medium rounded-lg focus:ring-1 focus:ring-dentiq-background-secondary"
         :class="
           !canProceed
             ? 'bg-dentiq-muted-light'
