@@ -57,7 +57,7 @@
           <button
             v-for="doctor in availableDoctors"
             :key="doctor._id"
-            class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-[0.5px] focus:ring-dentiq-background-secondary hover:bg-blue-50"
+            class="flex items-center justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-[0.5px] focus:ring-dentiq-background-secondary hover:bg-blue-50"
             :class="{
               'border-dentiq-background-primary bg-blue-50':
                 selectedDoctor?._id === doctor._id,
