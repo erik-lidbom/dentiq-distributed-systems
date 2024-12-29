@@ -11,12 +11,13 @@
     </p>
   </div>
 
-  <div v-else 
+  <div
+    v-else
     class="flex flex-col items-end space-y-4"
     :class="isMobile ? 'px-2 py-16' : 'p-2'"
   >
     <!-- Progress Bar -->
-    <div 
+    <div
       class="w-[95%] flex self-start justify-between items-center mb-4"
       aria-valuemax="4"
       aria-label="Booking progress"
@@ -46,29 +47,34 @@
         aria-label="Available doctors"
         role="listbox"
       >
-        <h3 id="step1-heading" class="sm:text-lg font-medium text-dentiq-muted-darkest">
+        <h3
+          id="step1-heading"
+          class="sm:text-lg font-medium text-dentiq-muted-darkest"
+        >
           Select Doctor <span class="text-dentiq-muted-semiLight">*</span>
         </h3>
         <div class="max-h-[240px] space-y-2">
           <button
             v-for="doctor in availableDoctors"
-            :key="doctor.id"
+            :key="doctor._id"
             class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-1 focus:ring-blue-500 hover:bg-blue-50"
             :class="{
-              'border-blue-500 bg-blue-50': selectedDoctor?.id === doctor.id,
+              'border-blue-500 bg-blue-50': selectedDoctor?._id === doctor._id,
               'cursor-not-allowed text-dentiq-muted-light':
                 !hasUpcomingAvailability(doctor),
             }"
             :aria-label="`Select ${doctor.name}, specialty: ${doctor.speciality}`"
             :aria-disabled="!hasUpcomingAvailability(doctor)"
-            :aria-selected="selectedDoctor?.id === doctor.id"
+            :aria-selected="selectedDoctor?._id === doctor._id"
             role="option"
             tabindex="0"
             @click="hasUpcomingAvailability(doctor) && selectDoctor(doctor)"
           >
             <div>
               <h4 class="font-medium text-sm sm:text-lg">{{ doctor.name }}</h4>
-              <p class="text-xs sm:text-sm text-gray-500">{{ doctor.speciality }}</p>
+              <p class="text-xs sm:text-sm text-gray-500">
+                {{ doctor.speciality }}
+              </p>
             </div>
           </button>
         </div>
@@ -104,7 +110,11 @@
     </div>
 
     <!-- Step 2: Select Date and Time -->
-    <section class="flex flex-col space-y-4 w-full max-h-fit" v-if="step === 2" aria-label="Select date and time">
+    <section
+      class="flex flex-col space-y-4 w-full max-h-fit"
+      v-if="step === 2"
+      aria-label="Select date and time"
+    >
       <h3 class="sm:text-lg font-medium text-dentiq-muted-darkest mb-4">
         Select Date <span class="text-dentiq-muted-semiLight">*</span>
       </h3>
@@ -132,7 +142,7 @@
           →
         </button>
       </div>
-      
+
       <div class="grid grid-cols-7 gap-2 text-center">
         <span
           v-for="day in days"
@@ -170,7 +180,6 @@
       <div class="flex flex-wrap gap-2">
         <button
           v-for="time in timeSlots"
-
           :key="time"
           class="py-2 px-4 border rounded-lg cursor-pointer text-center text-sm sm:text-base"
           :class="{
@@ -285,7 +294,7 @@ interface Availability {
 }
 
 interface Dentist {
-  id: string;
+  _id: string;
   name: string;
   speciality: string;
   languages: string[];
@@ -353,9 +362,11 @@ onUnmounted(() => {
 // Check if the current month is the selected month
 const isCurrentMonth = computed(() => {
   const today = new Date();
-  return currentYear.value === today.getFullYear() && currentMonth.value === today.getMonth();
+  return (
+    currentYear.value === today.getFullYear() &&
+    currentMonth.value === today.getMonth()
+  );
 });
-
 
 // State
 const selectedLanguage = ref<string | null>('Any Language');

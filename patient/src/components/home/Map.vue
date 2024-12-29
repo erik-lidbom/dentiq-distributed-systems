@@ -17,7 +17,7 @@
   >
     <CustomMarker
       v-for="clinic in filteredClinics"
-      :key="clinic.id"
+      :key="clinic._id"
       :options="{
         position: { lng: clinic.lng, lat: clinic.lat },
         anchorPoint: 'BOTTOM_CENTER',
@@ -31,7 +31,7 @@
         <img src="/svgs/logo-dark.svg" width="30" height="30" />
       </div>
       <div
-        v-if="activeClinic && activeClinic.id === clinic.id && !modalIsOpen"
+        v-if="activeClinic && activeClinic._id === clinic._id && !modalIsOpen"
         class="absolute z-50"
         style="transform: translate(-50%, -100%)"
         @click.stop
