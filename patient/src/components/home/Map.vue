@@ -9,7 +9,7 @@
     :map-id="googleMapId"
     style="width: 100%"
     :center="center"
-    :zoom="15"
+    :zoom="13"
     :zoom-control="mapOptions.zoomControl"
     :map-type-control="mapOptions.mapTypeControl"
     :fullscreen-control="mapOptions.fullscreenControl"
