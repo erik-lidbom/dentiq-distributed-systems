@@ -18,18 +18,16 @@ if (
   !process.env.MQTT_USERNAME ||
   !process.env.MQTT_PASSWORD
 ) {
-  throw new Error(
-    "Missing required MQTT environment variables. Check your .env file."
-  );
+  throw new Error("Missing required MQTT environment variables. Check your .env file.");
 }
 
-// MQTT connection options
 const mqttOptions: IClientOptions = {
   host: process.env.MQTT_HOST,
   port: parseInt(process.env.MQTT_PORT || "8883", 10),
   protocol: "mqtts",
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
+  reconnectPeriod: 1000,
 };
 
 // Create MQTT client
@@ -44,14 +42,9 @@ mqttClient.on("connect", () => {
     [TOPICS.SUBSCRIBE.LOGIN, TOPICS.SUBSCRIBE.AUTH_REQUEST],
     (err) => {
       if (err) {
-        console.error(
-          "[MQTT]: Could not establish subscription connections:",
-          err.message
-        );
+        console.error("[MQTT]: Subscription error:", err.message);
       } else {
-        console.log(
-          `[MQTT]: Subscribed to topics: ${TOPICS.SUBSCRIBE.LOGIN}, ${TOPICS.SUBSCRIBE.AUTH_REQUEST}`
-        );
+        console.log("[MQTT]: Subscribed to necessary topics.");
       }
     }
   );
@@ -68,58 +61,100 @@ mqttClient.on("error", (err) => {
 // Pipe-and-Filter Processing
 mqttClient.on("message", async (topic, message) => {
   try {
-    console.log(`[MQTT]: Message received on topic ${topic}:`, message.toString());
+    console.log(`[MQTT]: Message received on topic '${topic}':`, message.toString());
 
     const payload = JSON.parse(message.toString());
 
     if (topic === TOPICS.SUBSCRIBE.LOGIN) {
-      // Login Pipeline
-      try {
-        const validated = await validateCredentials(payload);
-        const tokenGenerated = await generateAuthToken(validated);
-        await publishAuthResult(tokenGenerated);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        console.error("[MQTT]: Error in login pipeline:", errorMessage);
-        publishMessage(TOPICS.PUBLISH.AUTH_FAILURE, {
-          success: false,
-          error: errorMessage,
-        });
-      }
+      console.log("[WORKFLOW]: Starting login workflow...");
+
+      // Step 1: Validate Credentials
+      console.log("[WORKFLOW]: Validating credentials...");
+      const validated = await validateCredentials(payload);
+      console.log("[WORKFLOW]: Credentials validated successfully:", validated);
+
+      // Step 2: Generate Token
+      console.log("[WORKFLOW]: Generating authentication token...");
+      const tokenGenerated = await generateAuthToken(validated);
+      console.log("[WORKFLOW]: Token generated successfully:", tokenGenerated);
+
+      // Step 3: Publish Login Result
+      console.log("[WORKFLOW]: Publishing login result...");
+      await publishAuthResult(tokenGenerated);
+      console.log("[WORKFLOW]: Login workflow completed successfully.");
     } else if (topic === TOPICS.SUBSCRIBE.AUTH_REQUEST) {
-      // Token Validation Pipeline
-      try {
-        const validatedToken = await validateAuthToken(payload);
-        await publishValidationResult(validatedToken);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
-        console.error("[MQTT]: Error processing message:", errorMessage);
-        publishMessage(TOPICS.PUBLISH.AUTH_RESPONSE, {
-          success: false,
-          error: errorMessage,
-        });
-      }
+      console.log("[WORKFLOW]: Starting token validation workflow...");
+
+      // Token Validation Workflow
+      const validatedToken = await validateAuthToken(payload);
+      console.log("[WORKFLOW]: Token validated successfully:", validatedToken);
+
+      console.log("[WORKFLOW]: Publishing token validation result...");
+      await publishValidationResult(validatedToken);
+      console.log("[WORKFLOW]: Token validation workflow completed successfully.");
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
-    console.error("[MQTT]: General error processing message:", errorMessage);
+    console.error("[WORKFLOW ERROR]: Error in workflow execution:", errorMessage);
   }
 });
 
-// Publish a message helper function
+// Publish-and-Subscribe Helper Function
+export const publishAndSubscribe = (
+  publishTopic: string,
+  message: object,
+  subscribeTopic: string,
+  timeout: number
+): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(message);
+
+    // Subscribe to the dynamic response topic with correlation ID
+    mqttClient.subscribe(subscribeTopic, { qos: 2 }, (err) => {
+      if (err) {
+        return reject(
+          new Error(`Failed to subscribe to topic ${subscribeTopic}: ${err.message}`)
+        );
+      }
+
+      // Publish the request
+      mqttClient.publish(publishTopic, payload, { qos: 2 }, (publishErr) => {
+        if (publishErr) {
+          return reject(
+            new Error(`Failed to publish to topic ${publishTopic}: ${publishErr.message}`)
+          );
+        }
+      });
+
+      // Listen for the response on the subscribed topic
+      const onMessage = (topic: string, msg: Buffer) => {
+        if (topic === subscribeTopic) {
+          mqttClient.removeListener("message", onMessage);
+          resolve(JSON.parse(msg.toString()));
+        }
+      };
+
+      mqttClient.on("message", onMessage);
+
+      // Timeout handling
+      setTimeout(() => {
+        mqttClient.removeListener("message", onMessage);
+        reject(new Error(`Timeout waiting for response on topic ${subscribeTopic}`));
+      }, timeout);
+    });
+  });
+};
+
+// Publish a message
 export const publishMessage = (topic: string, message: object): void => {
   const payload = JSON.stringify(message);
   mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
     if (err) {
-      console.error(
-        `[MQTT]: Failed to publish message to topic ${topic}:`,
-        err.message
-      );
+      console.error(`[MQTT]: Failed to publish message to topic ${topic}:`, err.message);
     } else {
       console.log(`[MQTT]: Message published to topic ${topic}:`, payload);
     }
   });
 };
 
-// Default export of the MQTT client
 export default mqttClient;
