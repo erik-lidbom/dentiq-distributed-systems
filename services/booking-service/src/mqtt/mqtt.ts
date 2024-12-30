@@ -2,16 +2,15 @@ import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
 import { subscribeTopics } from './subscribe';
 import { publishMessage } from './publish';
-import { getStatus, retrievePublishTopics } from './helpers';
 import { TOPICS } from './topics';
 import {
-  createDentist,
-  deleteDentist,
-  getDentist,
-  patchDentist,
-  queryClinics,
-  queryDentists,
-} from '../controllers/dentistController';
+  createAppointment,
+  getAppointments,
+  deleteAppointment,
+  bookAppointment,
+  getAppointment,
+} from '../controllers/appointmentController';
+
 dotenv.config();
 
 // Validate required environment variables
@@ -59,56 +58,43 @@ mqttClient.on('message', async (topic, message) => {
       `[MQTT]: Raw message received from ${topic}:`,
       message.toString()
     );
-    // Validate and parse the message
+
+    // Ensure the message is a valid JSON object
     const payload = Buffer.isBuffer(message)
       ? JSON.parse(message.toString())
       : message;
-    const correlationId = payload?.correlationId || 'unknown';
 
-    //Retrieve the response topic and status
-    const responseTopic: string = retrievePublishTopics(topic);
-    const responseStatus: boolean = await getStatus(topic, payload);
-
-    // Publish response
-    const responsePayload = { correlationId, responseStatus };
-    publishMessage(responseTopic, responsePayload);
-    console.log(
-      `[MQTT]: Response published to ${responseTopic}:`,
-      responsePayload
-    );
+    if (typeof payload !== 'object' || !payload) {
+      throw new Error('Invalid payload format.');
+    }
 
     switch (topic) {
       case TOPICS.SUBSCRIBE.CREATE:
-        await createDentist(payload);
+        await createAppointment(TOPICS.PUBLISH.CREATE_RESPONSE, message);
+        break;
+      case TOPICS.SUBSCRIBE.BOOK:
+        await bookAppointment(TOPICS.PUBLISH.BOOK_RESPONSE, message);
         break;
       case TOPICS.SUBSCRIBE.GET:
-        await getDentist(payload);
-        break;
-      case TOPICS.SUBSCRIBE.UPDATE:
-        await patchDentist(payload);
+        await getAppointment(TOPICS.PUBLISH.GET_RESPONSE, message);
         break;
       case TOPICS.SUBSCRIBE.DELETE:
-        await deleteDentist(payload);
+        await deleteAppointment(TOPICS.PUBLISH.DELETE_RESPONSE, message);
         break;
       case TOPICS.SUBSCRIBE.QUERY:
-        await queryDentists(payload);
-        break;
-      case TOPICS.SUBSCRIBE.CLINICS.QUERY_RESPONSE:
-        await queryClinics(payload);
+        await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE);
         break;
       default:
-        console.error('[MQTT]: Unknown topic:', topic);
+        console.error('[MQTT]: Unknown path received:', topic);
     }
-  } catch (err) {
-    console.error('[MQTT]: Error processing message:', err);
+  } catch (error: any) {
+    console.error('[MQTT]: Error processing message:', error.message);
 
     const errorResponse = {
-      correlationId: 'unknown',
       status: false,
-      error: 'Invalid message format',
+      error: error.message,
     };
 
-    // Publish error response
     const errorTopic = topic.replace('request', 'response');
     publishMessage(errorTopic, errorResponse);
     console.log(
