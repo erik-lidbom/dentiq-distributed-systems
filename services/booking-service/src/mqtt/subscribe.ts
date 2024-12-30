@@ -8,7 +8,7 @@ const subscriptionTopics = [
   TOPICS.SUBSCRIBE.UPDATE,
   TOPICS.SUBSCRIBE.DELETE,
   TOPICS.SUBSCRIBE.QUERY,
-  TOPICS.SUBSCRIBE.CLINICS.QUERY_RESPONSE,
+  TOPICS.SUBSCRIBE.BOOK,
 ];
 
 export const subscribeTopics = async () => {
