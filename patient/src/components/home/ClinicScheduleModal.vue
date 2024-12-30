@@ -300,7 +300,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, onMounted } from 'vue';
 import { getMonth, getYear } from 'date-fns';
-import { postAppointment } from '@/services/appointmentService';
+import { bookAppointment } from '@/services/appointmentService';
 
 // Define Types
 interface Availability {
@@ -390,6 +390,7 @@ const selectedDay = ref<number | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<number | null>(null);
 const selectedTime = ref<string | null>(null);
+const selectedAppointment = ref<string | null>('');
 const reason = ref<string>('');
 
 // Languages
@@ -440,12 +441,18 @@ const timeSlots = computed(() => {
     selectedDay.value
   );
 
+  console.log('Selected full date:', selectedFullDate);
+  console.log('Selected Year', currentYear.value);
+  console.log('Selected Month', currentMonth.value);
+  console.log('Selected Day', selectedDay.value);
+
   // Find the availability for the selected date
   const availability = selectedDoctor.value.availability.find(
     (slot) =>
       new Date(slot.date).toDateString() === selectedFullDate.toDateString()
   );
 
+  // Return the times if availability exists, otherwise return an empty array
   return availability ? availability.times : [];
 });
 
@@ -580,9 +587,39 @@ const selectLanguage = (language: string) =>
   (selectedLanguage.value = language);
 const selectDate = (date: number) => {
   selectedDay.value = date;
+  console.log('Selected day:', selectedDay.value);
   selectedTime.value = null; // Reset time when a new date is selected
 };
-const selectTime = (time: string) => (selectedTime.value = time);
+const selectTime = (time: string) => {
+  selectedTime.value = time;
+
+  // Construct the full date context for comparison
+  const selectedFullDate = new Date(
+    currentYear.value,
+    currentMonth.value,
+    selectedDay.value
+  ).toDateString();
+
+  // Find the matching appointment from the selected doctor's availability
+  const selectedSlot = selectedDoctor.value.availability.find(
+    (slot) =>
+      new Date(slot.date).toDateString() === selectedFullDate &&
+      slot.times.includes(time)
+  );
+
+  if (selectedSlot) {
+    selectedAppointment.value = {
+      date: selectedSlot.date,
+      time,
+    };
+  } else {
+    selectedAppointment.value = null;
+  }
+
+  console.log('Selected time:', selectedTime.value);
+  console.log('Selected appointment:', selectedAppointment.value);
+};
+
 const isSelectedTime = (time: string) => selectedTime.value === time;
 const isSuccess = ref(false);
 const submissionMessage = ref('');
@@ -608,28 +645,31 @@ const latestAvailableMonthYear = computed(() => {
 
 // Submit the appointment
 const submit = async () => {
-  const appointment = {
-    clinic: props.clinic.name,
-    doctor: selectedDoctor.value,
-    time: selectedTime.value,
-    day: selectedDay.value,
-    month: selectedMonth.value,
-    year: selectedYear.value,
-    reason: reason.value,
+  if (!selectedAppointment.value) {
+    console.error('No appointment selected.');
+    return;
+  }
+
+  const appointmentPayload = {
+    patientId: '11111111', // TODO: Replace with actual patient ID when Auth is Implemented
+    dentistId: selectedDoctor.value?._id,
+    date: selectedAppointment.value.date,
+    time: selectedAppointment.value.time,
+    reason_for_visit: reason.value || null,
   };
 
   try {
-    await postAppointment(appointment);
+    const response = await bookAppointment(appointmentPayload);
 
-    // Success
+    // Success handling
     isSuccess.value = true;
-    submissionMessage.value = `Your booking for ${selectedTime.value} on ${selectedDay.value}/${
-      selectedMonth.value + 1
-    }/${selectedYear.value} with Dr. ${
-      selectedDoctor.value.name
-    } at ${props.clinic.name} has been confirmed! 🎉`;
+    submissionMessage.value = `Your booking for ${appointmentPayload.time} on ${new Date(
+      appointmentPayload.date
+    ).toLocaleDateString()} with Dr. ${selectedDoctor.value.name} at ${
+      props.clinic.name
+    } has been confirmed! 🎉`;
   } catch (error) {
-    // Failure
+    // Failure handling
     isSuccess.value = false;
     submissionMessage.value = 'Failed to submit the booking. Please try again.';
     console.error('Error submitting booking:', error);
