@@ -24,6 +24,9 @@ export const retrievePublishTopic = (
         case 'query':
           publishTopic = TOPICS.PUBLISH.BOOKING_QUERY_RESPONSE;
           break;
+        case 'book':
+          publishTopic = TOPICS.PUBLISH.BOOKING_BOOK_RESPONSE;
+          break;
       }
       break;
     case 'dentist':
@@ -173,6 +176,9 @@ export const retrieveSubscribedTopic = (
           break;
         case 'query':
           subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_QUERY;
+          break;
+        case 'book':
+          subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_BOOK;
           break;
       }
       break;

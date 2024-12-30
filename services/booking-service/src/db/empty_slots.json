@@ -1,0 +1,74 @@
+[
+  {
+    "dentistId": "6770ec3e0f353c41ad4f942a",
+    "date": "2025-01-10",
+    "start_time": "09:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec3e0f353c41ad4f942a",
+    "date": "2025-01-10",
+    "start_time": "10:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec3e0f353c41ad4f942a",
+    "date": "2025-01-11",
+    "start_time": "11:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec3e0f353c41ad4f9429",
+    "date": "2025-01-12",
+    "start_time": "13:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec3e0f353c41ad4f9429",
+    "date": "2025-01-12",
+    "start_time": "14:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec3e0f353c41ad4f9429",
+    "date": "2025-01-13",
+    "start_time": "15:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec290f353c41ad4f9428",
+    "date": "2025-01-14",
+    "start_time": "09:30",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec290f353c41ad4f9428",
+    "date": "2025-01-14",
+    "start_time": "10:30",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770ec290f353c41ad4f9428",
+    "date": "2025-01-15",
+    "start_time": "11:30",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770eb7b0f353c41ad4f9422",
+    "date": "2025-01-16",
+    "start_time": "08:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770eb7b0f353c41ad4f9422",
+    "date": "2025-01-16",
+    "start_time": "09:00",
+    "status": "unbooked"
+  },
+  {
+    "dentistId": "6770eb7b0f353c41ad4f9422",
+    "date": "2025-01-17",
+    "start_time": "10:00",
+    "status": "unbooked"
+  }
+]
