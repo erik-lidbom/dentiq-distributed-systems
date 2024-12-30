@@ -1,5 +1,9 @@
-const BASE_URL = 'http://localhost:3000/api/dentist/query';
-const CLINICS_BASE_URL = 'http://localhost:3000/api/clinic/query';
+const BASE_URL =
+  import.meta.env.VITE_DENTIST_BASE_URL ||
+  'http://localhost:3000/api/dentist/query';
+const CLINICS_BASE_URL =
+  import.meta.env.VITE_CLINICS_BASE_URL ||
+  'http://localhost:3000/api/clinic/query';
 
 /**
  * Fetch dentists along with their associated clinic details.
