@@ -1,4 +1,4 @@
-import { TOPICS } from '../topics';
+import { TOPICS } from './topics';
 
 // Method that retrieves the topic that the gateway will publish to
 export const retrievePublishTopic = (
