@@ -1,25 +1,18 @@
 export const TOPICS = {
   SUBSCRIBE: {
-    DENTIST_CREATE_APP: 'dentiq/appointmentService/dentistService/addSlot',
-    CREATE: 'gateway/dentist/create/response',
-    GET: 'gateway/dentist/get/response',
-    UPDATE: 'gateway/dentist/update/response',
-    DELETE: 'gateway/dentist/delete/response',
-    QUERY: 'gateway/dentist/query/response',
-    CLINICS: {
-      QUERY_RESPONSE: 'gateway/clinic/query/response',
-    },
+    CREATE: 'gateway/booking/create/response',
+    GET: 'gateway/booking/get/response',
+    UPDATE: 'gateway/booking/update/response',
+    DELETE: 'gateway/booking/delete/response',
+    BOOK: 'gateway/booking/book/response',
+    QUERY: 'gateway/booking/query/response',
   },
   PUBLISH: {
-    DENTIST_AWAIT_CONF:
-      'dentiq/dentistService/appointmentService/addSlot/status',
-    CREATE_RESPONSE: 'dentist/create/response',
-    GET_RESPONSE: 'dentist/get/response',
-    UPDATE_RESPONSE: 'dentist/update/response',
-    DELETE_RESPONSE: 'dentist/delete/response',
-    QUERY_RESPONSE: 'dentist/query/response',
-    CLINICS: {
-      QUERY_RESPONSE: 'clinic/query/response',
-    },
+    CREATE_RESPONSE: 'booking/create/response',
+    GET_RESPONSE: 'booking/get/response',
+    UPDATE_RESPONSE: 'booking/update/response',
+    DELETE_RESPONSE: 'booking/delete/response',
+    BOOK_RESPONSE: 'booking/book/response',
+    QUERY_RESPONSE: 'booking/query/response',
   },
 };
