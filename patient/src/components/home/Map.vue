@@ -56,13 +56,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { GoogleMap, CustomMarker } from 'vue3-google-map';
 import CustomMapCard from './ClinicMapCard.vue';
 import ClinicScheduleModal from './ClinicScheduleModal.vue';
 import Modal from '../shared/Modal.vue';
 import Filter from './Filter.vue';
-import { fetchClinics } from '@/services/clinicService';
+import {
+  useAppointmentStore,
+  useClinicStore,
+  useDentistStore,
+} from '@/stores/index.ts';
+import { fetchClinics, fetchAppointments, fetchDentists } from '@/api/index.ts';
+import { aggregateClinicData } from '@/utils/dataAggregator.ts';
+import { TOPICS } from '@/mqtt/topics.ts';
+import { client, mqttClient } from '@/mqtt/mqtt.ts';
 
 // Google Maps Center
 const center = { lat: 57.7089, lng: 11.9746 };
@@ -89,6 +97,87 @@ const activeClinic = ref(null);
 const selectedServices = ref([]);
 const modalIsOpen = ref(false);
 
+// Fetch clinics and appointments on mount
+const clinicStore = useClinicStore();
+const dentistStore = useDentistStore();
+const appointmentStore = useAppointmentStore();
+
+// Computed appointments
+const appointments = computed(() => appointmentStore.appointments);
+
+// Track if data is being fetched
+let isFetching = false;
+
+// Watch for changes in appointments
+watch(
+  () => appointments.value,
+  async (newAppointments, oldAppointments) => {
+    console.log('Appointments changed, refetching data');
+
+    // Avoid unnecessary refetches
+    if (JSON.stringify(newAppointments) === JSON.stringify(oldAppointments)) {
+      console.log('No significant changes in appointments, skipping refetch.');
+      return;
+    }
+
+    try {
+      await fetchAndAggregateData();
+      activeClinic.value = null;
+    } catch (error) {
+      console.error('Error in watcher during refetch:', error);
+    }
+  },
+  { deep: true } // Watch for nested changes in appointments
+);
+
+// Function to fetch and aggregate data
+const fetchAndAggregateData = async () => {
+  if (isFetching) return;
+  isFetching = true;
+
+  try {
+    const appointmentsData = await fetchAppointments();
+    const clinicsData = await fetchClinics();
+    const dentistsData = await fetchDentists();
+
+    // Set data in stores
+    clinicStore.setClinics(clinicsData.data.clinics);
+    dentistStore.setDentists(dentistsData.data.data);
+    appointmentStore.setAppointments(appointmentsData.data.data);
+
+    // Aggregate data
+    clinics.value = aggregateClinicData(
+      clinicStore.clinics,
+      dentistStore.dentists,
+      appointmentStore.appointments
+    );
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  } finally {
+    isFetching = false;
+  }
+};
+
+onMounted(async () => {
+  // Initial data fetch
+  await fetchAndAggregateData();
+
+  // Setup MQTT client
+  await mqttClient.setup();
+
+  // Listen for booking and cancellation notifications
+  client.on('message', async (topic, message) => {
+    const payload = JSON.parse(message.toString());
+    if (
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
+    ) {
+      console.log(`[MQTT]: Refetching data due to ${topic}`);
+      await fetchAndAggregateData();
+    }
+  });
+});
+
 // Function to update the mobile status
 function updateIsMobile() {
   isMobile.value = window.innerWidth < 640;
@@ -101,15 +190,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateIsMobile);
-});
-
-onMounted(async () => {
-  try {
-    clinics.value = await fetchClinics();
-    console.log('Clinics:', clinics.value);
-  } catch (error) {
-    console.error(error);
-  }
 });
 
 // Functions to toggle and close the filter
