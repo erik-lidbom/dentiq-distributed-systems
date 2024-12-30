@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
 import { Appointment } from '../models/appointmentModel';
+import { publishMessage } from '../mqtt/publish';
 
 export type NotificationPayload = {
   patientId?: string | null;
@@ -13,73 +13,104 @@ export type NotificationPayload = {
 export type ResponsePayload = {
   status: number;
   message: string;
+  data?: any;
   notificationPayload?: NotificationPayload;
 };
 
-export const createAppointment = async (message: Buffer): Promise<ResponsePayload> => {
-    try {
-        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
-        const { dentistId, date, start_times } = payload;
-;
-        if(!dentistId || !date || !Array.isArray(start_times)) {
-            const resPayload = {
-                status: 400,
-                message: 'Missing required field(s).',
-                notificationPayload: {
-                  typeOfNotification: 'AppointmentCreated',
-                  error: true
-                }
-            }
-            return resPayload;
-        };
-        
-        const newAppointments = start_times.map((time) => ({
-            dentistId,
-            date,
-            start_time: time,
-            status: 'unbooked'
-        }))
-        
-        await Appointment.insertMany(newAppointments);
+/**
+ * Helper function to publish response messages
+ */
+const publishResponse = (topic: string, payload: ResponsePayload): void => {
+  if (topic) {
+    publishMessage(topic, payload);
+  } else {
+    console.error('[MQTT]: Topic not provided for publishing response.');
+  }
+};
 
-        const notificationPayload = {
-            dentistId: dentistId,
-            senderService: 'AppointmentService',
-            message: `${start_times}`,
-            typeOfNotification: 'AppointmentCreated'
-        };
+/**
+ * Create new appointments for a dentist
+ */
+export const createAppointment = async (
+  topic: string,
+  message: Buffer
+): Promise<void> => {
+  try {
+    const payload: {
+      dentistId: string;
+      date: string;
+      start_times: string[];
+    } = JSON.parse(message.toString());
+    const { dentistId, date, start_times } = payload;
 
-        const resPayload = {
-            status: 201,
-            message: `Successfully created ${newAppointments.length} appointment(s).`,
-            notificationPayload: notificationPayload
-        }
+    if (!dentistId || !date || !Array.isArray(start_times)) {
+      const resPayload: ResponsePayload = {
+        status: 400,
+        message: 'Missing required field(s).',
+        notificationPayload: {
+          typeOfNotification: 'AppointmentCreated',
+          error: true,
+        },
+      };
+      publishResponse(topic, resPayload);
+      return;
+    }
 
-    return resPayload;
+    const newAppointments = start_times.map((time) => ({
+      dentistId,
+      date,
+      start_time: time,
+      status: 'unbooked',
+    }));
+
+    await Appointment.insertMany(newAppointments);
+
+    const resPayload: ResponsePayload = {
+      status: 201,
+      message: `Successfully created ${newAppointments.length} appointment(s).`,
+      notificationPayload: {
+        dentistId,
+        senderService: 'AppointmentService',
+        message: `${start_times}`,
+        typeOfNotification: 'AppointmentCreated',
+      },
+    };
+
+    publishResponse(topic, resPayload);
   } catch (error) {
-    const resPayload = {
+    console.error('Error creating appointment:', error);
+    const resPayload: ResponsePayload = {
       status: 500,
-      message: 'Internal server error, please try again later',
+      message: 'Internal server error, please try again later.',
       notificationPayload: {
         typeOfNotification: 'AppointmentCreated',
         error: true,
       },
     };
-    console.log('Error: ', error);
-
-    return resPayload;
+    publishResponse(topic, resPayload);
   }
 };
 
-export const bookAppointment = async (message: Buffer): Promise<ResponsePayload> => {
-    try {
-        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+/**
+ * Book an existing appointment
+ */
+export const bookAppointment = async (
+  topic: string,
+  message: Buffer
+): Promise<void> => {
+  try {
+    const payload: {
+      patientId: string;
+      dentistId: string;
+      date: string;
+      time: string;
+      reason_for_visit?: string;
+    } = JSON.parse(message.toString());
 
-        const { patientId, appointmentId } = payload;
+    const { patientId, dentistId, date, time, reason_for_visit } = payload;
 
-
-    if (!patientId || !appointmentId) {
-      const resPayload = {
+    if (!patientId || !dentistId || !date || !time) {
+      const resPayload: ResponsePayload = {
         status: 400,
         message: 'Missing required field(s).',
         notificationPayload: {
@@ -87,57 +118,71 @@ export const bookAppointment = async (message: Buffer): Promise<ResponsePayload>
           error: true,
         },
       };
-      return resPayload;
+      publishResponse(topic, resPayload);
+      publishMessage('appointment/booked', {
+        topic: 'Failed Booking',
+        message: 'Failed Booking. Try Again!',
+      });
+      return;
     }
 
-    const appointment = await Appointment.findById(appointmentId);
+    // Find the appointment by dentistId, date, and time
+    const appointment = await Appointment.findOne({
+      dentistId,
+      date,
+      start_time: time,
+      status: 'unbooked',
+    });
 
     if (!appointment) {
-      const resPayload = {
+      const resPayload: ResponsePayload = {
         status: 404,
-        message: 'Appointment could not be found.',
+        message: 'Appointment not available for booking.',
         notificationPayload: {
           typeOfNotification: 'AppointmentBooked',
           error: true,
         },
       };
-      return resPayload;
+      publishResponse(topic, resPayload);
+      publishMessage('appointment/booked', {
+        topic: 'Failed Booking',
+        message: 'Failed Booking. Try Again!',
+      });
+      return;
     }
 
-        if(appointment.status !== 'unbooked') {
-            const resPayload = {
-                status: 400,
-                message: 'Appointment already booked.',
-                notificationPayload: {
-                  typeOfNotification: 'AppointmentBooked',
-                  error: true
-                }
-            };
-            return resPayload;
-        };
-
+    // Update the appointment with patient details and reason for visit
     appointment.status = 'booked';
     appointment.patientId = patientId;
+    appointment.reason_for_visit = reason_for_visit || '';
 
     const bookedAppointment = await appointment.save();
 
-        const notificationPayload = {
-            dentistId: bookedAppointment.dentistId,
-            patientId: bookedAppointment.patientId,
-            senderService: "AppointmentService",
-            message: `${bookedAppointment.start_time}`,
-            typeOfNotification: 'AppointmentBooked'
-        };
+    console.log('Booked appointment herrreeeee:', bookedAppointment);
 
-    const resPayload = {
+    const resPayload: ResponsePayload = {
       status: 200,
-      message: `Appointment successfully booked with id: ${bookedAppointment._id}`,
-      notificationPayload: notificationPayload,
+      message: `Appointment successfully booked for ${bookedAppointment.date} at ${bookedAppointment.start_time}.`,
+      notificationPayload: {
+        dentistId: bookedAppointment.dentistId,
+        patientId: bookedAppointment.patientId,
+        senderService: 'AppointmentService',
+        message: `${bookedAppointment.start_time}`,
+        typeOfNotification: 'AppointmentBooked',
+      },
     };
 
-    return resPayload;
+    publishResponse(topic, resPayload);
+    publishMessage('appointment/booked', {
+      dentistId: bookedAppointment.dentistId,
+      patientId: bookedAppointment.patientId,
+      date: bookedAppointment.date,
+      time: bookedAppointment.start_time,
+      message: `Appointment booked for ${date} at ${time}`,
+    });
   } catch (error) {
-    const resPayload = {
+    console.error('Error booking appointment:', error);
+    const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
       notificationPayload: {
@@ -145,22 +190,29 @@ export const bookAppointment = async (message: Buffer): Promise<ResponsePayload>
         error: true,
       },
     };
-    console.log('Error: ', error);
-    return resPayload;
+    publishResponse(topic, resPayload);
+    publishMessage('appointment/failed', {
+      topic: 'Failed Booking',
+      message: 'Failed Booking. Try Again!',
+    });
   }
 };
 
+/**
+ * Delete an appointment
+ */
 export const deleteAppointment = async (
+  topic: string,
   message: Buffer
-): Promise<ResponsePayload> => {
+): Promise<void> => {
   try {
-    const payload = Buffer.isBuffer(message)
-      ? JSON.parse(message.toString())
-      : message;
+    const payload: {
+      appointmentId: string;
+    } = JSON.parse(message.toString());
     const { appointmentId } = payload;
 
     if (!appointmentId) {
-      const resPayload = {
+      const resPayload: ResponsePayload = {
         status: 400,
         message: 'Missing required field.',
         notificationPayload: {
@@ -168,42 +220,43 @@ export const deleteAppointment = async (
           error: true,
         },
       };
-      return resPayload;
+      publishResponse(topic, resPayload);
+      return;
     }
 
     const appointment = await Appointment.findById(appointmentId);
 
     if (!appointment) {
-      const resPayload = {
+      const resPayload: ResponsePayload = {
         status: 404,
-        message: `Appointment with id ${appointmentId} not found.`,
+        message: `Appointment with ID ${appointmentId} not found.`,
         notificationPayload: {
           typeOfNotification: 'AppointmentDeleted',
           error: true,
         },
       };
-      return resPayload;
+      publishResponse(topic, resPayload);
+      return;
     }
 
-    const deletedAppointment = await Appointment.deleteOne({ _id: appointment._id });
+    await Appointment.deleteOne({ _id: appointment._id });
 
-    const notificationPayload = {
-        dentistId: appointment.dentistId,
-        patientId: appointment.patientId,
-        message: `${appointment.start_time}`,
-        senderService: 'AppointmentService',
-        typeOfNotification: 'AppointmentDeleted'
-    }
-
-    const resPayload = {
+    const resPayload: ResponsePayload = {
       status: 200,
       message: `Appointment with ID ${appointment._id} successfully deleted.`,
-      notificationPayload: notificationPayload,
+      notificationPayload: {
+        dentistId: appointment.dentistId,
+        patientId: appointment.patientId,
+        senderService: 'AppointmentService',
+        message: `${appointment.start_time}`,
+        typeOfNotification: 'AppointmentDeleted',
+      },
     };
 
-    return resPayload;
+    publishResponse(topic, resPayload);
   } catch (error) {
-    const resPayload = {
+    console.error('Error deleting appointment:', error);
+    const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
       notificationPayload: {
@@ -211,131 +264,191 @@ export const deleteAppointment = async (
         error: true,
       },
     };
-    console.log('Error: ', error);
-    return resPayload;
+    publishResponse(topic, resPayload);
   }
 };
 
-export const cancelAppointment = async (message: Buffer): Promise<ResponsePayload> => {
-    try {
-        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
-        const { appointmentId } = payload;
+/**
+ * Fetch a specific appointment by ID
+ */
+export const getAppointment = async (
+  topic: string,
+  message: Buffer
+): Promise<void> => {
+  try {
+    const payload: {
+      appointmentId: string;
+    } = JSON.parse(message.toString());
+    const { appointmentId } = payload;
 
-        if(!appointmentId) {
-            const resPayload = {
-                status: 400,
-                message: 'Missing required field.',
-                notificationPayload: {
-                  typeOfNotification: 'AppointmentCancelled',
-                  error: true
-                }
-            };
-            
-            return resPayload;
-        };
+    if (!appointmentId) {
+      const resPayload: ResponsePayload = {
+        status: 400,
+        message: 'Missing required field: appointmentId.',
+        notificationPayload: {
+          typeOfNotification: 'GetAppointment',
+          error: true,
+        },
+      };
+      publishResponse(topic, resPayload);
+      return;
+    }
 
     const appointment = await Appointment.findById(appointmentId);
 
-        if(!appointment) {
-            const resPayload = {
-                status: 404,
-                message: `Could not find appointment with ID: ${appointmentId}`,
-                notificationPayload: {
-                  typeOfNotification: 'AppointmentCancelled',
-                  error: true
-                }
-            };
-            return resPayload;
-        };
-
-        const notificationPayload = {
-            dentistId: appointment.dentistId,
-            patientId: appointment.patientId,
-            message: `${appointment.start_time}`,
-            senderService: "AppointmentService",
-            typeOfNotification: 'AppointmentCancelled'
-        }
-
-        appointment.patientId = null;
-        const updatedAppointment = await appointment.save()
-    
-        const resPayload = {
-            status: 200,
-            message: `Appointment with ID: ${appointment._id} successfully cancelled.`,
-            notificationPayload: notificationPayload
-        }
-        return resPayload;
-    } catch (error) {
-        const resPayload = {
-            status: 500,
-            message: 'Internal server error, please try again later.',
-            notificationPayload: {
-              typeOfNotification: 'AppointmentCancelled',
-              error: true
-            }
-        };
-        console.log("Error: ", error)
-        return resPayload;
+    if (!appointment) {
+      const resPayload: ResponsePayload = {
+        status: 404,
+        message: `Appointment with ID ${appointmentId} not found.`,
+        notificationPayload: {
+          typeOfNotification: 'GetAppointment',
+          error: true,
+        },
+      };
+      publishResponse(topic, resPayload);
+      return;
     }
-}
 
-export const getAppointments = async (req: Request, res: Response) => {
+    const resPayload: ResponsePayload = {
+      status: 200,
+      message: `Successfully fetched appointment with ID: ${appointment._id}`,
+      data: appointment,
+      notificationPayload: {
+        dentistId: appointment.dentistId,
+        patientId: appointment.patientId,
+        senderService: 'AppointmentService',
+        message: `${appointment.start_time}`,
+        typeOfNotification: 'GetAppointment',
+      },
+    };
+
+    publishResponse(topic, resPayload);
+  } catch (error) {
+    console.error('Error fetching appointment:', error);
+    const resPayload: ResponsePayload = {
+      status: 500,
+      message: 'Internal server error, please try again later.',
+      notificationPayload: {
+        typeOfNotification: 'GetAppointment',
+        error: true,
+      },
+    };
+    publishResponse(topic, resPayload);
+  }
+};
+
+/**
+ * Fetch all appointments
+ */
+export const getAppointments = async (topic: string): Promise<void> => {
   try {
     const appointments = await Appointment.find();
-    res.status(200).json(appointments);
+
+    const resPayload: ResponsePayload = {
+      status: 200,
+      message: `Successfully fetched ${appointments.length} appointments.`,
+      data: appointments,
+    };
+
+    if (!appointments || appointments.length === 0) {
+      resPayload.status = 404;
+      resPayload.message = 'No appointments found.';
+    }
+
+    publishResponse(topic, resPayload);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching appointments', error });
+    console.error('Error fetching appointments:', error);
+    const resPayload: ResponsePayload = {
+      status: 500,
+      message: 'Internal server error, please try again later.',
+    };
+    publishResponse(topic, resPayload);
   }
 };
 
-export const getAppointment = async (message: Buffer): Promise<ResponsePayload> => {
-    try {
-        const payload = Buffer.isBuffer(message) ? JSON.parse(message.toString()) : message;
+/**
+ * Cancel a booked appointment
+ */
 
-        const { appointmentId } = payload;
+export const cancelAppointment = async (
+  topic: string,
+  message: Buffer
+): Promise<void> => {
+  try {
+    const payload: {
+      appointmentId: string;
+    } = JSON.parse(message.toString());
+    const { appointmentId } = payload;
 
-        if (!appointmentId) {
-            const resPayload = {
-                status: 400,
-                message: 'Missing required field.',
-                notificationPayload: {
-                  typeOfNotification: 'GetAppointment',
-                  error: true
-                }
-            };
-            return resPayload;
-        }
+    if (!appointmentId) {
+      const resPayload: ResponsePayload = {
+        status: 400,
+        message: 'Missing required field.',
+        notificationPayload: {
+          typeOfNotification: 'AppointmentCancelled',
+          error: true,
+        },
+      };
+      publishResponse(topic, resPayload);
+      return;
+    }
 
     const appointment = await Appointment.findById(appointmentId);
 
-        if(!appointment) {
-            const resPayload = {
-                status: 404,
-                message: `Could not find appointment with ID: ${appointmentId}`,
-                notificationPayload: {
-                  typeOfNotification: 'GetAppointment',
-                  error: true
-                }
-            };
-            return resPayload;
-        }
-
-        const resPayload = {
-            status: 200,
-            message: `Appointment: ${appointment}`
-        };
-        return resPayload;
-
-    } catch (error) {
-        const resPayload = {
-            status: 500,
-            message: 'Internal server error, please try again later.',
-            notificationPayload: {
-              typeOfNotification: 'GetAppointment',
-              error: true
-            }
-        };
-        console.log("Error: ", error);
-        return resPayload;
+    if (!appointment) {
+      const resPayload: ResponsePayload = {
+        status: 404,
+        message: `Appointment with ID ${appointmentId} not found.`,
+        notificationPayload: {
+          typeOfNotification: 'AppointmentCancelled',
+          error: true,
+        },
+      };
+      publishResponse(topic, resPayload);
+      return;
     }
+
+    if (appointment.status !== 'booked') {
+      const resPayload: ResponsePayload = {
+        status: 400,
+        message: 'Appointment is not booked.',
+        notificationPayload: {
+          typeOfNotification: 'AppointmentCancelled',
+          error: true,
+        },
+      };
+      publishResponse(topic, resPayload);
+      return;
+    }
+
+    appointment.status = 'unbooked';
+    appointment.patientId = null;
+
+    const cancelledAppointment = await appointment.save();
+
+    const resPayload: ResponsePayload = {
+      status: 200,
+      message: `Appointment with ID ${cancelledAppointment._id} successfully cancelled.`,
+      notificationPayload: {
+        dentistId: cancelledAppointment.dentistId,
+        patientId: cancelledAppointment.patientId,
+        senderService: 'AppointmentService',
+        message: `${cancelledAppointment.start_time}`,
+        typeOfNotification: 'AppointmentCancelled',
+      },
+    };
+
+    publishResponse(topic, resPayload);
+  } catch (error) {
+    console.error('Error cancelling appointment:', error);
+    const resPayload: ResponsePayload = {
+      status: 500,
+      message: 'Internal server error, please try again later.',
+      notificationPayload: {
+        typeOfNotification: 'AppointmentCancelled',
+        error: true,
+      },
+    };
+    publishResponse(topic, resPayload);
+  }
 };
