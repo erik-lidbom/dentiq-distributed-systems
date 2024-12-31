@@ -1,4 +1,4 @@
-import { TOPICS } from '../topics';
+import { TOPICS } from './topics';
 
 // Method that retrieves the topic that the gateway will publish to
 export const retrievePublishTopic = (
@@ -23,6 +23,9 @@ export const retrievePublishTopic = (
           break;
         case 'query':
           publishTopic = TOPICS.PUBLISH.BOOKING_QUERY_RESPONSE;
+          break;
+        case 'book':
+          publishTopic = TOPICS.PUBLISH.BOOKING_BOOK_RESPONSE;
           break;
       }
       break;
@@ -173,6 +176,9 @@ export const retrieveSubscribedTopic = (
           break;
         case 'query':
           subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_QUERY;
+          break;
+        case 'book':
+          subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_BOOK;
           break;
       }
       break;

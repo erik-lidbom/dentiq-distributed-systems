@@ -1,9 +1,6 @@
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
-import {
-  retrievePublishTopic,
-  retrieveSubscribedTopic,
-} from './helpers/helpers';
+import { retrievePublishTopic, retrieveSubscribedTopic } from './helpers';
 
 export type MqttResponse = {
   status: string;

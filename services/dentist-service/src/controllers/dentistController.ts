@@ -202,7 +202,7 @@ export const queryDentists = async (payload: any): Promise<void> => {
       );
     }
 
-    const response = { status: 200, dentists };
+    const response = { status: 200, data: dentists };
     mqttClient.publish(TOPICS.PUBLISH.QUERY_RESPONSE, JSON.stringify(response));
 
     console.log(

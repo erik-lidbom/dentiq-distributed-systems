@@ -57,7 +57,7 @@
           <button
             v-for="doctor in availableDoctors"
             :key="doctor._id"
-            class="flex items-start justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-[0.5px] focus:ring-dentiq-background-secondary hover:bg-blue-50"
+            class="flex items-center justify-between px-4 py-3 min-w-full min-h-[65px] max-h-[65px] border rounded-xl focus:ring-[0.5px] focus:ring-dentiq-background-secondary hover:bg-blue-50"
             :class="{
               'border-dentiq-background-primary bg-blue-50':
                 selectedDoctor?._id === doctor._id,
@@ -228,36 +228,65 @@
       v-if="step === 4"
       class="flex flex-col items-center self-center space-y-6 text-center"
     >
-      <div>
-        <img
-          v-if="isSuccess"
-          src="/illustrations/success.png"
-          alt="Success"
-          class="w-50 h-50 mx-auto mb-4"
-        />
-      </div>
-      <h2
-        class="text-2xl font-bold"
-        :class="{ 'text-green-500': isSuccess, 'text-red-500': !isSuccess }"
+      <!-- Loading Spinner -->
+      <div
+        v-if="isLoading"
+        class="flex flex-col justify-center items-center gap-4 h-60"
       >
-        {{ isSuccess ? 'Booking Confirmed!' : 'Booking Failed' }}
-      </h2>
-      <p class="text-gray-600">{{ submissionMessage }}</p>
-      <div v-if="isSuccess">
-        <button
-          @click="redirectToBookings"
-          class="px-6 py-3 bg-dentiq-background-primary text-white rounded-lg hover:bg-dentiq-background-primary"
+        <svg
+          class="animate-spin h-20 w-20 text-dentiq-background-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
         >
-          Go to Bookings
-        </button>
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          ></path>
+        </svg>
+        <h3 class="text-dentiq-muted-dark text-dentiq-h3">Processing ...</h3>
       </div>
-      <div v-else>
-        <button
-          @click="resetToFirstStep"
-          class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+      <div v-else class="flex flex-col gap-6">
+        <div>
+          <img
+            v-if="isSuccess"
+            src="/illustrations/success.png"
+            alt="Success"
+            class="w-50 h-50 mx-auto mb-4"
+          />
+        </div>
+        <h2
+          class="text-2xl font-bold"
+          :class="{ 'text-green-500': isSuccess, 'text-red-500': !isSuccess }"
         >
-          Retry
-        </button>
+          {{ isSuccess ? 'Booking Confirmed!' : 'Booking Failed' }}
+        </h2>
+        <p class="text-gray-600">{{ submissionMessage }}</p>
+        <div v-if="isSuccess">
+          <button
+            @click="redirectToBookings"
+            class="px-6 py-3 bg-dentiq-background-primary text-white rounded-lg hover:bg-dentiq-background-primary"
+          >
+            Go to Bookings
+          </button>
+        </div>
+        <div v-else>
+          <button
+            @click="resetToFirstStep"
+            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     </div>
 
@@ -300,7 +329,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, onMounted } from 'vue';
 import { getMonth, getYear } from 'date-fns';
-import { postAppointment } from '@/services/appointmentService';
+import { bookAppointment } from '@/services/appointmentService';
 
 // Define Types
 interface Availability {
@@ -357,6 +386,9 @@ const resetToFirstStep = () => {
   reason.value = '';
 };
 
+// State for loading
+const isLoading = ref(false);
+
 // Reactive state for screen size
 const isMobile = ref(window.innerWidth < 768);
 
@@ -390,6 +422,7 @@ const selectedDay = ref<number | null>(null);
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<number | null>(null);
 const selectedTime = ref<string | null>(null);
+const selectedAppointment = ref<string | null>('');
 const reason = ref<string>('');
 
 // Languages
@@ -440,12 +473,18 @@ const timeSlots = computed(() => {
     selectedDay.value
   );
 
+  console.log('Selected full date:', selectedFullDate);
+  console.log('Selected Year', currentYear.value);
+  console.log('Selected Month', currentMonth.value);
+  console.log('Selected Day', selectedDay.value);
+
   // Find the availability for the selected date
   const availability = selectedDoctor.value.availability.find(
     (slot) =>
       new Date(slot.date).toDateString() === selectedFullDate.toDateString()
   );
 
+  // Return the times if availability exists, otherwise return an empty array
   return availability ? availability.times : [];
 });
 
@@ -580,9 +619,39 @@ const selectLanguage = (language: string) =>
   (selectedLanguage.value = language);
 const selectDate = (date: number) => {
   selectedDay.value = date;
+  console.log('Selected day:', selectedDay.value);
   selectedTime.value = null; // Reset time when a new date is selected
 };
-const selectTime = (time: string) => (selectedTime.value = time);
+const selectTime = (time: string) => {
+  selectedTime.value = time;
+
+  // Construct the full date context for comparison
+  const selectedFullDate = new Date(
+    currentYear.value,
+    currentMonth.value,
+    selectedDay.value
+  ).toDateString();
+
+  // Find the matching appointment from the selected doctor's availability
+  const selectedSlot = selectedDoctor.value.availability.find(
+    (slot) =>
+      new Date(slot.date).toDateString() === selectedFullDate &&
+      slot.times.includes(time)
+  );
+
+  if (selectedSlot) {
+    selectedAppointment.value = {
+      date: selectedSlot.date,
+      time,
+    };
+  } else {
+    selectedAppointment.value = null;
+  }
+
+  console.log('Selected time:', selectedTime.value);
+  console.log('Selected appointment:', selectedAppointment.value);
+};
+
 const isSelectedTime = (time: string) => selectedTime.value === time;
 const isSuccess = ref(false);
 const submissionMessage = ref('');
@@ -608,31 +677,40 @@ const latestAvailableMonthYear = computed(() => {
 
 // Submit the appointment
 const submit = async () => {
-  const appointment = {
-    clinic: props.clinic.name,
-    doctor: selectedDoctor.value,
-    time: selectedTime.value,
-    day: selectedDay.value,
-    month: selectedMonth.value,
-    year: selectedYear.value,
-    reason: reason.value,
+  if (!selectedAppointment.value) {
+    console.error('No appointment selected.');
+    return;
+  }
+
+  // Set loading state
+  isLoading.value = true;
+
+  const appointmentPayload = {
+    patientId: '11111111', // TODO: Replace with actual patient ID when Auth is Implemented
+    dentistId: selectedDoctor.value?._id,
+    date: selectedAppointment.value.date,
+    time: selectedAppointment.value.time,
+    reason_for_visit: reason.value || null,
   };
 
   try {
-    await postAppointment(appointment);
+    const response = await bookAppointment(appointmentPayload);
 
-    // Success
+    // Success handling
     isSuccess.value = true;
-    submissionMessage.value = `Your booking for ${selectedTime.value} on ${selectedDay.value}/${
-      selectedMonth.value + 1
-    }/${selectedYear.value} with Dr. ${
-      selectedDoctor.value.name
-    } at ${props.clinic.name} has been confirmed! 🎉`;
+    submissionMessage.value = `Your booking for ${appointmentPayload.time} on ${new Date(
+      appointmentPayload.date
+    ).toLocaleDateString()} with Dr. ${selectedDoctor.value.name} at ${
+      props.clinic.name
+    } has been confirmed! 🎉`;
   } catch (error) {
-    // Failure
+    // Failure handling
     isSuccess.value = false;
     submissionMessage.value = 'Failed to submit the booking. Please try again.';
     console.error('Error submitting booking:', error);
+  } finally {
+    // Remove loading state
+    isLoading.value = false;
   }
 };
 </script>
