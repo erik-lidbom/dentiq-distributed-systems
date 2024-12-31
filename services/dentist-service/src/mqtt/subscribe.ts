@@ -1,8 +1,15 @@
-import { mqttClient } from "./mqtt";
-import { TOPICS } from "./topics";
+import { mqttClient } from './mqtt';
+import { TOPICS } from './topics';
 
 // Subscribe to topics
-const subscriptionTopics = [TOPICS.SUBSCRIBE.DENTIST_CREATE_APP];
+const subscriptionTopics = [
+  TOPICS.SUBSCRIBE.CREATE,
+  TOPICS.SUBSCRIBE.GET,
+  TOPICS.SUBSCRIBE.UPDATE,
+  TOPICS.SUBSCRIBE.DELETE,
+  TOPICS.SUBSCRIBE.QUERY,
+  TOPICS.SUBSCRIBE.CLINICS.QUERY_RESPONSE,
+];
 
 export const subscribeTopics = async () => {
   subscriptionTopics.map((topic: string) => {
@@ -12,8 +19,8 @@ export const subscribeTopics = async () => {
         return;
       } else {
         console.log(
-          "[MQTT]: Subscribed to topics:",
-          subscriptionTopics.join(", ")
+          '[MQTT]: Subscribed to topics:',
+          subscriptionTopics.join(', ')
         );
       }
     });

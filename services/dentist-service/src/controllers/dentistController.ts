@@ -1,43 +1,44 @@
-import { Request, Response, NextFunction } from 'express';
 import { Dentist } from '../models/dentistSchema';
-import { publishMessage } from '../mqtt/publish';
+import { mqttClient } from '../mqtt/mqtt';
+import { TOPICS } from '../mqtt/topics';
+import { Clinic } from '../models/clinicSchema';
 
-// Helper function to handle errors
-const handleError = (error: any, res: Response): void => {
-  if (error.code === 11000) {
-    const duplicateField = Object.keys(error.keyValue)[0];
-    res.status(409).json({
-      message: `Duplicate value for field '${duplicateField}': ${error.keyValue[duplicateField]}`,
-    });
-  } else {
-    res.status(500).json({
-      message: 'An unexpected error occurred.',
-      error: error.message,
-    });
-  }
+/**
+ * Helper function to publish error responses.
+ */
+const publishError = (topic: string, message: string, status: number): void => {
+  const errorResponse = { status, message };
+  mqttClient.publish(topic, JSON.stringify(errorResponse));
+  console.log(
+    `[INFO] Query response message: ${errorResponse.message} with status code: ${errorResponse.status}`
+  );
 };
 
-// Create a new dentist
-export const createDentist = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+/**
+ * Helper function to extract error messages from unknown types.
+ */
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+};
+
+/**
+ * Handles creating a new dentist.
+ */
+export const createDentist = async (payload: any): Promise<void> => {
   try {
-    const {
-      personnummer,
-      firstName,
-      lastName,
-      password,
-      email,
-      appointments,
-      clinics,
-    } = req.body;
+    const { personnummer, firstName, lastName, password, email, clinic } =
+      payload;
 
     // Validate required fields
     if (!personnummer || !firstName || !lastName || !password || !email) {
-      res.status(400).json({ message: 'Missing required field(s).' });
-      return;
+      return publishError(
+        TOPICS.PUBLISH.CREATE_RESPONSE,
+        'Missing required fields',
+        400
+      );
     }
 
     const newDentist = new Dentist({
@@ -46,145 +47,202 @@ export const createDentist = async (
       lastName,
       password,
       email,
-      appointments,
-      clinics,
-    });
+      clinic,
+    }).populate('clinic');
 
-    const savedDentist = await newDentist.save();
+    const savedDentist = await newDentist;
 
-    // Publish message to HiveMQ
-    const message = {
-      type: 'dentist',
-      dentistId: savedDentist._id,
-      personnummer,
-      firstName,
-      lastName,
-      email,
-      appointments,
-      clinics,
+    await savedDentist.save();
+
+    const response = {
+      status: 201,
+      message: 'New dentist registered',
+      dentist: savedDentist,
     };
-    publishMessage(process.env.DENTIST_TOPIC!, message);
 
-    res
-      .status(201)
-      .json({ message: 'New dentist registered', dentist: savedDentist });
+    mqttClient.publish(
+      TOPICS.PUBLISH.CREATE_RESPONSE,
+      JSON.stringify(response)
+    );
+    console.log('[INFO] Query response:', response);
   } catch (error) {
-    console.error('[ERROR] Could not create dentist: ', error);
-    handleError(error, res);
+    console.error('[ERROR] Could not create dentist:', getErrorMessage(error));
+    publishError(TOPICS.PUBLISH.CREATE_RESPONSE, getErrorMessage(error), 500);
   }
 };
 
-// Delete a dentist
-export const deleteDentist = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+/**
+ * Handles retrieving a dentist by ID.
+ */
+export const getDentist = async (payload: any): Promise<void> => {
   try {
-    const { dentistId } = req.body;
+    const { dentistId } = payload;
 
     if (!dentistId) {
-      res.status(400).json({ message: 'Missing required field: dentistId.' });
-      return;
+      return publishError(
+        TOPICS.PUBLISH.GET_RESPONSE,
+        'Missing required field: dentistId',
+        400
+      );
+    }
+
+    const dentist = await Dentist.findById(dentistId).populate('clinic');
+
+    if (!dentist) {
+      return publishError(
+        TOPICS.PUBLISH.GET_RESPONSE,
+        'Dentist not found',
+        404
+      );
+    }
+
+    const response = { status: 200, dentist };
+    mqttClient.publish(TOPICS.PUBLISH.GET_RESPONSE, JSON.stringify(response));
+    console.log('[INFO] Query response:', response);
+  } catch (error) {
+    console.error('[ERROR] Could not fetch dentist:', getErrorMessage(error));
+    publishError(TOPICS.PUBLISH.GET_RESPONSE, getErrorMessage(error), 500);
+  }
+};
+
+/**
+ * Handles updating a dentist.
+ */
+export const patchDentist = async (payload: any): Promise<void> => {
+  try {
+    const { dentistId, updates } = payload;
+
+    if (!dentistId || !updates) {
+      return publishError(
+        TOPICS.PUBLISH.UPDATE_RESPONSE,
+        'Missing required fields',
+        400
+      );
+    }
+
+    const updatedDentist = await Dentist.findByIdAndUpdate(dentistId, updates, {
+      new: true,
+    }).populate('clinic');
+
+    if (!updatedDentist) {
+      return publishError(
+        TOPICS.PUBLISH.UPDATE_RESPONSE,
+        'Dentist not found',
+        404
+      );
+    }
+
+    const response = {
+      status: 200,
+      message: 'Dentist updated',
+      dentist: updatedDentist,
+    };
+    mqttClient.publish(
+      TOPICS.PUBLISH.UPDATE_RESPONSE,
+      JSON.stringify(response)
+    );
+    console.log('[INFO] Query response:', response);
+  } catch (error) {
+    console.error('[ERROR] Could not update dentist:', getErrorMessage(error));
+    publishError(TOPICS.PUBLISH.UPDATE_RESPONSE, getErrorMessage(error), 500);
+  }
+};
+
+/**
+ * Handles deleting a dentist.
+ */
+export const deleteDentist = async (payload: any): Promise<void> => {
+  try {
+    const { dentistId } = payload;
+
+    if (!dentistId) {
+      return publishError(
+        TOPICS.PUBLISH.DELETE_RESPONSE,
+        'Missing required field: dentistId',
+        400
+      );
     }
 
     const deletedDentist = await Dentist.findByIdAndDelete(dentistId);
 
     if (!deletedDentist) {
-      res.status(404).json({ message: 'Dentist not found.' });
-      return;
+      return publishError(
+        TOPICS.PUBLISH.DELETE_RESPONSE,
+        'Dentist not found',
+        404
+      );
     }
 
-    res.status(200).json({ message: 'Dentist deleted', dentistId });
-  } catch (error) {
-    console.error('[ERROR] Could not delete dentist: ', error);
-    handleError(error, res);
-  }
-};
-
-// Get a dentist by ID
-export const getDentist = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { dentistId } = req.query;
-
-    if (!dentistId) {
-      res.status(400).json({ message: 'Missing required field: dentistId.' });
-      return;
-    }
-
-    const dentist = await Dentist.findById(dentistId).populate(
-      'appointments clinics'
+    const response = { status: 200, message: 'Dentist deleted', dentistId };
+    mqttClient.publish(
+      TOPICS.PUBLISH.DELETE_RESPONSE,
+      JSON.stringify(response)
     );
-
-    if (!dentist) {
-      res.status(404).json({ message: 'Dentist not found.' });
-      return;
-    }
-
-    res.status(200).json(dentist);
+    console.log('[INFO] Query response:', response);
   } catch (error) {
-    console.error('[ERROR] Could not fetch dentist: ', error);
-    handleError(error, res);
+    console.error('[ERROR] Could not delete dentist:', getErrorMessage(error));
+    publishError(TOPICS.PUBLISH.DELETE_RESPONSE, getErrorMessage(error), 500);
   }
 };
 
-// Update a dentist (Patch)
-export const patchDentist = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+/**
+ * Handles querying multiple dentists.
+ */
+export const queryDentists = async (payload: any): Promise<void> => {
   try {
-    const { dentistId, updates } = req.body;
+    const filters = payload.filters || {};
 
-    if (!dentistId || !updates) {
-      res.status(400).json({ message: 'Missing required field(s).' });
-      return;
-    }
-
-    const updatedDentist = await Dentist.findByIdAndUpdate(dentistId, updates, {
-      new: true,
-    }).populate('appointments clinics');
-
-    if (!updatedDentist) {
-      res.status(404).json({ message: 'Dentist not found.' });
-      return;
-    }
-
-    res
-      .status(200)
-      .json({ message: 'Dentist updated', dentist: updatedDentist });
-  } catch (error) {
-    console.error('[ERROR] Could not update dentist: ', error);
-    handleError(error, res);
-  }
-};
-
-// Query multiple dentists
-export const queryDentists = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const filters = req.body.filters || {};
-
-    const dentists = await Dentist.find(filters).populate(
-      'appointments clinics'
-    );
+    const dentists = await Dentist.find(filters);
 
     if (!dentists || dentists.length === 0) {
-      res.status(404).json({ message: 'No dentists found.' });
-      return;
+      return publishError(
+        TOPICS.PUBLISH.QUERY_RESPONSE,
+        'No dentists found',
+        404
+      );
     }
 
-    res.status(200).json(dentists);
+    const response = { status: 200, dentists };
+    mqttClient.publish(TOPICS.PUBLISH.QUERY_RESPONSE, JSON.stringify(response));
+
+    console.log(
+      '[INFO] Query response:',
+      response,
+      ' to topic:',
+      TOPICS.PUBLISH.QUERY_RESPONSE
+    );
   } catch (error) {
-    console.error('[ERROR] Could not query dentists: ', error);
-    handleError(error, res);
+    console.error('[ERROR] Could not query dentists:', getErrorMessage(error));
+    publishError(TOPICS.PUBLISH.QUERY_RESPONSE, getErrorMessage(error), 500);
+  }
+};
+
+export const queryClinics = async (payload: any): Promise<void> => {
+  try {
+    const filters = payload.filters || {};
+
+    const clinics = await Clinic.find();
+
+    if (!clinics || clinics.length === 0) {
+      return publishError(
+        TOPICS.PUBLISH.CLINICS.QUERY_RESPONSE,
+        'No clinics found',
+        404
+      );
+    }
+
+    const response = { status: 200, clinics };
+
+    mqttClient.publish(
+      TOPICS.PUBLISH.CLINICS.QUERY_RESPONSE,
+      JSON.stringify(response)
+    );
+  } catch (error) {
+    console.error('[ERROR] Could not query clinic:', getErrorMessage(error));
+    publishError(
+      TOPICS.PUBLISH.CLINICS.QUERY_RESPONSE,
+      getErrorMessage(error),
+      500
+    );
   }
 };
