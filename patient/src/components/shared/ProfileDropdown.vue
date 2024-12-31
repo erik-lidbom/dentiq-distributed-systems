@@ -9,12 +9,12 @@
         <div class="flex flex-row items-center space-x-2">
           <div class="hidden sm:flex flex-col text-right">
             <p class="text-dentiq-text-dark font-normal text-dentiq-body-small">
-              Nabil Al Sayed
+              {{ user.name }}
             </p>
             <p
               class="text-dentiq-muted-default font-normal text-dentiq-body-small"
             >
-              Patient
+              {{ user.email }}
             </p>
           </div>
           <img
@@ -31,13 +31,14 @@
       v-if="isOpen"
       class="absolute top-[6px] -right-24 min-[400px]:right-0 p-4 sm:w-72 w-[290px] bg-white shadow-md rounded-xl mt-16 z-50 overflow-hidden"
     >
-      <Button>My bookings</Button>
+      <Button @click="handleNavigateToMyBookings">My bookings</Button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
+import router from '@/router';
 
 interface Notification {
   id: number;
@@ -54,6 +55,17 @@ const dropdownWrapper = ref<HTMLElement | null>(null);
 // Toggle visibility of the dropdown
 const toggleDropdownVisibility = () => {
   isOpen.value = !isOpen.value;
+};
+
+// User data
+const user = ref({
+  name: 'John Doe',
+  email: 'dummy@email.com',
+});
+
+// Function to handle navigation to My Bookings
+const handleNavigateToMyBookings = () => {
+  router.push('/bookings');
 };
 
 // Function to handle clicks outside the dropdown

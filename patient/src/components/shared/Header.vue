@@ -6,7 +6,7 @@
       class="flex flex-row justify-between items-center w-full space-x-2 md:space-x-6"
     >
       <li>
-        <a href="/public" class="items-center space-x-2 flex min-w-full">
+        <a href="/" class="items-center space-x-2 flex min-w-full">
           <img src="/svgs/logo-dark.svg" alt="Logo" />
           <h1
             class="hidden sm:block text-dentiq-text-primary font-archivoBlack text-dentiq-h2"
