@@ -5,10 +5,10 @@ const BASE_URL = 'http://localhost:3000/api/booking';
  * @returns {Promise<Object[]>} - List of clinics
  */
 
-export async function postAppointment(body: any): Promise<any> {
+export async function bookAppointment(body: any): Promise<any> {
   try {
     // Post an appointment
-    const response = await fetch(BASE_URL, {
+    const response = await fetch(`${BASE_URL}/book`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,6 +25,26 @@ export async function postAppointment(body: any): Promise<any> {
     return data;
   } catch (error) {
     console.error('Error posting appointment:', error);
+    throw error;
+  }
+}
+
+export async function getAppointments(): Promise<any> {
+  try {
+    // Get all appointments
+    const response = await fetch(`${BASE_URL}/query`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching appointments: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Appointments fetched successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
     throw error;
   }
 }

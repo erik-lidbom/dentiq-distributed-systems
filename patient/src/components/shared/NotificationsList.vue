@@ -83,7 +83,7 @@ const isOpen = ref(false);
 const unseenNotifications = ref(0);
 
 // Function to add a notification
-const addNotification = (message: string) => {
+const addNotification = (message) => {
   notifications.value.push({
     id: Date.now(),
     message,
@@ -130,9 +130,10 @@ onMounted(async () => {
       const validatedTopic = validateTopic(topic);
       if (!validatedTopic) return;
 
-      const payload = message.toString();
+      const payload = JSON.parse(message.toString());
       console.log(`[MQTT]: Received message on topic ${topic}:`, payload);
-      addNotification(payload);
+      console.log(`[MQTT]: Received message on topic ${topic}:`, payload);
+      addNotification(payload.message);
     });
   } catch (error) {
     console.error('[MQTT]: Error during setup or subscription', error);

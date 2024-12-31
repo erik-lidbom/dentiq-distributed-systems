@@ -3,6 +3,15 @@ import dotenv from 'dotenv';
 import { subscribeTopics } from './subscribe';
 import { publishMessage } from './publish';
 import { getStatus, retrievePublishTopics } from './helpers';
+import { TOPICS } from './topics';
+import {
+  createDentist,
+  deleteDentist,
+  getDentist,
+  patchDentist,
+  queryClinics,
+  queryDentists,
+} from '../controllers/dentistController';
 dotenv.config();
 
 // Validate required environment variables
@@ -54,9 +63,9 @@ mqttClient.on('message', async (topic, message) => {
     const payload = Buffer.isBuffer(message)
       ? JSON.parse(message.toString())
       : message;
-    const { correlationId } = payload;
+    const correlationId = payload?.correlationId || 'unknown';
 
-    //Retrieve thhe response topic and status
+    //Retrieve the response topic and status
     const responseTopic: string = retrievePublishTopics(topic);
     const responseStatus: boolean = await getStatus(topic, payload);
 
@@ -67,6 +76,29 @@ mqttClient.on('message', async (topic, message) => {
       `[MQTT]: Response published to ${responseTopic}:`,
       responsePayload
     );
+
+    switch (topic) {
+      case TOPICS.SUBSCRIBE.CREATE:
+        await createDentist(payload);
+        break;
+      case TOPICS.SUBSCRIBE.GET:
+        await getDentist(payload);
+        break;
+      case TOPICS.SUBSCRIBE.UPDATE:
+        await patchDentist(payload);
+        break;
+      case TOPICS.SUBSCRIBE.DELETE:
+        await deleteDentist(payload);
+        break;
+      case TOPICS.SUBSCRIBE.QUERY:
+        await queryDentists(payload);
+        break;
+      case TOPICS.SUBSCRIBE.CLINICS.QUERY_RESPONSE:
+        await queryClinics(payload);
+        break;
+      default:
+        console.error('[MQTT]: Unknown topic:', topic);
+    }
   } catch (err) {
     console.error('[MQTT]: Error processing message:', err);
 
@@ -75,6 +107,14 @@ mqttClient.on('message', async (topic, message) => {
       status: false,
       error: 'Invalid message format',
     };
+
+    // Publish error response
+    const errorTopic = topic.replace('request', 'response');
+    publishMessage(errorTopic, errorResponse);
+    console.log(
+      `[MQTT]: Error response published to ${errorTopic}:`,
+      errorResponse
+    );
   }
 });
 

@@ -9,7 +9,7 @@
     :map-id="googleMapId"
     style="width: 100%"
     :center="center"
-    :zoom="15"
+    :zoom="13"
     :zoom-control="mapOptions.zoomControl"
     :map-type-control="mapOptions.mapTypeControl"
     :fullscreen-control="mapOptions.fullscreenControl"
@@ -17,7 +17,7 @@
   >
     <CustomMarker
       v-for="clinic in filteredClinics"
-      :key="clinic.id"
+      :key="clinic._id"
       :options="{
         position: { lng: clinic.lng, lat: clinic.lat },
         anchorPoint: 'BOTTOM_CENTER',
@@ -28,10 +28,10 @@
       <div
         class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]"
       >
-        <img src="/svgs/logo-dark.svg" width="30" height="30" />
+        <img src="/svgs/logo-dark.svg" width="30" height="30" alt="logo" />
       </div>
       <div
-        v-if="activeClinic && activeClinic.id === clinic.id && !modalIsOpen"
+        v-if="activeClinic && activeClinic._id === clinic._id && !modalIsOpen"
         class="absolute z-50"
         style="transform: translate(-50%, -100%)"
         @click.stop
@@ -41,7 +41,7 @@
     </CustomMarker>
 
     <!-- Modal -->
-    <Modal v-if="modalIsOpen" @close="modalIsOpen = false">
+    <Modal v-if="modalIsOpen" @close="closeModal">
       <ClinicScheduleModal :clinic="activeClinic" />
     </Modal>
 
@@ -55,14 +55,22 @@
   </GoogleMap>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { GoogleMap, CustomMarker } from 'vue3-google-map';
 import CustomMapCard from './ClinicMapCard.vue';
 import ClinicScheduleModal from './ClinicScheduleModal.vue';
 import Modal from '../shared/Modal.vue';
 import Filter from './Filter.vue';
-import { fetchClinics } from '@/services/clinicService';
+import {
+  useAppointmentStore,
+  useClinicStore,
+  useDentistStore,
+} from '@/stores/index.ts';
+import { fetchClinics, fetchAppointments, fetchDentists } from '@/api/index.ts';
+import { aggregateClinicData } from '@/utils/dataAggregator.ts';
+import { TOPICS } from '@/mqtt/topics.ts';
+import { client, mqttClient } from '@/mqtt/mqtt.ts';
 
 // Google Maps Center
 const center = { lat: 57.7089, lng: 11.9746 };
@@ -89,6 +97,88 @@ const activeClinic = ref(null);
 const selectedServices = ref([]);
 const modalIsOpen = ref(false);
 
+// Fetch clinics and appointments on mount
+const clinicStore = useClinicStore();
+const dentistStore = useDentistStore();
+const appointmentStore = useAppointmentStore();
+
+// Computed appointments
+const appointments = computed(() => appointmentStore.appointments);
+
+// Track if data is being fetched
+let isFetching = false;
+
+// Watch for changes in appointments
+watch(
+  () => appointments.value,
+  async (newAppointments, oldAppointments) => {
+    console.log('Appointments changed, refetching data');
+
+    // Avoid unnecessary refetches
+    if (JSON.stringify(newAppointments) === JSON.stringify(oldAppointments)) {
+      console.log('No significant changes in appointments, skipping refetch.');
+      return;
+    }
+
+    try {
+      await fetchAndAggregateData();
+      activeClinic.value = null;
+    } catch (error) {
+      console.error('Error in watcher during refetch:', error);
+    } finally {
+      isFetching = false;
+    }
+  },
+  { deep: true } // Watch for nested changes in appointments
+);
+
+// Function to fetch and aggregate data
+const fetchAndAggregateData = async () => {
+  if (isFetching) return;
+  isFetching = true;
+
+  try {
+    const appointmentsData = await fetchAppointments();
+    const clinicsData = await fetchClinics();
+    const dentistsData = await fetchDentists();
+
+    // Set data in stores
+    clinicStore.setClinics(clinicsData.data.clinics);
+    dentistStore.setDentists(dentistsData.data.data);
+    appointmentStore.setAppointments(appointmentsData.data.data);
+
+    // Aggregate data
+    clinics.value = aggregateClinicData(
+      clinicStore.clinics,
+      dentistStore.dentists,
+      appointmentStore.appointments
+    );
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  } finally {
+    isFetching = false;
+  }
+};
+
+onMounted(async () => {
+  // Initial data fetch
+  await fetchAndAggregateData();
+
+  // Setup MQTT client
+  await mqttClient.setup();
+
+  // Listen for booking and cancellation notifications
+  client.on('message', async (topic, message) => {
+    if (
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
+    ) {
+      console.log(`[MQTT]: Refetching data due to ${topic}`);
+      await fetchAndAggregateData();
+    }
+  });
+});
+
 // Function to update the mobile status
 function updateIsMobile() {
   isMobile.value = window.innerWidth < 640;
@@ -101,15 +191,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateIsMobile);
-});
-
-onMounted(async () => {
-  try {
-    clinics.value = await fetchClinics();
-    console.log('Clinics:', clinics.value);
-  } catch (error) {
-    console.error(error);
-  }
 });
 
 // Functions to toggle and close the filter
@@ -149,6 +230,12 @@ const showInfoWindow = (clinic) => {
 const openCard = (clinic) => {
   modalIsOpen.value = false;
   showInfoWindow(clinic);
+};
+
+const closeModal = () => {
+  modalIsOpen.value = false;
+  // Clear active clinic to reset its state
+  activeClinic.value = null;
 };
 
 const openModal = () => {

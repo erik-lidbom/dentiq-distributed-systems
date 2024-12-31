@@ -1,9 +1,6 @@
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
-import {
-  retrievePublishTopic,
-  retrieveSubscribedTopic,
-} from './helpers/helpers';
+import { retrievePublishTopic, retrieveSubscribedTopic } from './helpers';
 
 export type MqttResponse = {
   status: string;
@@ -14,9 +11,10 @@ dotenv.config();
 
 const mqttConnOptions: IClientOptions = {
   host: process.env.MQTT_HOST,
-  port: parseInt(process.env.MQTT_PORT || '8883', 10),
+  port: parseInt(process.env.MQTT_PORT || '8884', 10),
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
+  protocol: 'mqtts', // Secure MQTT connection
 };
 
 const mqttClient: MqttClient = mqtt.connect(mqttConnOptions);
@@ -34,20 +32,27 @@ mqttClient.on('error', (err) => {
  * to listen for responses.
  *
  * @param {string} service - The service the request is coming from. This is used to know what topic to publish to.
+ * @param path
  * @param {any} data - The request data sent from client
  * @param {number} duration - The time in milliseconds that the mqtt will listen to the topic
  */
 export const publishAndSubscribe = (
   service: string,
+  path: string | undefined,
   data: any,
   duration: number
 ) => {
   return new Promise((resolve, reject) => {
     // Convert the data to a string
-    const payload = typeof data === 'string' ? data : JSON.stringify(data);
+    const payload =
+      typeof data === 'string' ? data : JSON.stringify(data) || '*';
 
-    const publishToTopic = retrievePublishTopic(service);
-    const subscribeToTopic = retrieveSubscribedTopic(publishToTopic);
+    const publishToTopic = retrievePublishTopic(service, path);
+    const subscribeToTopic = retrieveSubscribedTopic(service, path);
+
+    console.log('Publishing to topic:', publishToTopic);
+
+    console.log('Subscribing to topic:', subscribeToTopic);
 
     // Publish the message
     mqttClient.publish(publishToTopic, payload, { qos: 1 }, (err) => {
@@ -71,6 +76,7 @@ export const publishAndSubscribe = (
       );
     });
 
+    console.log('Waiting for response...');
     // Message handler to process and return the response from the subsribed topic
     const onMessage = (incomingTopic: string, message: Buffer) => {
       const receivedMessage = message.toString();

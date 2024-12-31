@@ -19,6 +19,7 @@ app.use(morgan('dev'));
 
 // Initialize MQTT Connection
 mqttClient;
+
 // Initialize rate limiters
 initRateLimiters();
 
