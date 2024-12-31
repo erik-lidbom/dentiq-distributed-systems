@@ -178,7 +178,7 @@ export const bookAppointment = async (
       patientId: bookedAppointment.patientId,
       date: bookedAppointment.date,
       time: bookedAppointment.start_time,
-      message: `Appointment booked for ${date} at ${time}`,
+      message: `Booked for ${date} at ${time}`,
     });
   } catch (error) {
     console.error('Error booking appointment:', error);
