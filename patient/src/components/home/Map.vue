@@ -28,7 +28,7 @@
       <div
         class="flex justify-center items-center border-dentiq-background-secondary border-4 bg-dentiq-muted-lightest rounded-full shadow-xl w-[60px] h-[60px]"
       >
-        <img src="/svgs/logo-dark.svg" width="30" height="30" />
+        <img src="/svgs/logo-dark.svg" width="30" height="30" alt="logo" />
       </div>
       <div
         v-if="activeClinic && activeClinic._id === clinic._id && !modalIsOpen"
@@ -41,7 +41,7 @@
     </CustomMarker>
 
     <!-- Modal -->
-    <Modal v-if="modalIsOpen" @close="modalIsOpen = false">
+    <Modal v-if="modalIsOpen" @close="closeModal">
       <ClinicScheduleModal :clinic="activeClinic" />
     </Modal>
 
@@ -55,7 +55,7 @@
   </GoogleMap>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { GoogleMap, CustomMarker } from 'vue3-google-map';
 import CustomMapCard from './ClinicMapCard.vue';
@@ -125,6 +125,8 @@ watch(
       activeClinic.value = null;
     } catch (error) {
       console.error('Error in watcher during refetch:', error);
+    } finally {
+      isFetching = false;
     }
   },
   { deep: true } // Watch for nested changes in appointments
@@ -167,7 +169,6 @@ onMounted(async () => {
 
   // Listen for booking and cancellation notifications
   client.on('message', async (topic, message) => {
-    const payload = JSON.parse(message.toString());
     if (
       topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
       topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
@@ -229,6 +230,12 @@ const showInfoWindow = (clinic) => {
 const openCard = (clinic) => {
   modalIsOpen.value = false;
   showInfoWindow(clinic);
+};
+
+const closeModal = () => {
+  modalIsOpen.value = false;
+  // Clear active clinic to reset its state
+  activeClinic.value = null;
 };
 
 const openModal = () => {
