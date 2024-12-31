@@ -1,363 +1,385 @@
 import {
-  createAppointment,
   bookAppointment,
+  createAppointment,
   deleteAppointment,
   cancelAppointment,
   getAppointment,
-  getAppointments,
 } from '../controllers/appointmentController';
+import { Buffer } from 'buffer';
 import { Appointment } from '../models/appointmentModel';
-import { publishMessage } from '../mqtt/publish';
-import mongoose from 'mongoose';
 
-jest.mock('../models/appointmentModel');
-jest.mock('../mqtt/publish');
-
-const mockPublishMessage = jest.fn();
-(publishMessage as jest.Mock).mockImplementation(mockPublishMessage);
+jest.mock('../models/appointmentModel.ts');
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.restoreAllMocks();
 });
 
-// Define Appointment Interface for Mock
-interface AppointmentDoc extends mongoose.Document {
-  patientId: string | null;
-  dentistId: string;
-  date: string;
-  start_time: string;
-  reason_for_visit?: string;
-  status: 'unbooked' | 'booked' | 'cancelled';
-}
+afterEach(() => {
+  jest.clearAllMocks();
+  jest.restoreAllMocks();
+});
 
-// Mock Data
-const mockAppointment: Partial<AppointmentDoc> = {
-  _id: new mongoose.Types.ObjectId('123456789012345678901234'),
-  patientId: null,
-  dentistId: '54321',
-  date: '2024-12-25',
-  start_time: '10:00',
+// ## Mock variables for create appointment
+const mockInvalidMessageCreateAppointment = Buffer.from(
+  JSON.stringify({
+    dentistId: '675dd76c3832989362ff6b2d',
+    date: '2024-12-14',
+  })
+);
+
+const mockMessageCreateAppointment = Buffer.from(
+  JSON.stringify({
+    dentistId: '675dd76c3832989362ff6b2d',
+    date: '2024-12-14',
+    start_times: ['08:00', '09:00', '13:00'],
+  })
+);
+
+const mockSavedAppointmentCreateAppointment = {
+  _id: '675dd76c3832989362cf6b2c',
+  dentistId: '675dd76c3832989362ff6b2d',
+  date: '2024-12-14',
+  start_times: ['08:00', '09:00', '13:00'],
   status: 'unbooked',
-  reason_for_visit: '',
+};
+
+// ## Mock variables for booking
+const mockInvalidMessageBooking = Buffer.from(
+  JSON.stringify({
+    patientId: '675dd76c3832989362ff6b2a',
+  })
+);
+
+const mockMessageBooking = Buffer.from(
+  JSON.stringify({
+    patientId: '675dd76c3832989362ff6b5d',
+    dentistId: '675dd76c3832989362ff6b2d',
+    date: '2024-12-14',
+    time: '08:00',
+  })
+);
+
+const mockMessageBookingDoesntExist = Buffer.from(
+  JSON.stringify({
+    _id: '675dd76c3841989362ff6b5d',
+    patientId: '675dd76c3832989362ff6b5d',
+    dentistId: '675dd76c3832989362ff6b2d',
+    date: '2024-12-14',
+    time: '08:00',
+  })
+);
+const mockSavedAppointmentBooking = {
+  _id: '675dd76c3832989362cf6b2c',
+  dentistId: '675dd76c3832989362ff6b2d',
+  patientId: '675dd76c3832989362ff6b5d',
+  date: '2024-12-14',
+  start_time: '08:00',
+  status: 'booked',
+  save: jest.fn().mockResolvedValue(this),
+  deleteOne: jest.fn().mockResolvedValue(this),
+};
+const mockUnbookedAppointmentBooking = {
+  _id: '675dd76c3832989362cf6b2c',
+  dentistId: '675dd76c3832989362ff6b2d',
+  patientId: null,
+  date: '2024-12-14',
+  start_time: '08:00',
+  status: 'unbooked',
   save: jest.fn().mockResolvedValue({
-    _id: new mongoose.Types.ObjectId('123456789012345678901234'),
-    patientId: '67890',
-    dentistId: '54321',
-    date: '2024-12-25',
-    start_time: '10:00',
+    _id: '675dd76c3832989362cf6b2c',
+    dentistId: '675dd76c3832989362ff6b2d',
+    patientId: '675dd76c3832989362ff6b5d',
+    date: '2024-12-14',
+    start_time: '08:00',
     status: 'booked',
-    reason_for_visit: 'General checkup',
   }),
-  deleteOne: jest
-    .fn()
-    .mockResolvedValue({ acknowledged: true, deletedCount: 1 }),
 };
+const mockMessageDeleteAppointment = Buffer.from(
+  JSON.stringify({
+    appointmentId: '675dd76c3832989362ff6b5d',
+  })
+);
+const mockMessageCancelAppointment = Buffer.from(
+  JSON.stringify({
+    appointmentId: '675dd76c3832989362ff6b5d',
+  })
+);
+const mockMessageGetAppointment = Buffer.from(
+  JSON.stringify({
+    appointmentId: '675dd76c3832989362ff6b5d',
+  })
+);
 
-const mockDeleteResult = {
-  acknowledged: true,
-  deletedCount: 1,
-};
-
-// Payloads
-const mockPayload = {
-  dentistId: '54321',
-  date: '2024-12-25',
-  start_times: ['10:00', '11:00'],
-};
-
-const mockBookPayload = {
-  dentistId: '54321',
-  date: '2024-12-25',
-  time: '10:00',
-  patientId: '67890',
-  reason_for_visit: 'General checkup',
-};
-
-// Tests
-describe('Appointment Controller', () => {
-  describe('createAppointment', () => {
-    it('should publish 400 if required fields are missing', async () => {
-      const invalidPayload = Buffer.from(
-        JSON.stringify({ dentistId: '54321' })
+describe('APPOINTMENT-SERVICE CONTROLLER', () => {
+  const topic = 'test/topic';
+  describe('Appointment-Service: Create Appointment', () => {
+    it('should return status 400 if fields are missing', async () => {
+      const response = await createAppointment(
+        topic,
+        mockInvalidMessageCreateAppointment
       );
-      await createAppointment('test/topic', invalidPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 400,
-        message: 'Missing required field(s).',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentCreated',
-          error: true,
-        },
+      expect(response.status).toBe(400);
+      expect(response.message).toMatch('Missing required field(s).');
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentCreated',
+        error: true,
       });
     });
 
-    it('should create appointments and publish success', async () => {
-      jest.spyOn(Appointment, 'insertMany').mockResolvedValue([
-        { ...mockAppointment, start_time: '10:00' },
-        { ...mockAppointment, start_time: '11:00' },
-      ]);
+    it('should return status 201 if the appointment is successfully created', async () => {
+      jest
+        .spyOn(Appointment.prototype, 'save')
+        .mockResolvedValue(mockSavedAppointmentCreateAppointment);
+      const response = await createAppointment(
+        topic,
+        mockMessageCreateAppointment
+      );
 
-      const validPayload = Buffer.from(JSON.stringify(mockPayload));
-      await createAppointment('test/topic', validPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 201,
-        message: 'Successfully created 2 appointment(s).',
-        notificationPayload: {
-          dentistId: '54321',
-          senderService: 'AppointmentService',
-          message: '10:00,11:00',
-          typeOfNotification: 'AppointmentCreated',
-        },
+      expect(response.status).toBe(201);
+      expect(response.message).toMatch(
+        `Successfully created ${mockSavedAppointmentCreateAppointment.start_times.length} appointment(s).`
+      );
+      expect(response.notificationPayload).toEqual({
+        dentistId: mockSavedAppointmentCreateAppointment.dentistId,
+        senderService: 'AppointmentService',
+        message: `${mockSavedAppointmentCreateAppointment.start_times}`,
+        typeOfNotification: 'AppointmentCreated',
       });
     });
   });
 
-  describe('bookAppointment', () => {
-    it('should publish 400 if required fields are missing', async () => {
-      const invalidPayload = Buffer.from(
-        JSON.stringify({ dentistId: '54321', date: '2024-12-25' })
-      );
-      await bookAppointment('test/topic', invalidPayload);
+  describe('Appointment-Service: Book Appointment', () => {
+    const topic = 'test/topic';
+    it('should return status 400 if required fields are missing', async () => {
+      const response = await bookAppointment(topic, mockInvalidMessageBooking);
 
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 400,
-        message: 'Missing required field(s).',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentBooked',
-          error: true,
-        },
+      expect(response.status).toBe(400);
+      expect(response.message).toMatch('Missing required field(s).');
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentBooked',
+        error: true,
       });
     });
 
-    it('should publish 404 if appointment not found', async () => {
-      jest.spyOn(Appointment, 'findOne').mockResolvedValue(null);
-
-      const validPayload = Buffer.from(JSON.stringify(mockBookPayload));
-      await bookAppointment('test/topic', validPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 404,
-        message: 'Appointment not available for booking.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentBooked',
-          error: true,
-        },
-      });
-    });
-
-    it('should book appointment and publish success', async () => {
-      jest.spyOn(Appointment, 'findOne').mockResolvedValue(mockAppointment);
-
-      const validPayload = Buffer.from(JSON.stringify(mockBookPayload));
-      await bookAppointment('test/topic', validPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 200,
-        message: 'Appointment successfully booked for 2024-12-25 at 10:00.',
-        notificationPayload: {
-          dentistId: '54321',
-          patientId: '67890',
-          senderService: 'AppointmentService',
-          message: '10:00',
-          typeOfNotification: 'AppointmentBooked',
-        },
-      });
-    });
-  });
-
-  describe('deleteAppointment', () => {
-    it('should publish 400 if appointmentId is missing', async () => {
-      const invalidPayload = Buffer.from(JSON.stringify({}));
-
-      await deleteAppointment('test/topic', invalidPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 400,
-        message: 'Missing required field.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentDeleted',
-          error: true,
-        },
-      });
-    });
-
-    it('should publish 404 if appointment is not found', async () => {
-      jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
-
-      const validPayload = Buffer.from(
-        JSON.stringify({ appointmentId: 'invalidId' })
-      );
-      await deleteAppointment('test/topic', validPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 404,
-        message: 'Appointment with ID invalidId not found.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentDeleted',
-          error: true,
-        },
-      });
-    });
-
-    it('should delete the appointment and publish success', async () => {
-      jest.spyOn(Appointment, 'findById').mockResolvedValue(mockAppointment);
-      jest.spyOn(Appointment, 'deleteOne').mockResolvedValue(mockDeleteResult);
-
-      const validPayload = Buffer.from(
-        JSON.stringify({ appointmentId: mockAppointment._id!.toString() })
-      );
-      await deleteAppointment('test/topic', validPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 200,
-        message: `Appointment with ID ${mockAppointment._id} successfully deleted.`,
-        notificationPayload: {
-          dentistId: '54321',
-          patientId: null,
-          senderService: 'AppointmentService',
-          message: '10:00',
-          typeOfNotification: 'AppointmentDeleted',
-        },
-      });
-    });
-  });
-
-  describe('getAppointments', () => {
-    it('should fetch all appointments and publish success', async () => {
-      jest.spyOn(Appointment, 'find').mockResolvedValue([mockAppointment]);
-
-      await getAppointments('test/topic');
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 200,
-        message: 'Successfully fetched 1 appointments.',
-        data: [mockAppointment],
-      });
-    });
-
-    it('should publish 404 if no appointments are found', async () => {
-      jest.spyOn(Appointment, 'find').mockResolvedValue([]);
-
-      await getAppointments('test/topic');
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 404,
-        message: 'No appointments found.',
-      });
-    });
-  });
-
-  describe('cancelAppointment', () => {
-    it('should publish 400 if required fields are missing', async () => {
-      const invalidPayload = Buffer.from(JSON.stringify({}));
-      await cancelAppointment('test/topic', invalidPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 400,
-        message: 'Missing required field.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentCancelled',
-          error: true,
-        },
-      });
-    });
-
-    it('should publish 404 if appointment not found', async () => {
-      jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
-
-      const validPayload = Buffer.from(
-        JSON.stringify({ appointmentId: 'invalidId' })
-      );
-      await cancelAppointment('test/topic', validPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 404,
-        message: 'Appointment with ID invalidId not found.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentCancelled',
-          error: true,
-        },
-      });
-    });
-
-    it('should cancel a booked appointment and publish success', async () => {
+    it('should return status 400 if the appointment is already booked', async () => {
       jest
         .spyOn(Appointment, 'findById')
-        .mockResolvedValue({ ...mockAppointment, status: 'booked' });
+        .mockResolvedValue(mockSavedAppointmentBooking);
 
-      const validPayload = Buffer.from(
-        JSON.stringify({ appointmentId: mockAppointment._id.toString() })
+      const response = await bookAppointment(topic, mockMessageBooking);
+
+      expect(response.status).toBe(400);
+      expect(response.message).toMatch(
+        'Appointment not available for booking.'
       );
-      await cancelAppointment('test/topic', validPayload);
-
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 200,
-        message: `Appointment with ID ${mockAppointment._id} successfully cancelled.`,
-        notificationPayload: {
-          dentistId: '54321',
-          patientId: null,
-          senderService: 'AppointmentService',
-          message: '10:00',
-          typeOfNotification: 'AppointmentCancelled',
-        },
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentBooked',
+        error: true,
       });
     });
   });
 
-  describe('getAppointment', () => {
-    it('should publish 400 if appointmentId is missing', async () => {
-      const invalidPayload = Buffer.from(JSON.stringify({}));
-      await getAppointment('test/topic', invalidPayload);
+  describe('Appointment-Service: Delete Appointment', () => {
+    it('should return status 400 if required fields are missing', async () => {
+      const response = await deleteAppointment(
+        topic,
+        mockInvalidMessageBooking
+      );
 
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 400,
-        message: 'Missing required field: appointmentId.',
-        notificationPayload: {
-          typeOfNotification: 'GetAppointment',
-          error: true,
-        },
+      expect(response.status).toBe(400);
+      expect(response.message).toMatch('Missing required field.');
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentDeleted',
+        error: true,
       });
     });
 
-    it('should publish 404 if appointment not found', async () => {
+    it('should return status 404 if appointment is not found', async () => {
       jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
+      const appointmentId = JSON.parse(
+        mockMessageDeleteAppointment.toString()
+      ).appointmentId;
 
-      const validPayload = Buffer.from(
-        JSON.stringify({ appointmentId: 'invalidId' })
+      const response = await deleteAppointment(
+        topic,
+        mockMessageDeleteAppointment
       );
-      await getAppointment('test/topic', validPayload);
 
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 404,
-        message: 'Appointment with ID invalidId not found.',
-        notificationPayload: {
-          typeOfNotification: 'GetAppointment',
-          error: true,
-        },
+      expect(response.status).toBe(404);
+      expect(response.message).toMatch(
+        `Appointment with ID ${appointmentId} not found.`
+      );
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentDeleted',
+        error: true,
       });
     });
 
-    it('should fetch an appointment and publish success', async () => {
-      jest.spyOn(Appointment, 'findById').mockResolvedValue(mockAppointment);
+    it('should return status 200 if appointment is successfully deleted', async () => {
+      jest
+        .spyOn(Appointment, 'findById')
+        .mockResolvedValue(mockSavedAppointmentBooking);
+      jest
+        .spyOn(Appointment.prototype, 'deleteOne')
+        .mockResolvedValue(mockSavedAppointmentBooking);
 
-      const validPayload = Buffer.from(
-        JSON.stringify({ appointmentId: mockAppointment._id.toString() })
+      const response = await deleteAppointment(
+        topic,
+        mockMessageDeleteAppointment
       );
-      await getAppointment('test/topic', validPayload);
 
-      expect(mockPublishMessage).toHaveBeenCalledWith('test/topic', {
-        status: 200,
-        message: `Successfully fetched appointment with ID: ${mockAppointment._id}`,
-        data: mockAppointment,
-        notificationPayload: {
-          dentistId: '54321',
+      expect(response.status).toBe(200);
+      expect(response.message).toMatch(
+        `Appointment with ID ${mockSavedAppointmentBooking._id} successfully deleted.`
+      );
+      expect(response.notificationPayload).toEqual({
+        dentistId: mockSavedAppointmentBooking.dentistId,
+        patientId: mockSavedAppointmentBooking.patientId,
+        message: `${mockSavedAppointmentBooking.start_time}`,
+        senderService: 'AppointmentService',
+        typeOfNotification: 'AppointmentDeleted',
+      });
+    });
+
+    it('should return status 500 if there is an internal error', async () => {
+      jest
+        .spyOn(Appointment, 'findById')
+        .mockRejectedValue(mockSavedAppointmentBooking);
+
+      const response = await deleteAppointment(
+        topic,
+        mockMessageDeleteAppointment
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.message).toMatch(
+        'Internal server error, please try again later.'
+      );
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentDeleted',
+        error: true,
+      });
+    });
+  });
+
+  describe('Appointment-Service: Cancel Appointment', () => {
+    it('should return stats 400 if required fields are missing', async () => {
+      const mockData = Buffer.from(
+        JSON.stringify({
           patientId: null,
-          senderService: 'AppointmentService',
-          message: '10:00',
-          typeOfNotification: 'GetAppointment',
-        },
+        })
+      );
+
+      const response = await cancelAppointment(topic, mockData);
+
+      expect(response.status).toBe(400);
+      expect(response.message).toMatch('Missing required field.');
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentCancelled',
+        error: true,
+      });
+    });
+
+    it('should return status 404 if appointment could not be found', async () => {
+      jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
+      const appointmentId = JSON.parse(
+        mockMessageCancelAppointment.toString()
+      ).appointmentId;
+
+      const response = await cancelAppointment(
+        topic,
+        mockMessageCancelAppointment
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.message).toMatch(
+        `Appointment with ID ${appointmentId} not found.`
+      );
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentCancelled',
+        error: true,
+      });
+    });
+
+    it('should return status 500 if there is an internal error', async () => {
+      jest
+        .spyOn(Appointment, 'findById')
+        .mockRejectedValue(mockSavedAppointmentBooking);
+
+      const response = await cancelAppointment(
+        topic,
+        mockMessageCancelAppointment
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.message).toMatch(
+        'Internal server error, please try again later.'
+      );
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'AppointmentCancelled',
+        error: true,
+      });
+    });
+  });
+
+  describe('Appointment-Service: Get Appointment', () => {
+    it('should return status 400 if required fields are missing', async () => {
+      const response = await getAppointment(topic, mockInvalidMessageBooking);
+
+      expect(response.status).toBe(400);
+      expect(response.message).toMatch('Missing required field: appointmentId');
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'GetAppointment',
+        error: true,
+      });
+    });
+
+    it('should return status 404 if appointment could not be found', async () => {
+      jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
+      const appointmentId = JSON.parse(
+        mockMessageGetAppointment.toString()
+      ).appointmentId;
+
+      const response = await getAppointment(topic, mockMessageGetAppointment);
+
+      expect(response.status).toBe(404);
+      expect(response.message).toMatch(
+        `Appointment with ID ${appointmentId} not found.`
+      );
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'GetAppointment',
+        error: true,
+      });
+    });
+
+    it('should return status 200 if it can get the appointment', async () => {
+      jest
+        .spyOn(Appointment, 'findById')
+        .mockResolvedValue(mockSavedAppointmentBooking);
+
+      const response = await getAppointment(topic, mockMessageGetAppointment);
+
+      expect(response.status).toBe(200);
+      expect(response.message).toMatch(
+        `Successfully fetched appointment with ID: ${mockSavedAppointmentBooking._id}`
+      );
+    });
+
+    it('should return status 500 if there is an internal error', async () => {
+      jest
+        .spyOn(Appointment, 'findById')
+        .mockRejectedValue(mockSavedAppointmentBooking);
+
+      const response = await getAppointment(topic, mockMessageGetAppointment);
+
+      expect(response.status).toBe(500);
+      expect(response.message).toBe(
+        'Internal server error, please try again later.'
+      );
+      expect(response.notificationPayload).toEqual({
+        typeOfNotification: 'GetAppointment',
+        error: true,
       });
     });
   });

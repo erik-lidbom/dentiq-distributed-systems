@@ -34,7 +34,7 @@ const publishResponse = (topic: string, payload: ResponsePayload): void => {
 export const createAppointment = async (
   topic: string,
   message: Buffer
-): Promise<void> => {
+): Promise<ResponsePayload> => {
   try {
     const payload: {
       dentistId: string;
@@ -53,7 +53,7 @@ export const createAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     const newAppointments = start_times.map((time) => ({
@@ -77,6 +77,7 @@ export const createAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    return resPayload;
   } catch (error) {
     console.error('Error creating appointment:', error);
     const resPayload: ResponsePayload = {
@@ -88,6 +89,7 @@ export const createAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
+    return resPayload;
   }
 };
 
@@ -97,7 +99,7 @@ export const createAppointment = async (
 export const bookAppointment = async (
   topic: string,
   message: Buffer
-): Promise<void> => {
+): Promise<ResponsePayload> => {
   try {
     const payload: {
       patientId: string;
@@ -123,7 +125,7 @@ export const bookAppointment = async (
         topic: 'Failed Booking',
         message: 'Failed Booking. Try Again!',
       });
-      return;
+      return resPayload;
     }
 
     // Find the appointment by dentistId, date, and time
@@ -136,7 +138,7 @@ export const bookAppointment = async (
 
     if (!appointment) {
       const resPayload: ResponsePayload = {
-        status: 404,
+        status: 400,
         message: 'Appointment not available for booking.',
         notificationPayload: {
           typeOfNotification: 'AppointmentBooked',
@@ -148,7 +150,7 @@ export const bookAppointment = async (
         topic: 'Failed Booking',
         message: 'Failed Booking. Try Again!',
       });
-      return;
+      return resPayload;
     }
 
     // Update the appointment with patient details and reason for visit
@@ -180,6 +182,7 @@ export const bookAppointment = async (
       time: bookedAppointment.start_time,
       message: `Booked for ${date} at ${time}`,
     });
+    return resPayload;
   } catch (error) {
     console.error('Error booking appointment:', error);
     const resPayload: ResponsePayload = {
@@ -195,6 +198,7 @@ export const bookAppointment = async (
       topic: 'Failed Booking',
       message: 'Failed Booking. Try Again!',
     });
+    return resPayload;
   }
 };
 
@@ -204,7 +208,7 @@ export const bookAppointment = async (
 export const deleteAppointment = async (
   topic: string,
   message: Buffer
-): Promise<void> => {
+): Promise<ResponsePayload> => {
   try {
     const payload: {
       appointmentId: string;
@@ -221,7 +225,7 @@ export const deleteAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     const appointment = await Appointment.findById(appointmentId);
@@ -236,7 +240,7 @@ export const deleteAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     await Appointment.deleteOne({ _id: appointment._id });
@@ -254,6 +258,7 @@ export const deleteAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    return resPayload;
   } catch (error) {
     console.error('Error deleting appointment:', error);
     const resPayload: ResponsePayload = {
@@ -265,6 +270,7 @@ export const deleteAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
+    return resPayload;
   }
 };
 
@@ -274,7 +280,7 @@ export const deleteAppointment = async (
 export const getAppointment = async (
   topic: string,
   message: Buffer
-): Promise<void> => {
+): Promise<ResponsePayload> => {
   try {
     const payload: {
       appointmentId: string;
@@ -291,7 +297,7 @@ export const getAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     const appointment = await Appointment.findById(appointmentId);
@@ -306,7 +312,7 @@ export const getAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     const resPayload: ResponsePayload = {
@@ -323,6 +329,7 @@ export const getAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    return resPayload;
   } catch (error) {
     console.error('Error fetching appointment:', error);
     const resPayload: ResponsePayload = {
@@ -334,13 +341,16 @@ export const getAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
+    return resPayload;
   }
 };
 
 /**
  * Fetch all appointments
  */
-export const getAppointments = async (topic: string): Promise<void> => {
+export const getAppointments = async (
+  topic: string
+): Promise<ResponsePayload> => {
   try {
     const appointments = await Appointment.find();
 
@@ -356,6 +366,7 @@ export const getAppointments = async (topic: string): Promise<void> => {
     }
 
     publishResponse(topic, resPayload);
+    return resPayload;
   } catch (error) {
     console.error('Error fetching appointments:', error);
     const resPayload: ResponsePayload = {
@@ -363,6 +374,7 @@ export const getAppointments = async (topic: string): Promise<void> => {
       message: 'Internal server error, please try again later.',
     };
     publishResponse(topic, resPayload);
+    return resPayload;
   }
 };
 
@@ -373,7 +385,7 @@ export const getAppointments = async (topic: string): Promise<void> => {
 export const cancelAppointment = async (
   topic: string,
   message: Buffer
-): Promise<void> => {
+): Promise<ResponsePayload> => {
   try {
     const payload: {
       appointmentId: string;
@@ -390,7 +402,7 @@ export const cancelAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     const appointment = await Appointment.findById(appointmentId);
@@ -405,7 +417,7 @@ export const cancelAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     if (appointment.status !== 'booked') {
@@ -418,7 +430,7 @@ export const cancelAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      return;
+      return resPayload;
     }
 
     appointment.status = 'unbooked';
@@ -439,6 +451,7 @@ export const cancelAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    return resPayload;
   } catch (error) {
     console.error('Error cancelling appointment:', error);
     const resPayload: ResponsePayload = {
@@ -450,5 +463,6 @@ export const cancelAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
+    return resPayload;
   }
 };
