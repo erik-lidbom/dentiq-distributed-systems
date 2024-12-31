@@ -55,7 +55,7 @@ export const publishAndSubscribe = (
     console.log('Subscribing to topic:', subscribeToTopic);
 
     // Publish the message
-    mqttClient.publish(publishToTopic, data, { qos: 1 }, (err) => {
+    mqttClient.publish(publishToTopic, payload, { qos: 1 }, (err) => {
       if (err) {
         console.error(`Failed to publish to ${publishToTopic}:`, err);
         reject(`Failed to publish to ${publishToTopic}`);
