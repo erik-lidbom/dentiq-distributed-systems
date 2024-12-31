@@ -1,8 +1,3 @@
-<script setup lang="ts">
-import Search from '@/components/shared/Search.vue';
-import NotificationsList from '@/components/shared/NotificationsList.vue';
-</script>
-
 <template>
   <nav
     class="flex h-[80px] bg-white px-4 rounded-2xl border-dentiq-muted-semilight border-2"
@@ -21,26 +16,16 @@ import NotificationsList from '@/components/shared/NotificationsList.vue';
         </a>
       </li>
       <Search />
-      <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
         <NotificationsList />
-        <div class="flex flex-row items-center space-x-2">
-          <div class="hidden sm:flex flex-col text-right">
-            <p class="text-dentiq-text-dark font-normal text-dentiq-body-small">
-              Nabil Al Sayed
-            </p>
-            <p
-              class="text-dentiq-muted-default font-normal text-dentiq-body-small"
-            >
-              Patient
-            </p>
-          </div>
-          <img
-            src="/svgs/user-avatar.svg"
-            alt="User"
-            class="h-[60px] w-[60px] border-4 rounded-full"
-          />
-        </div>
+        <ProfileDropdown />
       </div>
     </ul>
   </nav>
 </template>
+
+<script setup lang="ts">
+import Search from '@/components/shared/Search.vue';
+import NotificationsList from '@/components/shared/NotificationsList.vue';
+import ProfileDropdown from '@/components/shared/ProfileDropdown.vue';
+</script>
