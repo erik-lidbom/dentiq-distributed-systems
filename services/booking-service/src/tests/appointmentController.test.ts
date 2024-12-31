@@ -9,6 +9,23 @@ import { Buffer } from 'buffer';
 import { Appointment } from '../models/appointmentModel';
 
 jest.mock('../models/appointmentModel.ts');
+jest.mock('../mqtt/mqtt', () => ({
+  publish: jest.fn((topic, message, options, callback) => {
+    // Simulate successful publish
+    callback(null);
+  }),
+  subscribe: jest.fn((topic, callback) => {
+    // Simulate successful subscription
+    callback(null);
+  }),
+  end: jest.fn((force, callback) => {
+    // Simulate successful disconnection
+    callback();
+  }),
+  connected: true,
+  on: jest.fn(),
+  once: jest.fn(),
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();
