@@ -228,36 +228,65 @@
       v-if="step === 4"
       class="flex flex-col items-center self-center space-y-6 text-center"
     >
-      <div>
-        <img
-          v-if="isSuccess"
-          src="/illustrations/success.png"
-          alt="Success"
-          class="w-50 h-50 mx-auto mb-4"
-        />
-      </div>
-      <h2
-        class="text-2xl font-bold"
-        :class="{ 'text-green-500': isSuccess, 'text-red-500': !isSuccess }"
+      <!-- Loading Spinner -->
+      <div
+        v-if="isLoading"
+        class="flex flex-col justify-center items-center gap-4 h-60"
       >
-        {{ isSuccess ? 'Booking Confirmed!' : 'Booking Failed' }}
-      </h2>
-      <p class="text-gray-600">{{ submissionMessage }}</p>
-      <div v-if="isSuccess">
-        <button
-          @click="redirectToBookings"
-          class="px-6 py-3 bg-dentiq-background-primary text-white rounded-lg hover:bg-dentiq-background-primary"
+        <svg
+          class="animate-spin h-20 w-20 text-dentiq-background-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
         >
-          Go to Bookings
-        </button>
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8H4z"
+          ></path>
+        </svg>
+        <h3 class="text-dentiq-muted-dark text-dentiq-h3">Processing ...</h3>
       </div>
-      <div v-else>
-        <button
-          @click="resetToFirstStep"
-          class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+      <div v-else class="flex flex-col gap-6">
+        <div>
+          <img
+            v-if="isSuccess"
+            src="/illustrations/success.png"
+            alt="Success"
+            class="w-50 h-50 mx-auto mb-4"
+          />
+        </div>
+        <h2
+          class="text-2xl font-bold"
+          :class="{ 'text-green-500': isSuccess, 'text-red-500': !isSuccess }"
         >
-          Retry
-        </button>
+          {{ isSuccess ? 'Booking Confirmed!' : 'Booking Failed' }}
+        </h2>
+        <p class="text-gray-600">{{ submissionMessage }}</p>
+        <div v-if="isSuccess">
+          <button
+            @click="redirectToBookings"
+            class="px-6 py-3 bg-dentiq-background-primary text-white rounded-lg hover:bg-dentiq-background-primary"
+          >
+            Go to Bookings
+          </button>
+        </div>
+        <div v-else>
+          <button
+            @click="resetToFirstStep"
+            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     </div>
 
@@ -356,6 +385,9 @@ const resetToFirstStep = () => {
   selectedTime.value = null;
   reason.value = '';
 };
+
+// State for loading
+const isLoading = ref(false);
 
 // Reactive state for screen size
 const isMobile = ref(window.innerWidth < 768);
@@ -650,6 +682,9 @@ const submit = async () => {
     return;
   }
 
+  // Set loading state
+  isLoading.value = true;
+
   const appointmentPayload = {
     patientId: '11111111', // TODO: Replace with actual patient ID when Auth is Implemented
     dentistId: selectedDoctor.value?._id,
@@ -673,6 +708,9 @@ const submit = async () => {
     isSuccess.value = false;
     submissionMessage.value = 'Failed to submit the booking. Please try again.';
     console.error('Error submitting booking:', error);
+  } finally {
+    // Remove loading state
+    isLoading.value = false;
   }
 };
 </script>
