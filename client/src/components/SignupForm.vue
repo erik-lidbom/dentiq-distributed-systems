@@ -1,7 +1,10 @@
 <template>
-  <div class="flex flex-col gap-14">
+  <div class="flex flex-col gap-7">
+    <!-- DentiQ logo + title -->
     <SignupHeader />
+    <!-- Form Section -->
     <form @submit.prevent="validateForm" class="flex flex-col gap-2 w-full">
+      <!-- Name -->
       <div class="w-full relative lg:px-9">
         <font-awesome-icon
           icon="fa-solid fa-user"
@@ -16,6 +19,7 @@
         />
       </div>
       <p class="text-red-400 text-sm lg:px-9" v-if="errors.fullname">{{ errors.fullname }}</p>
+      <!-- Personal number -->
       <div class="w-full relative lg:px-9">
         <font-awesome-icon
           icon="fa-solid fa-shield-halved"
@@ -32,6 +36,7 @@
       <p class="text-red-400 text-sm lg:px-9" v-if="errors.personnummer">
         {{ errors.personnummer }}
       </p>
+      <!-- Email -->
       <div class="w-full relative lg:px-9">
         <font-awesome-icon
           icon="fa-solid fa-envelope"
@@ -46,6 +51,7 @@
         />
       </div>
       <p class="text-red-400 text-sm lg:px-9" v-if="errors.email">{{ errors.email }}</p>
+      <!-- Password -->
       <div class="w-full flex lg:flex-row flex-col gap-2 lg:px-9 h-20">
         <div class="w-full relative">
           <div class="relative">
@@ -65,7 +71,7 @@
             {{ errors.password }}
           </p>
         </div>
-
+        <!-- Confirm Password -->
         <div class="w-full relative">
           <div class="relative">
             <font-awesome-icon
@@ -86,13 +92,13 @@
         </div>
       </div>
     </form>
-
-    <div class="w-full flex flex-col gap-5 lg:px-9">
+    <!-- Text + button -->
+    <div class="w-full flex flex-col gap-1 lg:gap-3 lg:px-9">
       <div class="flex items-center justify-start font-thin gap-2">
         <p class="text-dentiqGray">Already have an account?</p>
         <router-link
           to="/login"
-          class="text-dentiqLightBlue hover:text-opacity-30 transition-all duration-300"
+          class="relative text-dentiqLightBlue transition-all duration-300 hover:after:w-full after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-dentiqLightBlue after:transition-all after:duration-300"
         >
           Log in
         </router-link>

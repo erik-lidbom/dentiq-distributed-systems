@@ -24,10 +24,14 @@
                     <p class="text-red-400 text-sm lg:px-9" v-if="errors.password">{{ errors.password }}</p>
                 </div>
                 <!-- Button --> 
-                <div class="flex flex-col mt-10 gap-2">
+                <div class="flex flex-col mt-10 gap-2 font-thin">
                     <p class="text-dentiq-gray text-dentiqGray text-right"> Forgot password?</p>
-                    <button type="submit" class="w-full rounded-xl bg-dentiqBtnBlue text-white font-thin py-3 hover:bg-opacity-30 transition-all duration-300">Log In </button>
-                    <router-link to="/" class="text-center text-dentiq-gray text-dentiqGray">New to DentiQ? Join now</router-link>
+                    <button type="submit" class="w-full rounded-xl bg-dentiqBtnBlue text-white py-3 hover:bg-opacity-30 transition-all duration-300">Log In </button>
+                    <div class="flex flex row gap-2">
+                      <p class="text-dentiqGray">New to DentiQ? </p>
+                      <router-link to="/" class="relative text-dentiqLightBlue transition-all duration-300 hover:after:w-full after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-dentiqLightBlue after:transition-all after:duration-300"> Join now</router-link>
+                    </div>
+                    
                 </div>
 
                 
