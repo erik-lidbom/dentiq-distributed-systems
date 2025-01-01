@@ -77,18 +77,18 @@ mqttClient.on("message", async (topic, message) => {
 // Handle Credential Validation Requests
 const handleCredentialValidation = async (payload: any) => {
   try {
-    const { username, password, correlationId } = payload;
+    const { email, password, correlationId } = payload;
 
-    if (!username || !password || !correlationId) {
+    if (!email || !password || !correlationId) {
       throw new Error("Invalid payload: Missing required fields");
     }
 
     console.log(
-      `[DEBUG]: Validating credentials for username: ${username}, correlationId: ${correlationId}`
+      `[DEBUG]: Validating credentials for username: ${email}, correlationId: ${correlationId}`
     );
 
     // Query database for username and password
-    const patient = await Patient.findOne({ email: username, password });
+    const patient = await Patient.findOne({ email: email, password });
 
     const responsePayload = {
       correlationId,
