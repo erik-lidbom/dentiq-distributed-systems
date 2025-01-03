@@ -82,7 +82,7 @@ mqttClient.on('message', async (topic, message) => {
         await deleteAppointment(TOPICS.PUBLISH.DELETE_RESPONSE, message);
         break;
       case TOPICS.SUBSCRIBE.QUERY:
-        await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE);
+        await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE, message);
         break;
       default:
         console.error('[MQTT]: Unknown path received:', topic);
