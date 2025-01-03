@@ -3,12 +3,8 @@ import { TOPICS } from './topics';
 
 // Subscribe to topics
 const subscriptionTopics = [
-  TOPICS.SUBSCRIBE.CREATE,
-  TOPICS.SUBSCRIBE.GET,
-  TOPICS.SUBSCRIBE.UPDATE,
-  TOPICS.SUBSCRIBE.DELETE,
-  TOPICS.SUBSCRIBE.QUERY,
-  TOPICS.SUBSCRIBE.CLINICS.QUERY_RESPONSE,
+  TOPICS.SUBSCRIBE.DENTIST_CREATE_APP,
+  TOPICS.SUBSCRIBE.CREDENTIAL_VALIDATION_REQUEST,
 ];
 
 export const subscribeTopics = async () => {
@@ -16,12 +12,8 @@ export const subscribeTopics = async () => {
     mqttClient?.subscribe(topic, (err) => {
       if (!err) {
         console.log(`Subscribed to ${topic}`);
-        return;
       } else {
-        console.log(
-          '[MQTT]: Subscribed to topics:',
-          subscriptionTopics.join(', ')
-        );
+        console.error(`[MQTT]: Error subscribing to ${topic}:`, err.message);
       }
     });
   });
