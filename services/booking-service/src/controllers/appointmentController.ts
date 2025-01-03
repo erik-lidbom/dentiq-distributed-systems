@@ -349,10 +349,23 @@ export const getAppointment = async (
  * Fetch all appointments
  */
 export const getAppointments = async (
-  topic: string
+  topic: string,
+  message: Buffer = Buffer.from('')
 ): Promise<ResponsePayload> => {
   try {
-    const appointments = await Appointment.find();
+    let appointments;
+    if (message.length > 0) {
+      const payload: {
+        id: string;
+      } = JSON.parse(message.toString());
+      const { id } = payload;
+
+      appointments = await Appointment.find({
+        $or: [{ dentistId: id }, { patientId: id }],
+      });
+    } else {
+      appointments = await Appointment.find();
+    }
 
     const resPayload: ResponsePayload = {
       status: 200,
