@@ -42,6 +42,7 @@ export const createAppointment = async (
       start_times: string[];
     } = JSON.parse(message.toString());
     const { dentistId, date, start_times } = payload;
+    console.log('payload: ', payload)
 
     if (!dentistId || !date || !Array.isArray(start_times)) {
       const resPayload: ResponsePayload = {
@@ -349,16 +350,25 @@ export const getAppointment = async (
  * Fetch all appointments
  */
 export const getAppointments = async (
-  topic: string
+  topic: string,
+  message: Buffer
 ): Promise<ResponsePayload> => {
   try {
-    const appointments = await Appointment.find();
+    const payload: {
+      dentistId: string;
+      date: string
+    } = JSON.parse(message.toString());
+    const { dentistId, date } = payload;
+    console.log('Query ID: ', dentistId)
+    const appointments = await Appointment.find({ dentistId, date });
+
 
     const resPayload: ResponsePayload = {
       status: 200,
       message: `Successfully fetched ${appointments.length} appointments.`,
       data: appointments,
     };
+    console.log('Payload: ', resPayload)
 
     if (!appointments || appointments.length === 0) {
       resPayload.status = 404;
