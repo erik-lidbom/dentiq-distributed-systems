@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { ServiceError } from '../utils/customError'; // Custom Error Classes
 import { publishAndSubscribe } from '../mqtt/mqtt';
 
 const routingController = async (
