@@ -36,84 +36,122 @@
 </template>
 
 <script setup>
-//Imports for calendar
-import { ref, computed } from 'vue';
+// Imports for calendar
+import { ref, computed, watch, onMounted } from 'vue';
 import Datepicker from 'vue3-datepicker';
 import 'vue3-datepicker';
+import { fetchAppointments, postAppointments } from '@/api/bookingservice';
+
+
+const fetchData = async () => {
+  const date = formatDate(selectedDate.value)
+  console.log('The date is: ', date);
+  try {
+    const appointments = await fetchAppointments('6756c273e4730b3a76915a35', date);
+    console.log("Fetched appointments:", appointments);
+
+    const appointmentData = Array.isArray(appointments?.data?.data)
+    ? appointments.data.data
+    : [];
+
+    slots.value.forEach(slot => {
+      const matchingApps = appointmentData.find(appointment => 
+        appointment.start_time === slot.time && appointment.date === date
+      );
+      slot.active = !!matchingApps;
+    })
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+  }
+};
+
+onMounted(() => {
+  fetchData(); 
+});
 
 // State for the date picker
-  const showCalendar = ref(false); // Controls the visibility of the calendar
-  const selectedDate = ref(new Date()); // Holds the selected date
+const showCalendar = ref(false); // Controls the visibility of the calendar
+const selectedDate = ref(new Date()); // Holds the selected date
 
-    // Computed property to format the selected date
-    const formattedDate = computed(() => {
-      const options = { weekday: 'long', month: 'long', day: 'numeric' };
-      return selectedDate.value.toLocaleDateString('en-US', options);
+// Computed property to format the selected date
+const formattedDate = computed(() => {
+  const options = { weekday: 'long', month: 'long', day: 'numeric' };
+  return selectedDate.value.toLocaleDateString('en-US', options);
+});
+
+// Toggle calendar visibility
+const toggleCalendar = () => {
+  showCalendar.value = !showCalendar.value;
+};
+
+// Predefined slot times
+const slots = ref([
+  { time: '08:00', active: false },
+  { time: '09:00', active: false },
+  { time: '10:00', active: false },
+  { time: '11:00', active: false },
+  { time: '12:00', active: false },
+  { time: '13:00', active: false },
+  { time: '14:00', active: false },
+  { time: '15:00', active: false },
+  { time: '16:00', active: false },
+]);
+
+// Helper function to format the date as YYYY-MM-DD
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+  const day = String(date.getDate()).padStart(2, '0'); // Pad single-digit days
+  return `${year}-${month}-${day}`;
+};
+
+// Load slots from API for the selected date
+const loadSlotsForDate = async (id, date) => {
+  try {
+    const response = await fetchAppointments(id, formatDate(date));
+    const serverSlots = response.data || [];
+    slots.value.forEach(slot => {
+      const serverSlot = serverSlots.find(s => s.time === slot.time);
+      slot.active = serverSlot ? serverSlot.active : false;
     });
+  } catch (error) {
+    console.error("Error fetching slots for the date:", error);
+    // Reset all slots to inactive on error
+    slots.value.forEach(slot => slot.active = false);
+  }
+};
 
-    // Toggle calendar visibility
-    const toggleCalendar = () => {
-      showCalendar.value = !showCalendar.value;
-    };
+// Watcher for selectedDate
+watch(selectedDate, async (newDate, oldDate) => {
+  console.log("Date changed:", newDate);
 
-    // Handle date change
-    const onDateChange = (date) => {
-      selectedDate.value = date;
-      showCalendar.value = false; // Close the calendar after a date is selected
-      loadSlotsForDate(date);
-    };
+  // Reset all slots to inactive before loading the new date's data
+  slots.value.forEach(slot => slot.active = false);
+  // call fetchData to check if slots are already picked
+  await fetchData();
+});
 
-    // Predefined slot times
-    const slots = ref([
-      { time: '08:00', active: false },
-      { time: '09:00', active: false },
-      { time: '10:00', active: false },
-      { time: '11:00', active: false },
-      { time: '12:00', active: false },
-      { time: '13:00', active: false },
-      { time: '14:00', active: false },
-      { time: '15:00', active: false },
-      { time: '16:00', active: false },
-    ]);
+// Handle marking available slots
+const toggleSlot = (slot) => {
+  slot.active = !slot.active; // Toggle the active state of a slot
+};
 
-    // Handle marking available slots
-    const toggleSlot = (slot) => {
-      slot.active = !slot.active; // This flips the availability (true/false)
-    };
-
-    const loadSlotsForDate = (date) => {
-      const savedSlots = JSON.parse(localStorage.getItem(formatDAte(date)));
-      if (savedSlots) {
-        slots.value.forEach(slot => {
-          const savedSlot = savedSlots.find(s => s.time === slot.time);
-          if (savedSlot) {
-            slot.active = savedSlot.active;
-          }
-        });
-      }
-    };
-
-    const formatDate = (date) => {
-      // extract year, moth and date
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed, so add 1
-      const day = String(date.getDate()).padStart(2, '0'); // Pad single-digit days with a leading zero ex 01, 02
-
-      return `${year}-${month}-${day}`; // Return in YYYY-MM-DD format
-    }
-
-    const confirmChanges = () => {
-      const appointmentData = {
-        patientId: null,
-        dentistId: '6756c273e4730b3a76915a35',
-        date: formatDate(selectedDate.value),
-        start_times: slots.value.filter(slot => slot.active).map(slot => slot.time),
-        status: 'unbooked'
-      };
-      console.log(appointmentData);
-    
-      // Save slots to localStorage (API implemented here later !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
-      localStorage.setItem(formatDate(selectedDate.value), JSON.stringify(slots.value));
-      alert("Changes confirmed!")
+// Confirm changes and send to API
+const confirmChanges = async () => {
+  const appointmentData = {
+    patientId: null,
+    dentistId: '6756c273e4730b3a76915a35',
+    date: formatDate(selectedDate.value),
+    start_times: slots.value.filter(slot => slot.active).map(slot => slot.time),
+    status: 'unbooked'
   };
+
+  try {
+    await postAppointments(appointmentData); // Send data to API
+    alert("Changes confirmed!");
+  } catch (error) {
+    console.error("Failed to confirm changes:", error);
+    alert("An error occurred while confirming changes.");
+  }
+};
 </script>
