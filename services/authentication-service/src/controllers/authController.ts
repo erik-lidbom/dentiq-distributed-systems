@@ -30,21 +30,24 @@ interface AuthTokenPayload {
  * @returns {any} - Returns an object with success status and a message
  */
 
-export const createAccount = async (
-  email: string,
-  password: string,
-  role: string
-): Promise<any> => {
+export const createAccount = async (payload: any): Promise<any> => {
+  const { email, fullname, personnummer, role, password } = payload;
   const existingUser = await User.findOne({ email });
   if (existingUser)
-    return { success: false, message: `User with role ${role} already exists` };
+    return { status: 403, message: `User with role ${role} already exists` };
 
   const hashPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ email, password: hashPassword, role });
+  const newUser = new User({
+    email,
+    password: hashPassword,
+    role,
+    personnummer,
+    fullname,
+  });
   await newUser.save();
 
   return {
-    success: true,
+    status: 201,
     message: `${role.toUpperCase()} account created successfully`,
   };
 };
@@ -57,20 +60,23 @@ export const createAccount = async (
  * @returns {any} - Returns an object with success status, token and a refresh token
  */
 
-export const login = async (email: string, password: string): Promise<any> => {
+export const login = async (payload: any): Promise<any> => {
+  const { email, password } = payload;
+
   const user: any = await User.findOne({ email });
-  const decodedPassword = await bcrypt.compare(password, user?.password);
+  const decodedPassword = user
+    ? await bcrypt.compare(password, user?.password)
+    : null;
 
   if (!user || !decodedPassword) {
-    return { success: false, message: 'Invalid credentials' };
+    return { status: 401, message: 'Invalid credentials' };
   }
-
   const token = generateToken(user.email);
   const refreshToken = generateRefreshToken(user.email);
 
-  await Session.create({ userId: user._id, refreshToken });
+  const session = await Session.create({ userId: user._id, refreshToken });
 
-  return { success: true, token, refreshToken };
+  return { status: 200, sessionId: session._id };
 };
 
 /**
