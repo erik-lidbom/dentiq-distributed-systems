@@ -9,6 +9,7 @@ import {
   deleteAppointment,
   bookAppointment,
   getAppointment,
+  cancelAppointment,
 } from '../controllers/appointmentController';
 
 dotenv.config();
@@ -80,6 +81,9 @@ mqttClient.on('message', async (topic, message) => {
         break;
       case TOPICS.SUBSCRIBE.DELETE:
         await deleteAppointment(TOPICS.PUBLISH.DELETE_RESPONSE, message);
+        break;
+      case TOPICS.SUBSCRIBE.CANCEL:
+        await cancelAppointment(TOPICS.PUBLISH.CANCEL_RESPONSE, message);
         break;
       case TOPICS.SUBSCRIBE.QUERY:
         await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE);

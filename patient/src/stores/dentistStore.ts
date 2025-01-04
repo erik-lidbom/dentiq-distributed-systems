@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { fetchDentists } from '@/api';
 
 // Define a type for Dentist
 interface Dentist {
@@ -16,6 +17,19 @@ export const useDentistStore = defineStore('dentistStore', {
   actions: {
     setDentists(dentists: Dentist[]) {
       this.dentists = dentists;
+    },
+    async fetchAndSetDentists() {
+      try {
+        const response = await fetchDentists();
+        if (response?.data) {
+          this.setDentists(response.data.data);
+          console.log('Dentists fetched: ', this.dentists);
+        } else {
+          console.warn('No data found in the response:', response);
+        }
+      } catch (error) {
+        console.error('Error fetching dentists:', error);
+      }
     },
   },
 });

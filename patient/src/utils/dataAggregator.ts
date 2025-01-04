@@ -1,50 +1,10 @@
-/**
- * Types for the data used in the aggregation
- */
-interface Availability {
-  date: string;
-  times: string[];
-}
-
-interface Dentist {
-  _id: string;
-  name: string;
-  speciality: string;
-  languages: string[];
-  availability?: Availability[];
-  image?: string;
-  clinic: string; // Clinic ID
-}
-
-interface Clinic {
-  _id: string;
-  name: string;
-  address: string;
-  lat: number;
-  lng: number;
-  phone: string;
-  services: string[];
-  firstAvailableTime: string;
-  languages: string[];
-}
-
-interface Appointment {
-  _id: string;
-  patientId: string | null;
-  dentistId: string;
-  date: string;
-  start_time: string;
-  reason_for_visit?: string;
-  status: 'unbooked' | 'booked' | 'cancelled';
-}
-
-interface AggregatedDentist extends Dentist {
-  appointments: Appointment[];
-}
-
-interface AggregatedClinic extends Clinic {
-  dentists: AggregatedDentist[];
-}
+import type {
+  Clinic,
+  Dentist,
+  Appointment,
+  AggregatedClinic,
+  Availability,
+} from '@/types/types';
 
 /**
  * Aggregate clinic data with dentists and appointments.
@@ -128,4 +88,48 @@ export const aggregateClinicData = (
   });
 
   return aggregatedClinics;
+};
+
+export const aggregatePatientAppointments = (
+  appointments: Appointment[],
+  dentists: Dentist[],
+  clinics: Clinic[],
+  patientId: string
+): Availability[] => {
+  // Validate inputs
+  if (
+    !appointments ||
+    !dentists ||
+    !clinics ||
+    !Array.isArray(appointments) ||
+    !Array.isArray(dentists) ||
+    !Array.isArray(clinics)
+  ) {
+    console.error('Invalid input data:', { appointments, dentists, clinics });
+    return [];
+  }
+
+  // Filter appointments by patient ID
+  const patientAppointments = appointments.filter(
+    (appointment) => appointment.patientId === patientId
+  );
+
+  // Attach dentist and clinic information to each appointment
+  const appointmentsWithDentistAndClinic = patientAppointments.map(
+    (appointment) => {
+      const dentist = dentists.find(
+        (dentist) => dentist._id === appointment.dentistId
+      );
+      const clinic = clinics.find((clinic) => clinic._id === dentist?.clinic);
+      return {
+        ...appointment,
+        dentist,
+        clinic,
+      };
+    }
+  );
+
+  console.log('Patient appointments: ', appointmentsWithDentistAndClinic);
+
+  return appointmentsWithDentistAndClinic;
 };
