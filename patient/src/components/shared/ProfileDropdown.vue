@@ -2,7 +2,7 @@
   <div class="relative" ref="dropdownWrapper">
     <!-- User Avatar -->
     <div class="relative h-fit w-fit">
-      <button
+      <div
         @click="toggleDropdownVisibility"
         class="flex w-fit pl-3 justify-center items-center cursor-pointer text-dentiq-muted-darker hover:bg-dentiq-muted-lighter rounded-xl"
       >
@@ -23,7 +23,7 @@
             class="h-[60px] w-[60px] border-4 rounded-full"
           />
         </div>
-      </button>
+      </div>
     </div>
 
     <!-- User Dropdown Options -->
@@ -37,7 +37,7 @@
         >My bookings</Button
       >
       <Button
-        @click="handleNavigateToMyBookings"
+        @click="handleLogOut"
         class="hover:bg-dentiq-danger-light text-dentiq-danger-default text-start w-full h-[48px] px-3 rounded-lg text-dentiq-body-small"
         >Log out</Button
       >
@@ -76,6 +76,12 @@ const user = ref({
 const handleNavigateToMyBookings = () => {
   isOpen.value = false;
   router.push('/bookings');
+};
+
+const handleLogOut = () => {
+  isOpen.value = false;
+  router.push('/');
+  // TODO: Implement logout functionality
 };
 
 // Function to handle clicks outside the dropdown
