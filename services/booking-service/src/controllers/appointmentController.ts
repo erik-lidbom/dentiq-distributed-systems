@@ -121,9 +121,9 @@ export const bookAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      publishMessage('appointment/booked', {
-        topic: 'Failed Booking',
-        message: 'Failed Booking. Try Again!',
+      publishMessage('appointment/failed', {
+        topic: 'appointment/failed',
+        message: 'Booking Cancellation Failed!',
       });
       return resPayload;
     }
@@ -147,8 +147,8 @@ export const bookAppointment = async (
       };
       publishResponse(topic, resPayload);
       publishMessage('appointment/booked', {
-        topic: 'Failed Booking',
-        message: 'Failed Booking. Try Again!',
+        topic: 'appointment/failed',
+        message: 'Booking Cancellation Failed!',
       });
       return resPayload;
     }
@@ -195,8 +195,8 @@ export const bookAppointment = async (
     };
     publishResponse(topic, resPayload);
     publishMessage('appointment/failed', {
-      topic: 'Failed Booking',
-      message: 'Failed Booking. Try Again!',
+      topic: 'appointment/failed',
+      message: 'Booking Cancellation Failed!',
     });
     return resPayload;
   }
@@ -443,6 +443,10 @@ export const cancelAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
+      publishMessage('appointment/failed', {
+        topic: 'appointment/failed',
+        message: 'Booking Cancellation Failed!',
+      });
       return resPayload;
     }
 
@@ -465,6 +469,11 @@ export const cancelAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    publishMessage('appointment/cancelled', {
+      topic: 'appointment/cancelled',
+      message: `Booking Cancelled Successfully`,
+    });
+    return resPayload;
     return resPayload;
   } catch (error) {
     console.error('Error cancelling appointment:', error);
@@ -477,6 +486,10 @@ export const cancelAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
+    publishMessage('appointment/failed', {
+      topic: 'appointment/failed',
+      message: `Booking Cancellation Failed!`,
+    });
     return resPayload;
   }
 };
