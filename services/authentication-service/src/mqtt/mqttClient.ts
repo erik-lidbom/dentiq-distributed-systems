@@ -44,7 +44,8 @@ mqttClient.on('connect', () => {
       TOPICS.AUTHENTICATION.CREATE,
       TOPICS.AUTHENTICATION.LOGIN,
       TOPICS.AUTHENTICATION.REFRESH_TOKEN,
-      TOPICS.AUTHENTICATION.RESPONSE,
+      TOPICS.AUTHENTICATION.CREATE_RESPONSE,
+      TOPICS.AUTHENTICATION.LOGIN_RESPONSE,
       TOPICS.AUTHENTICATION.VALIDATE_TOKEN,
     ],
     (err) => {
@@ -75,21 +76,19 @@ mqttClient.on('message', async (topic, message) => {
     const payload = JSON.parse(message.toString());
 
     if (topic === TOPICS.AUTHENTICATION.CREATE) {
-      const { email, password, role } = payload;
-      const result = await createAccount(email, password, role);
-      publishMessage(TOPICS.AUTHENTICATION.RESPONSE, result);
+      const result = await createAccount(payload);
+      publishMessage(TOPICS.AUTHENTICATION.CREATE_RESPONSE, result);
     } else if (topic === TOPICS.AUTHENTICATION.LOGIN) {
-      const { email, password } = payload;
-      const result = await login(email, password);
-      publishMessage(TOPICS.AUTHENTICATION.RESPONSE, result);
+      const result = await login(payload);
+      publishMessage(TOPICS.AUTHENTICATION.LOGIN_RESPONSE, result);
     } else if (topic === TOPICS.AUTHENTICATION.VALIDATE_TOKEN) {
       const { token } = payload;
       const result = await validateAuthToken(token);
-      publishMessage(TOPICS.AUTHENTICATION.RESPONSE, result);
+      publishMessage(TOPICS.AUTHENTICATION.CREATE_RESPONSE, result);
     } else if (topic === TOPICS.AUTHENTICATION.REFRESH_TOKEN) {
       const { refreshToken } = payload;
       const result = await refreshAuthToken(refreshToken);
-      publishMessage(TOPICS.AUTHENTICATION.RESPONSE, result);
+      publishMessage(TOPICS.AUTHENTICATION.CREATE_RESPONSE, result);
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
