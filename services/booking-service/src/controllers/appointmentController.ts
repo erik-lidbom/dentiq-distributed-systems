@@ -448,6 +448,7 @@ export const cancelAppointment = async (
 
     appointment.status = 'unbooked';
     appointment.patientId = null;
+    appointment.reason_for_visit = '';
 
     const cancelledAppointment = await appointment.save();
 
