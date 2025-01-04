@@ -1,10 +1,11 @@
 export const TOPICS = {
   AUTHENTICATION: {
-    CREATE: 'auth/account/create',
-    LOGIN: 'auth/login',
+    CREATE: 'gateway/auth/create/response',
+    LOGIN: 'gateway/auth/login/response',
     VALIDATE_TOKEN: 'auth/token/validate',
     REFRESH_TOKEN: 'auth/token/refresh',
-    RESPONSE: 'auth/response',
+    CREATE_RESPONSE: 'auth/create/response',
+    LOGIN_RESPONSE: 'auth/login/response',
   },
   SUBSCRIBE: {
     LOGIN: 'dentiq/authService/login',
