@@ -1,6 +1,11 @@
-import { publishAndSubscribe, publishMessage } from "../mqtt/mqttClient"; // Ensure publishMessage is imported
-import { TOPICS } from "../mqtt/topics";
-import { generateToken, validateToken } from "../utils/tokenUtils";
+import Session from '../models/sessionModel';
+import User from '../models/userModel';
+import {
+  generateRefreshToken,
+  generateToken,
+  validateToken,
+} from '../utils/tokenUtils';
+import bcrypt from 'bcrypt';
 
 interface ValidationPayload {
   isValid: any;
@@ -17,103 +22,83 @@ interface AuthTokenPayload {
   payload?: any;
 }
 
-// Filter 1: Validate Credentials with Patient/Dentist Service
-export const validateCredentials = async (payload: ValidationPayload): Promise<any> => {
-  const { email, password, role } = payload;
+/**
+ * Creates a new dentist or patient account in the database
+ * @param {string} email - Email provided.
+ * @param {string} password - Password provided.
+ * @param {string} role - Role provided.
+ * @returns {any} - Returns an object with success status and a message
+ */
 
-  console.log("[LOGIN WORKFLOW]: Starting credential validation...");
-  console.log(`[LOGIN WORKFLOW]: Payload received - Email: ${email}, Role: ${role}`);
+export const createAccount = async (
+  email: string,
+  password: string,
+  role: string
+): Promise<any> => {
+  const existingUser = await User.findOne({ email });
+  if (existingUser)
+    return { success: false, message: `User with role ${role} already exists` };
 
-  if (!email || !password || !role) {
-    console.error("[LOGIN WORKFLOW]: Validation failed - Missing email, password, or role.");
-    throw new Error("Missing email, password, or role");
-  }
+  const hashPassword = await bcrypt.hash(password, 10);
+  const newUser = new User({ email, password: hashPassword, role });
+  await newUser.save();
 
-  const correlationId = `${role}_${Date.now()}`;
-  const validationRequest = { email, password, correlationId };
-
-  console.log(`[LOGIN WORKFLOW]: Publishing validation request with Correlation ID: ${correlationId}`);
-  const validationResponse = await publishAndSubscribe(
-    TOPICS.PUBLISH.CREDENTIAL_VALIDATION_REQUEST(role),
-    validationRequest,
-    TOPICS.SUBSCRIBE.CREDENTIAL_VALIDATION_RESPONSE(correlationId),
-    5000
-  );
-
-  console.log("[LOGIN WORKFLOW]: Validation response received:", validationResponse);
-
-  if (!validationResponse || !validationResponse.success) {
-    console.error("[LOGIN WORKFLOW]: Validation failed - Invalid credentials.");
-    throw new Error("Invalid credentials");
-  }
-
-  console.log("[LOGIN WORKFLOW]: Credentials validated successfully.");
-  return { ...payload, isValid: true };
+  return {
+    success: true,
+    message: `${role.toUpperCase()} account created successfully`,
+  };
 };
 
-// Filter 2: Generate Token
-export const generateAuthToken = async (payload: ValidationPayload): Promise<any> => {
-  console.log("[LOGIN WORKFLOW]: Generating token...");
+/**
+ * Checks if the credentials are valid, and if it is valid it creates a new session that is stored in the database.
+ * Lastly the method returns a status, token and refreshToken.
+ * @param {string} email - Email provided.
+ * @param {string} password - Password provided.
+ * @returns {any} - Returns an object with success status, token and a refresh token
+ */
 
-  if (!payload.isValid) {
-    console.error("[LOGIN WORKFLOW]: Token generation failed - Invalid credentials.");
-    throw new Error("Invalid email or password");
+export const login = async (email: string, password: string): Promise<any> => {
+  const user: any = await User.findOne({ email });
+  const decodedPassword = await bcrypt.compare(password, user?.password);
+
+  if (!user || !decodedPassword) {
+    return { success: false, message: 'Invalid credentials' };
   }
 
-  const token = generateToken(payload.email);
-  console.log("[LOGIN WORKFLOW]: Token generated successfully:", token);
+  const token = generateToken(user.email);
+  const refreshToken = generateRefreshToken(user.email);
 
-  return { ...payload, token };
+  await Session.create({ userId: user._id, refreshToken });
+
+  return { success: true, token, refreshToken };
 };
 
-// Filter 3: Publish Login Result
-export const publishAuthResult = async (payload: any): Promise<void> => {
-  const topic = payload.isValid
-    ? TOPICS.PUBLISH.AUTH_SUCCESS
-    : TOPICS.PUBLISH.AUTH_FAILURE;
+/**
+ * Checks if the token provided is valid or expired
+ * @param {string} token - Token provided.
+ * @returns {any} - Returns an object with success status and the decoded token
+ */
 
-  console.log(`[LOGIN WORKFLOW]: Publishing login result to topic: ${topic}`);
-  console.log("[LOGIN WORKFLOW]: Login Result Payload:", {
-    success: payload.isValid,
-    token: payload.token || null,
-  });
-
-  publishMessage(topic, {
-    success: payload.isValid,
-    token: payload.token || null,
-  });
-  console.log("[LOGIN WORKFLOW]: Login result published successfully.");
+export const validateAuthToken = async (token: string): Promise<any> => {
+  const decoded = validateToken(token);
+  if (!decoded) {
+    return { success: false, message: 'Invalid or expired token' };
+  }
+  return { success: true, user: decoded };
 };
 
-// Filter 4: Validate Token
-export const validateAuthToken = async (payload: AuthTokenPayload): Promise<any> => {
-  console.log("[TOKEN VALIDATION]: Validating token...");
-  const { token } = payload;
-
-  // Await the token validation before destructuring
-  const { valid, payload: decoded } = await validateToken(token);
-
-  if (!valid) {
-    console.error("[TOKEN VALIDATION]: Token validation failed - Invalid or expired token.");
-    throw new Error("Invalid or expired token");
+/**
+ * Checks if the token provided is valid or expired
+ * @param {string} refreshToken - Refresh Token provided.
+ * @returns {any} - Returns an object with success status and a new token
+ */
+export const refreshAuthToken = async (refreshToken: string): Promise<any> => {
+  const decoded: any = validateToken(refreshToken, true);
+  if (!decoded) {
+    return { success: false, message: 'Invalid or expired refresh token' };
   }
 
-  console.log("[TOKEN VALIDATION]: Token validated successfully:", decoded);
-  return { ...payload, valid, decoded };
-};
+  const newToken = generateToken(decoded.email);
 
-// Publish Validation Result
-export const publishValidationResult = async (payload: AuthTokenPayload): Promise<void> => {
-  console.log("[TOKEN VALIDATION]: Publishing validation result...");
-  console.log("[TOKEN VALIDATION]: Validation Result Payload:", {
-    success: payload.valid,
-    user: payload.decoded || null,
-  });
-
-  // Ensure publishMessage is properly used
-  publishMessage(TOPICS.PUBLISH.AUTH_RESPONSE, {
-    success: payload.valid,
-    user: payload.decoded || null,
-  });
-  console.log("[TOKEN VALIDATION]: Validation result published successfully.");
+  return { success: true, token: newToken };
 };
