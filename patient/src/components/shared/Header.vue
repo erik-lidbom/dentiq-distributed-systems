@@ -15,7 +15,6 @@
           </h1>
         </a>
       </li>
-      <Search />
       <div class="flex items-center gap-3">
         <NotificationsList />
         <ProfileDropdown />
@@ -25,7 +24,6 @@
 </template>
 
 <script setup lang="ts">
-import Search from '@/components/shared/Search.vue';
 import NotificationsList from '@/components/shared/NotificationsList.vue';
 import ProfileDropdown from '@/components/shared/ProfileDropdown.vue';
 </script>
