@@ -1,7 +1,9 @@
-const BASE_URL = 'http://localhost:3000/api/booking/query';
+const QUERY_URL = 'http://localhost:3000/api/booking/query';
+const BOOK_URL = 'http://localhost:3000/api/booking/book';
+const CANCEL_URL = 'http://localhost:3000/api/booking/cancel';
 
 export async function fetchAppointments(body = {}): Promise<any> {
-  const response = await fetch(BASE_URL, {
+  const response = await fetch(QUERY_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -19,7 +21,7 @@ export async function fetchAppointments(body = {}): Promise<any> {
 export async function bookAppointment(body: any): Promise<any> {
   try {
     // Post an appointment
-    const response = await fetch(`${BASE_URL}/book`, {
+    const response = await fetch(BOOK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,3 +41,26 @@ export async function bookAppointment(body: any): Promise<any> {
     throw error;
   }
 }
+
+export const cancelBooking = async (appointmentId: string): Promise<any> => {
+  try {
+    const response = await fetch(CANCEL_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ appointmentId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error cancelling booking: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Booking cancelled successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error cancelling booking:', error);
+    throw error;
+  }
+};
