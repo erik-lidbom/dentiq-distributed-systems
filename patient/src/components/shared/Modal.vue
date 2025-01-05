@@ -8,7 +8,11 @@
   >
     <div
       class="bg-white overflow-hidden shadow-lg relative"
-      :class="isMobile ? 'w-full h-full rounded-none' : 'w-[75vw] md:min-w-[600px] max-w-[700px] h-fit rounded-3xl'"
+      :class="
+        isMobile
+          ? 'w-full h-full rounded-none'
+          : 'w-[75vw] md:min-w-[600px] max-w-[700px] h-fit rounded-3xl'
+      "
     >
       <!-- Close Button -->
       <button
@@ -20,16 +24,18 @@
       >
         ✕
       </button>
-      <div class="flex flex-col h-full" :class="isMobile ? 'px-4 py-6' : 'px-8 py-6'">
+      <div
+        class="flex flex-col h-full"
+        :class="isMobile ? 'px-4 py-6' : 'px-8 py-6'"
+      >
         <slot></slot>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 
 const emit = defineEmits(['close']);
 
@@ -41,14 +47,8 @@ const updateIsMobile = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-// Listen for resize events
-onMounted(() => {
-  window.addEventListener('resize', updateIsMobile);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateIsMobile);
-});
+// Ref to track the dropdown wrapper
+const dropdownWrapper = (ref < HTMLElement) | (null > null);
 
 const closeModalInside = () => {
   emit('close');

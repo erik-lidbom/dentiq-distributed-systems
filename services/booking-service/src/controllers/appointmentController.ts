@@ -122,9 +122,9 @@ export const bookAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      publishMessage('appointment/booked', {
-        topic: 'Failed Booking',
-        message: 'Failed Booking. Try Again!',
+      publishMessage('appointment/failed', {
+        topic: 'appointment/failed',
+        message: 'Booking Cancellation Failed!',
       });
       return resPayload;
     }
@@ -148,8 +148,8 @@ export const bookAppointment = async (
       };
       publishResponse(topic, resPayload);
       publishMessage('appointment/booked', {
-        topic: 'Failed Booking',
-        message: 'Failed Booking. Try Again!',
+        topic: 'appointment/failed',
+        message: 'Booking Cancellation Failed!',
       });
       return resPayload;
     }
@@ -196,8 +196,8 @@ export const bookAppointment = async (
     };
     publishResponse(topic, resPayload);
     publishMessage('appointment/failed', {
-      topic: 'Failed Booking',
-      message: 'Failed Booking. Try Again!',
+      topic: 'appointment/failed',
+      message: 'Booking Cancellation Failed!',
     });
     return resPayload;
   }
@@ -351,6 +351,7 @@ export const getAppointment = async (
  */
 export const getAppointments = async (
   topic: string,
+<<<<<<< HEAD
   message: Buffer
 ): Promise<ResponsePayload> => {
   try {
@@ -362,6 +363,24 @@ export const getAppointments = async (
     console.log('Query ID: ', dentistId)
     const appointments = await Appointment.find({ dentistId, date });
 
+=======
+  message: Buffer = Buffer.from('')
+): Promise<ResponsePayload> => {
+  try {
+    let appointments;
+    if (message.length > 0) {
+      const payload: {
+        id: string;
+      } = JSON.parse(message.toString());
+      const { id } = payload;
+
+      appointments = await Appointment.find({
+        $or: [{ dentistId: id }, { patientId: id }],
+      });
+    } else {
+      appointments = await Appointment.find();
+    }
+>>>>>>> origin/main
 
     const resPayload: ResponsePayload = {
       status: 200,
@@ -440,11 +459,16 @@ export const cancelAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
+      publishMessage('appointment/failed', {
+        topic: 'appointment/failed',
+        message: 'Booking Cancellation Failed!',
+      });
       return resPayload;
     }
 
     appointment.status = 'unbooked';
     appointment.patientId = null;
+    appointment.reason_for_visit = '';
 
     const cancelledAppointment = await appointment.save();
 
@@ -461,6 +485,11 @@ export const cancelAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    publishMessage('appointment/cancelled', {
+      topic: 'appointment/cancelled',
+      message: `Booking Cancelled Successfully`,
+    });
+    return resPayload;
     return resPayload;
   } catch (error) {
     console.error('Error cancelling appointment:', error);
@@ -473,6 +502,10 @@ export const cancelAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
+    publishMessage('appointment/failed', {
+      topic: 'appointment/failed',
+      message: `Booking Cancellation Failed!`,
+    });
     return resPayload;
   }
 };

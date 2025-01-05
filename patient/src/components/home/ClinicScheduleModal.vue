@@ -329,7 +329,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, onMounted } from 'vue';
 import { getMonth, getYear } from 'date-fns';
-import { bookAppointment } from '@/services/appointmentService';
+import { bookAppointment } from '@/api/bookingService';
 
 // Define Types
 interface Availability {
