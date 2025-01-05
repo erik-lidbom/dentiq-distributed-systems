@@ -144,11 +144,11 @@ export const patchPatient = async (req: Request, res: Response, next: NextFuncti
 };
 
 // MQTT: Handle Credential Validation
-const handleCredentialValidation = async (payload: any) => {
+export const handleCredentialValidation = async (payload: any) => {
     try {
-      const { email, password, correlationId } = payload; // Updated to destructure 'email'
+      const { email, password, correlationId } = payload;
   
-      if (!email || !password || !correlationId) { // Validate 'email' instead of 'username'
+      if (!email || !password || !correlationId) { 
         console.error("[MQTT]: Invalid payload received:", payload);
         throw new Error("Invalid payload: Missing required fields");
       }
@@ -192,6 +192,7 @@ const handleCredentialValidation = async (payload: any) => {
       );
     } catch (err) {
       console.error("[MQTT]: Error during credential validation:", err);
+      throw err;
     }
   };  
 
