@@ -4,7 +4,6 @@ import SlotsSection from '@/components/SlotsSection.vue';
 import Datepicker from 'vue3-datepicker';
 
 describe('SlotsSection.vue', () => {
-
     
     it('should render the correct number of slot buttons', () => {
         const wrapper = mount(SlotsSection);
@@ -15,7 +14,30 @@ describe('SlotsSection.vue', () => {
         });
         
         // Check that the correct number of slot buttons are rendered
-        expect(slotButtons.length).toBe(9); // Adjust the number according to your slot data
+        expect(slotButtons.length).toBe(9); 
+    });
+
+    it('buttons react correct to being clicked (active/not active)', async () => {
+        const wrapper = mount(SlotsSection);
+        
+        // Get the slot buttons (ignoring the calendar and confirm buttons)
+        const slotButtons = wrapper.findAll('button').filter(button => {
+          return button.text() !== '' && button.text() !== 'Confirm Changes' && !button.find('i.pi-calendar').exists();
+        });
+    
+        // Check the initial state of the first button
+        const firstButton = slotButtons.at(0);
+        expect(firstButton.classes()).toContain('bg-white'); // Should be inactive initially
+    
+        // Click the first slot button
+        await firstButton.trigger('click');
+        
+        // Check if the button's active state is toggled
+        expect(firstButton.classes()).toContain('bg-dentiq-button-dark'); // Should now be active
+    
+        // Click it again to toggle back to inactive
+        await firstButton.trigger('click');
+        expect(firstButton.classes()).toContain('bg-white'); // Should be inactive again
     });
 
     it('formats the date correctly', () => {
