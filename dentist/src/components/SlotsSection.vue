@@ -21,12 +21,20 @@
         <!-- Slots Display -->
         <div class="grid grid-cols-3 gap-2 border-b border-gray-400 pb-4">
           <button
-            v-for="slot in slots"
-            :key="slot.time"
-            :class="['h-full w-full p-3 text-lg font-semibold rounded-3xl transition-all duration-200', slot.active ? 'bg-dentiq-button-dark text-white border-2 border-transparent' : 'bg-white text-gray-800 border-2 border-dentiq-button-dark']"
-            @click="toggleSlot(slot)">
-            {{ slot.time }} 
-          </button>
+  v-for="slot in slots"
+  :key="slot.time"
+  :disabled="slot.isBooked"
+  :class="[
+    'h-full w-full p-3 text-lg font-semibold rounded-3xl transition-all duration-200',
+    slot.isBooked 
+      ? 'bg-red-500 text-white border-red-500'
+      : slot.isSelected
+        ? 'bg-dentiq-button-dark text-white border-2 border-transparent'
+        : 'bg-white text-gray-800 border-2 border-dentiq-button-dark'
+  ]"
+  @click="toggleSlot(slot)">
+  {{ slot.time }}
+</button>
         </div>
         <div class="flex justify-center">
           <button class="bg-dentiq-button-primary m-2 p-4 text-white rounded-md" @click="confirmChanges">Confirm Changes</button>
@@ -40,7 +48,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import Datepicker from 'vue3-datepicker';
 import 'vue3-datepicker';
-import { fetchAppointments, postAppointments } from '@/api/bookingservice';
+import { deleteAppointment, fetchAppointments, postAppointments } from '@/api/bookingservice';
 
 
 const fetchData = async () => {
@@ -56,12 +64,24 @@ const fetchData = async () => {
 
     slots.value.forEach(slot => {
       const matchingApps = appointmentData.find(appointment => 
-        appointment.start_time === slot.time && appointment.date === date
+      appointment.start_time === slot.time && appointment.date === date
       );
-      slot.active = !!matchingApps;
-    })
+      if(matchingApps && matchingApps.patientId) {
+        slot.isBooked = true;
+        slot.isSelected = false;
+        if(matchingApps.patientId) {
+          slot.isBooked = true
+        }
+      } else {
+        slot.isBooked = false;
+        slot.isSelected = !!matchingApps
+      }
+      //slot.active = !!matchingApps;
+    });
   } catch (error) {
     console.error("Error fetching appointments:", error);
+  } finally {
+    console.log(slots.value)
   }
 };
 
@@ -72,6 +92,7 @@ onMounted(() => {
 // State for the date picker
 const showCalendar = ref(false); // Controls the visibility of the calendar
 const selectedDate = ref(new Date()); // Holds the selected date
+const selectedApponintment = ref({})
 
 // Computed property to format the selected date
 const formattedDate = computed(() => {
@@ -86,15 +107,15 @@ const toggleCalendar = () => {
 
 // Predefined slot times
 const slots = ref([
-  { time: '08:00', active: false },
-  { time: '09:00', active: false },
-  { time: '10:00', active: false },
-  { time: '11:00', active: false },
-  { time: '12:00', active: false },
-  { time: '13:00', active: false },
-  { time: '14:00', active: false },
-  { time: '15:00', active: false },
-  { time: '16:00', active: false },
+  { time: '08:00', isSelected: false, isBooked: false, isCreated: false },
+  { time: '09:00', isSelected: false, isBooked: false , isCreated: false},
+  { time: '10:00', isSelected: false, isBooked: false , isCreated: false},
+  { time: '11:00', isSelected: false, isBooked: false , isCreated: false},
+  { time: '12:00', isSelected: false, isBooked: false , isCreated: false},
+  { time: '13:00', isSelected: false, isBooked: false , isCreated: false},
+  { time: '14:00', isSelected: false, isBooked: false , isCreated: false},
+  { time: '15:00', isSelected: false, isBooked: false , isCreated: false},
+  { time: '16:00', isSelected: false, isBooked: false , isCreated: false},
 ]);
 
 // Helper function to format the date as YYYY-MM-DD
@@ -112,12 +133,12 @@ const loadSlotsForDate = async (id, date) => {
     const serverSlots = response.data || [];
     slots.value.forEach(slot => {
       const serverSlot = serverSlots.find(s => s.time === slot.time);
-      slot.active = serverSlot ? serverSlot.active : false;
+      slot.isSelected = serverSlot ? serverSlot.active : false;
     });
   } catch (error) {
     console.error("Error fetching slots for the date:", error);
     // Reset all slots to inactive on error
-    slots.value.forEach(slot => slot.active = false);
+    slots.value.forEach(slot => slot.isSelected = false);
   }
 };
 
@@ -126,29 +147,49 @@ watch(selectedDate, async (newDate, oldDate) => {
   console.log("Date changed:", newDate);
 
   // Reset all slots to inactive before loading the new date's data
-  slots.value.forEach(slot => slot.active = false);
+  slots.value.forEach(slot => slot.isSelected = false);
   // call fetchData to check if slots are already picked
   await fetchData();
 });
 
 // Handle marking available slots
 const toggleSlot = (slot) => {
-  slot.active = !slot.active; // Toggle the active state of a slot
+  console.log("SLOT", slot)
+  slot.isSelected = !slot.isSelected; // Toggle the active state of a slot
+  if(slot.isSelected) {
+    selectedAppointment.value = {
+      date: selectedDate,
+      start_time: slot.time
+    }
+  }
 };
 
 // Confirm changes and send to API
 const confirmChanges = async () => {
+
   const appointmentData = {
     patientId: null,
     dentistId: '6756c273e4730b3a76915a35',
-    date: formatDate(selectedDate.value),
-    start_times: slots.value.filter(slot => slot.active).map(slot => slot.time),
+    date: formatDate(selectedAppoinment.date),
+    start_times: selectedAppoinment.time,
     status: 'unbooked'
   };
 
+  const slot = slots.value.filter((slot) => slot.time === selectedAppoinment.value.time).map((slot) => slot.value.isCreated === true)
+
+  if(slot){
+    
+  }
+  
+
   try {
-    await postAppointments(appointmentData); // Send data to API
-    alert("Changes confirmed!");
+    if(!appointment) {
+      await postAppointments(appointmentData);
+      alert("Changes confirmed!");
+    } else {
+      return;
+    }
+
   } catch (error) {
     console.error("Failed to confirm changes:", error);
     alert("An error occurred while confirming changes.");
