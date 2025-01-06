@@ -12,7 +12,7 @@ const routingController = async (
     console.log(`[INFO]: Path: ${path}`);
 
     const data = req.body || {};
-
+    
     const stringifiedData = JSON.stringify(data);
 
     const mqttResponse: any = await publishAndSubscribe(
