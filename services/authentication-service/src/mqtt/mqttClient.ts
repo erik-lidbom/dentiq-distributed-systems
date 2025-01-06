@@ -6,6 +6,7 @@ import {
   createAccount,
   login,
   refreshAuthToken,
+  getTokensBySessionId,
 } from '../controllers/authController';
 
 dotenv.config();
@@ -47,6 +48,7 @@ mqttClient.on('connect', () => {
       TOPICS.AUTHENTICATION.CREATE_RESPONSE,
       TOPICS.AUTHENTICATION.LOGIN_RESPONSE,
       TOPICS.AUTHENTICATION.VALIDATE_TOKEN,
+      TOPICS.AUTHENTICATION.VALIDATE_SESSION,
     ],
     (err) => {
       if (err) {
@@ -89,6 +91,12 @@ mqttClient.on('message', async (topic, message) => {
       const { refreshToken } = payload;
       const result = await refreshAuthToken(refreshToken);
       publishMessage(TOPICS.AUTHENTICATION.CREATE_RESPONSE, result);
+    } else if (topic === TOPICS.AUTHENTICATION.VALIDATE_SESSION) {
+      const { sessionId } = payload;
+      const result = await getTokensBySessionId(sessionId);
+      console.log('RESULT');
+      console.log(result);
+      publishMessage(TOPICS.PUBLISH.AUTH_VALIDATE_SESSION, result);
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';

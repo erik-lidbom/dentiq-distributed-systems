@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000/api/booking';
+const BASE_URL = 'http://localhost:4000/api/booking';
 
 /**
  * Fetch clinics from the API gateway
@@ -7,6 +7,10 @@ const BASE_URL = 'http://localhost:3000/api/booking';
 
 export async function bookAppointment(body: any): Promise<any> {
   try {
+    console.log('HAHAH');
+    const token = localStorage.getItem('token');
+    console.log('HEJ');
+    console.log(token);
     // Post an appointment
     const response = await fetch(`${BASE_URL}/book`, {
       method: 'POST',

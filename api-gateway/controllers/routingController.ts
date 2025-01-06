@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { ServiceError } from '../utils/customError'; // Custom Error Classes
 import { publishAndSubscribe } from '../mqtt/mqtt';
 
 const routingController = async (
@@ -13,6 +12,12 @@ const routingController = async (
     console.log(`[INFO]: Path: ${path}`);
 
     const data = req.body || {};
+    const header = req.headers;
+    if (header.authorization) {
+      const authHeader = header.authorization; // e.g., "Bearer <token>"
+      const token = authHeader.split(' ')[1]; // Extract the token part
+      console.log('Extracted Token:', token);
+    }
 
     const stringifiedData = JSON.stringify(data);
 

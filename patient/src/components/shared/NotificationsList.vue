@@ -1,6 +1,6 @@
 <template>
   <!-- NOTIFICATION BUTTON -->
-  <div class="relative">
+  <div class="relative" ref="dropdownWrapper">
     <div class="relative h-fit w-fit">
       <button
         @click="toggleListVisibility"
@@ -82,8 +82,11 @@ const notifications = ref<Notification[]>([]);
 const isOpen = ref(false);
 const unseenNotifications = ref(0);
 
+// Ref to track the dropdown wrapper
+const dropdownWrapper = ref<HTMLElement | null>(null);
+
 // Function to add a notification
-const addNotification = (message) => {
+const addNotification = (message: string) => {
   notifications.value.push({
     id: Date.now(),
     message,
@@ -109,6 +112,7 @@ const handleDeleteNotifications = () => {
   isOpen.value = false;
 };
 
+// Function to delete a single notification
 const deleteNotification = (notification: Notification) => {
   const index = notifications.value.findIndex((n) => n.id === notification.id);
   if (index !== -1) {
@@ -117,21 +121,31 @@ const deleteNotification = (notification: Notification) => {
   }
 };
 
+// Function to handle clicks outside the dropdown
+const handleClickOutside = (event: MouseEvent) => {
+  if (
+    dropdownWrapper.value &&
+    !dropdownWrapper.value.contains(event.target as Node)
+  ) {
+    isOpen.value = false;
+  }
+};
+
 // Subscribe and handle MQTT messages
 onMounted(async () => {
+  // Attach the outside click listener
+  document.addEventListener('click', handleClickOutside);
+
   try {
     console.log('[MQTT]: Initializing MQTT client...');
     await mqttClient.setup();
 
     // Handle incoming messages
     client.on('message', (topic: string, message: any) => {
-      //Topic validate --> This method can later be refactored by logic determining what action should happen
-
       const validatedTopic = validateTopic(topic);
       if (!validatedTopic) return;
 
       const payload = JSON.parse(message.toString());
-      console.log(`[MQTT]: Received message on topic ${topic}:`, payload);
       console.log(`[MQTT]: Received message on topic ${topic}:`, payload);
       addNotification(payload.message);
     });
@@ -142,6 +156,9 @@ onMounted(async () => {
 
 // Clean up on unmount
 onUnmounted(() => {
+  // Detach the outside click listener
+  document.removeEventListener('click', handleClickOutside);
+
   console.log(
     `[MQTT]: Unsubscribing from ${TOPICS.SUBSCRIBE.NOTIFICATION_CREATED}`
   );

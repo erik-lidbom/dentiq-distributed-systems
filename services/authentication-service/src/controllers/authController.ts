@@ -74,9 +74,17 @@ export const login = async (payload: any): Promise<any> => {
   const token = generateToken(user.email);
   const refreshToken = generateRefreshToken(user.email);
 
-  const session = await Session.create({ userId: user._id, refreshToken });
+  const session = await Session.create({
+    userId: user._id,
+    token,
+    refreshToken,
+  });
 
-  return { status: 200, sessionId: session._id };
+  return {
+    status: 200,
+    sessionId: session._id,
+    userId: user._id,
+  };
 };
 
 /**
@@ -107,4 +115,27 @@ export const refreshAuthToken = async (refreshToken: string): Promise<any> => {
   const newToken = generateToken(decoded.email);
 
   return { success: true, token: newToken };
+};
+
+/**
+ * Retrieves the accessToken and refreshToken for a given sessionId.
+ * @param {string} sessionId - The session ID.
+ * @returns {any} - Returns an object with the tokens or an error message.
+ */
+export const getTokensBySessionId = async (sessionId: string): Promise<any> => {
+  try {
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return { status: 404, message: 'Session not found' };
+    }
+
+    return {
+      status: 200,
+      token: session.token,
+      refreshToken: session.refreshToken,
+    };
+  } catch (error) {
+    console.error('Error retrieving tokens:', error);
+    return { status: 500, message: 'Internal server error' };
+  }
 };

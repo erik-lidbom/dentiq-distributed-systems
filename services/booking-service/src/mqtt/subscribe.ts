@@ -9,6 +9,7 @@ const subscriptionTopics = [
   TOPICS.SUBSCRIBE.DELETE,
   TOPICS.SUBSCRIBE.QUERY,
   TOPICS.SUBSCRIBE.BOOK,
+  TOPICS.SUBSCRIBE.CANCEL,
 ];
 
 export const subscribeTopics = async () => {

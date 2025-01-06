@@ -36,6 +36,11 @@ export default {
             selected: '#46BCECCC',
             shadowStrenghter: '#83838333',
           },
+          danger: {
+            light: '#FFEBEE',
+            default: '#F44336',
+            dark: '#D32F2F',
+          },
         },
       },
       boxShadow: {

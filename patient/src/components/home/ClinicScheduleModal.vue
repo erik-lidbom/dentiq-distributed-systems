@@ -329,7 +329,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, onMounted } from 'vue';
 import { getMonth, getYear } from 'date-fns';
-import { bookAppointment } from '@/services/appointmentService';
+import { bookAppointment } from '@/api/bookingService';
 
 // Define Types
 interface Availability {
@@ -698,11 +698,11 @@ const submit = async () => {
 
     // Success handling
     isSuccess.value = true;
-    submissionMessage.value = `Your booking for ${appointmentPayload.time} on ${new Date(
-      appointmentPayload.date
-    ).toLocaleDateString()} with Dr. ${selectedDoctor.value.name} at ${
-      props.clinic.name
-    } has been confirmed! 🎉`;
+    submissionMessage.value = `Your booking for ${
+      appointmentPayload.time
+    } on ${new Date(appointmentPayload.date).toLocaleDateString()} with Dr. ${
+      selectedDoctor.value.name
+    } at ${props.clinic.name} has been confirmed! 🎉`;
   } catch (error) {
     // Failure handling
     isSuccess.value = false;

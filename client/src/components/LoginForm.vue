@@ -119,10 +119,11 @@ const onSubmit = async () => {
 
   if (!res) return
   await axios
-    .post(`${import.meta.env.VITE_GATEWAY_URL}/api/auth/login`, form.value)
+    .post(`http://localhost:4000/api/auth/login`, form.value)
     .then((response: AxiosResponse) => {
-      const sessionId = response.data.data.sessionId
-      window.location.href = `${import.meta.env.VITE_PATIENT}/?sessionId=${sessionId}`
+      console.log(response.data)
+      const { sessionId, userId } = response.data.data
+      window.location.href = `http://localhost:5174/${userId}/?sessionId=${sessionId}`
     })
     .catch((error: AxiosError) => {
       console.log(error)
