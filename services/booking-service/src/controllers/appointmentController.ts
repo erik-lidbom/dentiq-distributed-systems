@@ -228,7 +228,7 @@ export const deleteAppointment = async (
       publishResponse(topic, resPayload);
       return resPayload;
     }
-
+    
     const appointment = await Appointment.findById(appointmentId);
 
     if (!appointment) {
@@ -351,43 +351,39 @@ export const getAppointment = async (
  */
 export const getAppointments = async (
   topic: string,
-<<<<<<< HEAD
-  message: Buffer
-): Promise<ResponsePayload> => {
-  try {
-    const payload: {
-      dentistId: string;
-      date: string
-    } = JSON.parse(message.toString());
-    const { dentistId, date } = payload;
-    console.log('Query ID: ', dentistId)
-    const appointments = await Appointment.find({ dentistId, date });
-
-=======
   message: Buffer = Buffer.from('')
 ): Promise<ResponsePayload> => {
   try {
     let appointments;
     if (message.length > 0) {
       const payload: {
-        id: string;
+        dentistId?: string,
+        patientId?: string
       } = JSON.parse(message.toString());
-      const { id } = payload;
+      const { dentistId, patientId } = payload;
 
-      appointments = await Appointment.find({
-        $or: [{ dentistId: id }, { patientId: id }],
-      });
+      console.log('Dentist ID: ', dentistId);
+      console.log('Patient ID: ', patientId);
+
+      const query: any = {};
+      if (dentistId) query.dentistId = dentistId;
+      if (patientId) query.patientId = patientId;
+
+      appointments = await Appointment.find(query);
+      //appointments = await Appointment.find( {dentistId} );
+
+      
+      //console.log('APPS: ', appointments)
     } else {
       appointments = await Appointment.find();
     }
->>>>>>> origin/main
 
     const resPayload: ResponsePayload = {
       status: 200,
       message: `Successfully fetched ${appointments.length} appointments.`,
       data: appointments,
     };
-    console.log('Payload: ', resPayload)
+    //console.log('Payload: ', resPayload)
 
     if (!appointments || appointments.length === 0) {
       resPayload.status = 404;
