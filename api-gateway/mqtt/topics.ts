@@ -42,8 +42,16 @@ export const TOPICS = {
     AUTH_UPDATE: 'auth/update/response',
     AUTH_DELETE: 'auth/delete/response',
     AUTH_QUERY: 'auth/query/response',
+    AUTH_LOGIN: 'auth/login/response',
   } as Record<
-    `${string}_${'CREATE' | 'GET' | 'UPDATE' | 'DELETE' | 'QUERY' | 'BOOK'}`,
+    `${string}_${
+      | 'CREATE'
+      | 'GET'
+      | 'UPDATE'
+      | 'DELETE'
+      | 'QUERY'
+      | 'BOOK'
+      | 'LOGIN'}`,
     string
   >,
   PUBLISH: {
@@ -85,12 +93,20 @@ export const TOPICS = {
     LOGGING_QUERY_RESPONSE: 'gateway/logging/query/response',
 
     AUTH_CREATE_RESPONSE: 'gateway/auth/create/response',
+    AUTH_LOGIN_RESPONSE: 'gateway/auth/login/response',
     AUTH_GET_RESPONSE: 'gateway/auth/get/response',
     AUTH_UPDATE_RESPONSE: 'gateway/auth/update/response',
     AUTH_DELETE_RESPONSE: 'gateway/auth/delete/response',
     AUTH_QUERY_RESPONSE: 'gateway/auth/query/response',
   } as Record<
-    `${string}_${'CREATE' | 'GET' | 'UPDATE' | 'DELETE' | 'QUERY' | 'BOOK'}_RESPONSE`,
+    `${string}_${
+      | 'CREATE'
+      | 'GET'
+      | 'UPDATE'
+      | 'DELETE'
+      | 'QUERY'
+      | 'BOOK'
+      | 'LOGIN'}_RESPONSE`,
     string
   >,
 };

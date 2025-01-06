@@ -3,8 +3,12 @@ import { TOPICS } from './topics';
 
 // Subscribe to topics
 const subscriptionTopics = [
-  TOPICS.SUBSCRIBE.DENTIST_CREATE_APP,
-  TOPICS.SUBSCRIBE.CREDENTIAL_VALIDATION_REQUEST,
+  TOPICS.SUBSCRIBE.CREATE,
+  TOPICS.SUBSCRIBE.GET,
+  TOPICS.SUBSCRIBE.UPDATE,
+  TOPICS.SUBSCRIBE.DELETE,
+  TOPICS.SUBSCRIBE.QUERY,
+  TOPICS.SUBSCRIBE.CLINICS.QUERY_RESPONSE,
 ];
 
 export const subscribeTopics = async () => {
@@ -13,7 +17,10 @@ export const subscribeTopics = async () => {
       if (!err) {
         console.log(`Subscribed to ${topic}`);
       } else {
-        console.error(`[MQTT]: Error subscribing to ${topic}:`, err.message);
+        console.log(
+          '[MQTT]: Subscribed to topics:',
+          subscriptionTopics.join(', ')
+        );
       }
     });
   });

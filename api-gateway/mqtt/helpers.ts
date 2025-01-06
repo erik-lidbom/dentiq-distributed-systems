@@ -106,6 +106,9 @@ export const retrievePublishTopic = (
         case 'query':
           publishTopic = TOPICS.PUBLISH.AUTH_QUERY_RESPONSE;
           break;
+        case 'login':
+          publishTopic = TOPICS.PUBLISH.AUTH_LOGIN_RESPONSE;
+          break;
       }
       break;
 
@@ -258,6 +261,9 @@ export const retrieveSubscribedTopic = (
           break;
         case 'query':
           subscriptionTopic = TOPICS.SUBSCRIBE.AUTH_QUERY;
+          break;
+        case 'login':
+          subscriptionTopic = TOPICS.SUBSCRIBE.AUTH_LOGIN;
           break;
       }
       break;
