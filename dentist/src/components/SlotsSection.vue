@@ -101,12 +101,15 @@ const fetchData = async () => {
       const appointment = appointmentData.find(
         (a) => a.start_time === slot.time && a.date === date
       );
-      slot.isCreated = !!appointment; // Mark as created if there's an appointment
-      slot.id = appointment?._id || ''; // Assign appointment ID if available
-      slot.isBooked = !!appointment?.patientId; // Mark as booked if a patient exists
-      slot.isSelected = false; // Reset selected state
-      slot.isToBeCreated = false; // Reset creation flag
-      slot.isToBeDeleted = false; // Reset deletion flag
+      // Mark as created if there's an appointment
+      slot.isCreated = !!appointment; 
+       // Assign appointment ID if available
+      slot.id = appointment?._id || '';
+      // Mark as booked if a patient exists
+      slot.isBooked = !!appointment?.patientId; 
+      slot.isSelected = false; 
+      slot.isToBeCreated = false;
+      slot.isToBeDeleted = false; 
     });
   } catch (error) {
     console.error('Error fetching appointments:', error);
@@ -127,9 +130,8 @@ onMounted(() => {
 });
 
 // State for the date picker
-const showCalendar = ref(false); // Controls the visibility of the calendar
-const selectedDate = ref(new Date()); // Holds the selected date
-const selectedApponintment = ref({});
+const showCalendar = ref(false);
+const selectedDate = ref(new Date()); 
 
 // Computed property to format the selected date
 const formattedDate = computed(() => {
@@ -307,7 +309,8 @@ const confirmChanges = async () => {
     ]);
 
     alert('Changes confirmed!');
-    await fetchData(); // Refresh the slots
+    // Fetch data again to update the UI
+    await fetchData(); 
   } catch (error) {
     console.error('Error confirming changes:', error);
     alert('An error occurred while confirming changes.');
