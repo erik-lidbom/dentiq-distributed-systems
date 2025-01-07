@@ -42,7 +42,7 @@ export const createAppointment = async (
       start_times: string[];
     } = JSON.parse(message.toString());
     const { dentistId, date, start_times } = payload;
-    console.log('payload: ', payload)
+    console.log('payload: ', payload);
 
     if (!dentistId || !date || !Array.isArray(start_times)) {
       const resPayload: ResponsePayload = {
@@ -78,6 +78,12 @@ export const createAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    if (newAppointments.length > 0) {
+      publishMessage('appointment/added', {
+        topic: 'appointment/added',
+        message: `New Available Slot`,
+      });
+    }
     return resPayload;
   } catch (error) {
     console.error('Error creating appointment:', error);
@@ -147,10 +153,6 @@ export const bookAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      publishMessage('appointment/booked', {
-        topic: 'appointment/failed',
-        message: 'Booking Cancellation Failed!',
-      });
       return resPayload;
     }
 
@@ -177,11 +179,8 @@ export const bookAppointment = async (
 
     publishResponse(topic, resPayload);
     publishMessage('appointment/booked', {
-      dentistId: bookedAppointment.dentistId,
-      patientId: bookedAppointment.patientId,
-      date: bookedAppointment.date,
-      time: bookedAppointment.start_time,
-      message: `Booked for ${date} at ${time}`,
+      topic: 'appointment/booked',
+      message: `${date} at ${time} has been booked`,
     });
     return resPayload;
   } catch (error) {
@@ -195,10 +194,6 @@ export const bookAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
-    publishMessage('appointment/failed', {
-      topic: 'appointment/failed',
-      message: 'Booking Cancellation Failed!',
-    });
     return resPayload;
   }
 };
@@ -228,7 +223,7 @@ export const deleteAppointment = async (
       publishResponse(topic, resPayload);
       return resPayload;
     }
-    
+
     const appointment = await Appointment.findById(appointmentId);
 
     if (!appointment) {
@@ -259,6 +254,10 @@ export const deleteAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    publishMessage('appointment/removed', {
+      topic: 'appointment/removed',
+      message: `A slot has been deleted`,
+    });
     return resPayload;
   } catch (error) {
     console.error('Error deleting appointment:', error);
@@ -357,8 +356,8 @@ export const getAppointments = async (
     let appointments;
     if (message.length > 0) {
       const payload: {
-        dentistId?: string,
-        patientId?: string
+        dentistId?: string;
+        patientId?: string;
       } = JSON.parse(message.toString());
       const { dentistId, patientId } = payload;
 
@@ -372,7 +371,6 @@ export const getAppointments = async (
       appointments = await Appointment.find(query);
       //appointments = await Appointment.find( {dentistId} );
 
-      
       //console.log('APPS: ', appointments)
     } else {
       appointments = await Appointment.find();
@@ -445,7 +443,7 @@ export const cancelAppointment = async (
       return resPayload;
     }
 
-    if (appointment.status !== 'booked') {
+    if (appointment.status !== 'booked' && appointment.patientId === null) {
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Appointment is not booked.',
@@ -455,10 +453,6 @@ export const cancelAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      publishMessage('appointment/failed', {
-        topic: 'appointment/failed',
-        message: 'Booking Cancellation Failed!',
-      });
       return resPayload;
     }
 
@@ -483,9 +477,8 @@ export const cancelAppointment = async (
     publishResponse(topic, resPayload);
     publishMessage('appointment/cancelled', {
       topic: 'appointment/cancelled',
-      message: `Booking Cancelled Successfully`,
+      message: `New Available Slot`,
     });
-    return resPayload;
     return resPayload;
   } catch (error) {
     console.error('Error cancelling appointment:', error);
