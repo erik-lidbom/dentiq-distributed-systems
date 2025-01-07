@@ -1,3 +1,5 @@
+import { logout } from '@/utils/helpers';
+
 const BASE_URL = 'http://localhost:4000/api/booking';
 
 /**
@@ -7,18 +9,21 @@ const BASE_URL = 'http://localhost:4000/api/booking';
 
 export async function bookAppointment(body: any): Promise<any> {
   try {
-    console.log('HAHAH');
     const token = localStorage.getItem('token');
-    console.log('HEJ');
-    console.log(token);
     // Post an appointment
     const response = await fetch(`${BASE_URL}/book`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body),
     });
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(`Error posting appointment: ${response.statusText}`);
@@ -34,11 +39,20 @@ export async function bookAppointment(body: any): Promise<any> {
 }
 
 export async function getAppointments(): Promise<any> {
+  const token = localStorage.getItem('token');
   try {
     // Get all appointments
     const response = await fetch(`${BASE_URL}/query`, {
       method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(`Error fetching appointments: ${response.statusText}`);

@@ -1,16 +1,25 @@
-const QUERY_URL = 'http://localhost:3000/api/booking/query';
-const BOOK_URL = 'http://localhost:3000/api/booking/book';
-const CANCEL_URL = 'http://localhost:3000/api/booking/cancel';
+import { logout } from '@/utils/helpers';
+
+//TODO --> Change all of these to env variables
+const QUERY_URL = 'http://localhost:4000/api/booking/query';
+const BOOK_URL = 'http://localhost:4000/api/booking/book';
+const CANCEL_URL = 'http://localhost:4000/api/booking/cancel';
 
 export async function fetchAppointments(body = {}): Promise<any> {
+  const token = localStorage.getItem('token');
   const response = await fetch(QUERY_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      // Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(body),
   });
+
+  if (response.status === 401) {
+    logout();
+    return;
+  }
 
   if (!response.ok) {
     throw new Error(`Failed to fetch appointments: ${response.statusText}`);
@@ -20,15 +29,23 @@ export async function fetchAppointments(body = {}): Promise<any> {
 }
 
 export async function bookAppointment(body: any): Promise<any> {
+  const token = localStorage.getItem('token');
+
   try {
     // Post an appointment
     const response = await fetch(BOOK_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body),
     });
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(`Error posting appointment: ${response.statusText}`);
@@ -44,14 +61,22 @@ export async function bookAppointment(body: any): Promise<any> {
 }
 
 export const cancelBooking = async (appointmentId: string): Promise<any> => {
+  const token = localStorage.getItem('token');
+
   try {
     const response = await fetch(CANCEL_URL, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ appointmentId }),
     });
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
 
     if (!response.ok) {
       throw new Error(`Error cancelling booking: ${response.statusText}`);
