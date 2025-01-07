@@ -45,6 +45,7 @@ export const TOPICS = {
     AUTH_QUERY: 'auth/query/response',
     AUTH_LOGIN: 'auth/login/response',
     AUTH_SESSION: 'auth/validate-session/response',
+    AUTH_TOKEN: 'auth/validate-token/response',
   } as Record<
     `${string}_${
       | 'CREATE'
@@ -55,7 +56,8 @@ export const TOPICS = {
       | 'BOOK'
       | 'CANCEL'
       | 'LOGIN'
-      | 'SESSION'}`,
+      | 'SESSION'
+      | 'TOKEN'}`,
     string
   >,
   PUBLISH: {
@@ -104,6 +106,7 @@ export const TOPICS = {
     AUTH_DELETE_RESPONSE: 'gateway/auth/delete/response',
     AUTH_QUERY_RESPONSE: 'gateway/auth/query/response',
     AUTH_SESSION_RESPONSE: 'gateway/auth/validate-session/response',
+    AUTH_TOKEN_RESPONSE: 'gateway/auth/validate-token/response',
   } as Record<
     `${string}_${
       | 'CREATE'
@@ -114,7 +117,8 @@ export const TOPICS = {
       | 'BOOK'
       | 'CANCEL'
       | 'LOGIN'
-      | 'SESSION'}_RESPONSE`,
+      | 'SESSION'
+      | 'TOKEN'}_RESPONSE`,
     string
   >,
 };
