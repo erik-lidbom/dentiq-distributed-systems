@@ -198,7 +198,7 @@ const onSubmit = async () => {
 
   if (!res) return
   await axios
-    .post(`${import.meta.env.VITE_GATEWAY_URL}/api/auth/create`, form.value)
+    .post(`http://localhost:4000/api/auth/create`, form.value)
     .then(() => {
       router.push('/login')
     })

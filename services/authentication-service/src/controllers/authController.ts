@@ -1,10 +1,6 @@
 import Session from '../models/sessionModel';
 import User from '../models/userModel';
-import {
-  generateRefreshToken,
-  generateToken,
-  validateToken,
-} from '../utils/tokenUtils';
+import { generateToken, validateToken } from '../utils/tokenUtils';
 import bcrypt from 'bcrypt';
 
 interface ValidationPayload {
@@ -72,11 +68,19 @@ export const login = async (payload: any): Promise<any> => {
     return { status: 401, message: 'Invalid credentials' };
   }
   const token = generateToken(user.email);
-  const refreshToken = generateRefreshToken(user.email);
+  //const refreshToken = generateRefreshToken(user.email);
 
-  const session = await Session.create({ userId: user._id, refreshToken });
+  const session = await Session.create({
+    userId: user._id,
+    token,
+    // refreshToken,
+  });
 
-  return { status: 200, sessionId: session._id };
+  return {
+    status: 200,
+    sessionId: session._id,
+    userId: user._id,
+  };
 };
 
 /**
@@ -86,10 +90,19 @@ export const login = async (payload: any): Promise<any> => {
  */
 
 export const validateAuthToken = async (token: string): Promise<any> => {
-  const decoded = validateToken(token);
+  let decoded = validateToken(token);
+
   if (!decoded) {
-    return { success: false, message: 'Invalid or expired token' };
+    console.log('Access token invalid or expired.');
+    try {
+      await Session.findOneAndDelete({ token });
+      console.log('Session successfully deleted.');
+    } catch (error) {
+      console.error('Error deleting session:', error);
+    }
+    return { success: false, message: 'Access token invalid or expired.' };
   }
+
   return { success: true, user: decoded };
 };
 
@@ -107,4 +120,27 @@ export const refreshAuthToken = async (refreshToken: string): Promise<any> => {
   const newToken = generateToken(decoded.email);
 
   return { success: true, token: newToken };
+};
+
+/**
+ * Retrieves the accessToken and refreshToken for a given sessionId.
+ * @param {string} sessionId - The session ID.
+ * @returns {any} - Returns an object with the tokens or an error message.
+ */
+export const getTokensBySessionId = async (sessionId: string): Promise<any> => {
+  try {
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return { status: 404, message: 'Session not found' };
+    }
+
+    return {
+      status: 200,
+      token: session.token,
+      // refreshToken: session.refreshToken,
+    };
+  } catch (error) {
+    console.error('Error retrieving tokens:', error);
+    return { status: 500, message: 'Internal server error' };
+  }
 };

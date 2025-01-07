@@ -72,9 +72,16 @@ import { aggregateClinicData } from '@/utils/dataAggregator.ts';
 import { TOPICS } from '@/mqtt/topics.ts';
 import { client, mqttClient } from '@/mqtt/mqtt.ts';
 
-// Google Maps Center
+// Reactive States
+const isLoading = ref(false);
+const errorMessage = ref(null);
+const clinics = ref([]);
+const isMobile = ref(window.innerWidth < 630);
+const showFilter = ref(false);
+const activeClinic = ref(null);
+const modalIsOpen = ref(false);
+const selectedServices = ref([]);
 const center = { lat: 57.7089, lng: 11.9746 };
-// Google Maps Options
 const mapOptions = {
   mapTypeControl: false,
   fullscreenControl: false,
@@ -82,31 +89,93 @@ const mapOptions = {
   zoomControl: false,
   rotateControl: false,
 };
-// Google Maps API Key
-const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const googleMapId = import.meta.env.VITE_GOOGLE_MAP_ID;
-// Track filter status
-const showFilter = ref(false);
-// Track mobile status
-const isMobile = ref(window.innerWidth < 630);
-// Track clinics
-const clinics = ref([]);
-// Track active clinic
-const activeClinic = ref(null);
-// Track selected services
-const selectedServices = ref([]);
-const modalIsOpen = ref(false);
 
-// Fetch clinics and appointments on mount
 const clinicStore = useClinicStore();
 const dentistStore = useDentistStore();
 const appointmentStore = useAppointmentStore();
+let isFetching = false;
 
-// Computed appointments
 const appointments = computed(() => appointmentStore.appointments);
 
-// Track if data is being fetched
-let isFetching = false;
+// Fetch and Aggregate Data
+const fetchAndAggregateData = async () => {
+  if (isFetching) return;
+  isFetching = true;
+  isLoading.value = true;
+  errorMessage.value = null;
+
+  try {
+    // Fetch appointments
+    const appointmentsData = await fetchAppointments();
+    appointmentStore.setAppointments(appointmentsData.data.data);
+    console.log('Fetched appointments:', appointmentsData.data.data);
+
+    // Fetch clinics
+    const clinicsData = await fetchClinics();
+    clinicStore.setClinics(clinicsData.data.clinics);
+    console.log('Fetched clinics:', clinicsData.data.clinics);
+
+    // Fetch dentists
+    const dentistsData = await fetchDentists();
+    dentistStore.setDentists(dentistsData.data.data);
+    console.log('Fetched dentists:', dentistsData.data.data);
+
+    // Aggregate the data
+    clinics.value = aggregateClinicData(
+      clinicStore.clinics,
+      dentistStore.dentists,
+      appointmentStore.appointments
+    );
+    console.log('Aggregated clinics:', clinics.value);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    errorMessage.value = 'Failed to load clinics. Please try again later.';
+  } finally {
+    isFetching = false;
+    isLoading.value = false;
+  }
+};
+
+// Watch for Appointments Changes
+watch(
+  () => appointments.value,
+  async (newAppointments, oldAppointments) => {
+    if (JSON.stringify(newAppointments) !== JSON.stringify(oldAppointments)) {
+      await fetchAndAggregateData();
+    }
+  },
+  { deep: true }
+);
+
+// Handle Initial Data Fetch
+onMounted(async () => {
+  await fetchAndAggregateData();
+
+  // MQTT Setup
+  await mqttClient.setup();
+  client.on('message', async (topic) => {
+    if (
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
+    ) {
+      await fetchAndAggregateData();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth < 630;
+  });
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', () => {
+    isMobile.value = window.innerWidth < 630;
+  });
+});
+
+// Google Maps API Key
+const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const googleMapId = import.meta.env.VITE_GOOGLE_MAP_ID;
 
 // Watch for changes in appointments
 watch(
@@ -131,34 +200,6 @@ watch(
   },
   { deep: true } // Watch for nested changes in appointments
 );
-
-// Function to fetch and aggregate data
-const fetchAndAggregateData = async () => {
-  if (isFetching) return;
-  isFetching = true;
-
-  try {
-    const appointmentsData = await fetchAppointments();
-    const clinicsData = await fetchClinics();
-    const dentistsData = await fetchDentists();
-
-    // Set data in stores
-    clinicStore.setClinics(clinicsData.data.clinics);
-    dentistStore.setDentists(dentistsData.data.data);
-    appointmentStore.setAppointments(appointmentsData.data.data);
-
-    // Aggregate data
-    clinics.value = aggregateClinicData(
-      clinicStore.clinics,
-      dentistStore.dentists,
-      appointmentStore.appointments
-    );
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  } finally {
-    isFetching = false;
-  }
-};
 
 onMounted(async () => {
   // Initial data fetch

@@ -21,6 +21,9 @@ export const retrievePublishTopic = (
         case 'delete':
           publishTopic = TOPICS.PUBLISH.BOOKING_DELETE_RESPONSE;
           break;
+        case 'cancel':
+          publishTopic = TOPICS.PUBLISH.BOOKING_CANCEL_RESPONSE;
+          break;
         case 'query':
           publishTopic = TOPICS.PUBLISH.BOOKING_QUERY_RESPONSE;
           break;
@@ -109,6 +112,12 @@ export const retrievePublishTopic = (
         case 'login':
           publishTopic = TOPICS.PUBLISH.AUTH_LOGIN_RESPONSE;
           break;
+        case 'validate-session':
+          publishTopic = TOPICS.PUBLISH.AUTH_SESSION_RESPONSE;
+          break;
+        case 'validate-token':
+          publishTopic = TOPICS.PUBLISH.AUTH_TOKEN_RESPONSE;
+          break;
       }
       break;
 
@@ -176,6 +185,9 @@ export const retrieveSubscribedTopic = (
           break;
         case 'delete':
           subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_DELETE;
+          break;
+        case 'cancel':
+          subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_CANCEL;
           break;
         case 'query':
           subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_QUERY;
@@ -264,6 +276,12 @@ export const retrieveSubscribedTopic = (
           break;
         case 'login':
           subscriptionTopic = TOPICS.SUBSCRIBE.AUTH_LOGIN;
+          break;
+        case 'validate-session':
+          subscriptionTopic = TOPICS.SUBSCRIBE.AUTH_SESSION;
+          break;
+        case 'validate-token':
+          subscriptionTopic = TOPICS.SUBSCRIBE.AUTH_TOKEN;
           break;
       }
       break;
