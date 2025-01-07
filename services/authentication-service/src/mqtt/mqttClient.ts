@@ -42,13 +42,10 @@ mqttClient.on('connect', () => {
   // Subscribe to necessary topics
   mqttClient.subscribe(
     [
-      TOPICS.AUTHENTICATION.CREATE,
-      TOPICS.AUTHENTICATION.LOGIN,
-      TOPICS.AUTHENTICATION.REFRESH_TOKEN,
-      TOPICS.AUTHENTICATION.CREATE_RESPONSE,
-      TOPICS.AUTHENTICATION.LOGIN_RESPONSE,
-      TOPICS.AUTHENTICATION.VALIDATE_TOKEN,
-      TOPICS.AUTHENTICATION.VALIDATE_SESSION,
+      TOPICS.SUBSCRIBE.AUTH_CREATE_ACCOUNT,
+      TOPICS.SUBSCRIBE.AUTH_LOGIN,
+      TOPICS.SUBSCRIBE.AUTH_VALIDATE_TOKEN,
+      TOPICS.SUBSCRIBE.AUTH_VALIDATE_SESSION,
     ],
     (err) => {
       if (err) {
@@ -77,25 +74,20 @@ mqttClient.on('message', async (topic, message) => {
 
     const payload = JSON.parse(message.toString());
 
-    if (topic === TOPICS.AUTHENTICATION.CREATE) {
+    if (topic === TOPICS.SUBSCRIBE.AUTH_CREATE_ACCOUNT) {
       const result = await createAccount(payload);
-      publishMessage(TOPICS.AUTHENTICATION.CREATE_RESPONSE, result);
-    } else if (topic === TOPICS.AUTHENTICATION.LOGIN) {
+      publishMessage(TOPICS.PUBLISH.AUTH_CREATE_ACCOUNT, result);
+    } else if (topic === TOPICS.SUBSCRIBE.AUTH_LOGIN) {
       const result = await login(payload);
-      publishMessage(TOPICS.AUTHENTICATION.LOGIN_RESPONSE, result);
-    } else if (topic === TOPICS.AUTHENTICATION.VALIDATE_TOKEN) {
+      publishMessage(TOPICS.PUBLISH.AUTH_LOGIN, result);
+    } else if (topic === TOPICS.SUBSCRIBE.AUTH_VALIDATE_TOKEN) {
       const { token } = payload;
       const result = await validateAuthToken(token);
-      publishMessage(TOPICS.AUTHENTICATION.CREATE_RESPONSE, result);
-    } else if (topic === TOPICS.AUTHENTICATION.REFRESH_TOKEN) {
-      const { refreshToken } = payload;
-      const result = await refreshAuthToken(refreshToken);
-      publishMessage(TOPICS.AUTHENTICATION.CREATE_RESPONSE, result);
-    } else if (topic === TOPICS.AUTHENTICATION.VALIDATE_SESSION) {
+      publishMessage(TOPICS.PUBLISH.AUTH_VALIDATE_TOKEN, result);
+    } else if (topic === TOPICS.SUBSCRIBE.AUTH_VALIDATE_SESSION) {
       const { sessionId } = payload;
       const result = await getTokensBySessionId(sessionId);
-      console.log('RESULT');
-      console.log(result);
+
       publishMessage(TOPICS.PUBLISH.AUTH_VALIDATE_SESSION, result);
     }
   } catch (err) {
