@@ -13,10 +13,47 @@ const routingController = async (
 
     const data = req.body || {};
     const header = req.headers;
-    if (header.authorization) {
-      const authHeader = header.authorization; // e.g., "Bearer <token>"
-      const token = authHeader.split(' ')[1]; // Extract the token part
-      console.log('Extracted Token:', token);
+
+    // Authorization header is required on every path excepts these ones.
+    if (
+      path !== 'login' &&
+      path !== 'validate-session' &&
+      serviceName !== 'auth' &&
+      path !== 'create'
+    ) {
+      // Checks if authorization header is included in the requests. Returns authorization error if not.
+      if (!header.authorization) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authorization header is required for this route',
+        });
+      }
+
+      // Splits the Bearer token
+      const authHeader = header.authorization;
+      const token = authHeader.split(' ')[1];
+
+      try {
+        const mqttResponse: any = await publishAndSubscribe(
+          'auth',
+          'validate-token',
+          JSON.stringify({ token }),
+          10000
+        );
+
+        const parsedResponse = JSON.parse(mqttResponse);
+        if (!parsedResponse.success) {
+          return res.status(401).json({
+            message: 'Session expired or invalid. Please re-authenticate.',
+          });
+        }
+      } catch (error) {
+        console.error('Error validating token:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'Error validating token',
+        });
+      }
     }
 
     const stringifiedData = JSON.stringify(data);
@@ -38,6 +75,9 @@ const routingController = async (
       .json({ message: parsedResponse.message, data: parsedResponse });
   } catch (error: any) {
     console.error(`[ERROR]: Internal error in routingController: ${error}`);
+    return res.status(500).json({
+      message: 'Internal error',
+    });
   }
 };
 
