@@ -115,6 +115,9 @@ export const retrievePublishTopic = (
         case 'validate-session':
           publishTopic = TOPICS.PUBLISH.AUTH_SESSION_RESPONSE;
           break;
+        case 'validate-token':
+          publishTopic = TOPICS.PUBLISH.AUTH_TOKEN_RESPONSE;
+          break;
       }
       break;
 
@@ -276,6 +279,10 @@ export const retrieveSubscribedTopic = (
           break;
         case 'validate-session':
           subscriptionTopic = TOPICS.SUBSCRIBE.AUTH_SESSION;
+          break;
+        case 'validate-token':
+          subscriptionTopic = TOPICS.SUBSCRIBE.AUTH_TOKEN;
+          break;
       }
       break;
 
