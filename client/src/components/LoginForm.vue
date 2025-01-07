@@ -121,7 +121,6 @@ const onSubmit = async () => {
   await axios
     .post(`http://localhost:4000/api/auth/login`, form.value)
     .then((response: AxiosResponse) => {
-      console.log(response.data)
       const { sessionId, userId } = response.data.data
       window.location.href = `http://localhost:5174/${userId}/?sessionId=${sessionId}`
     })
