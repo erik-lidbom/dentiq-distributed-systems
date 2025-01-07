@@ -8,25 +8,16 @@ export const subscribeTopics = async (): Promise<void> => {
   }
 
   try {
-    client.subscribe(
-      [
-        TOPICS.SUBSCRIBE.NOTIFICATION_CREATED,
-        TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT,
-        TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT,
-        TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT,
-        TOPICS.SUBSCRIBE.NOTIFICATION_FAILED,
-      ],
-      (err) => {
-        if (err) {
-          console.error('[MQTT]: Subscription error:', err);
-          throw err;
-        } else {
-          console.log(
-            `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_CREATED}`
-          );
-        }
+    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_REMOVED, (err) => {
+      if (err) {
+        console.error('[MQTT]: Subscription error:', err);
+        throw err;
+      } else {
+        console.log(
+          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT}`
+        );
       }
-    );
+    });
     client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT, (err) => {
       if (err) {
         console.error('[MQTT]: Subscription error:', err);
