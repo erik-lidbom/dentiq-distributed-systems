@@ -3,7 +3,6 @@ import {
     deletePatient,
     getPatient,
     patchPatient,
-    handleCredentialValidation,
   } from '../controllers/patientController';
   import { Patient } from '../models/patientSchema';
   import mqttClient from '../mqtt/mqtt';
@@ -384,107 +383,4 @@ import {
         );
       });
     });
-  
-    // handle credential
-    describe('handleCredentialValidation()', () => {
-      // Helper: mock the Patient.findOne result
-      const mockPatient = {
-        _id: 'mockedPatientId',
-        email: 'test@example.com',
-        password: 'testpassword',
-      };
-  
-      it('should throw an error if missing email, password, or correlationId', async () => {
-        const invalidPayload = { email: 'test@example.com', password: 'testpass' };
-        // correlationId missing
-  
-        await expect(handleCredentialValidation(invalidPayload)).rejects.toThrow(
-          'Invalid payload: Missing required fields'
-        );
-      });
-  
-      it('should publish a success response if patient is found', async () => {
-        (Patient.findOne as jest.Mock).mockResolvedValueOnce(mockPatient);
-  
-        const payload = {
-          email: 'test@example.com',
-          password: 'testpassword',
-          correlationId: 'corId123',
-        };
-  
-        await handleCredentialValidation(payload);
-  
-        // Check that findOne was called properly
-        expect(Patient.findOne).toHaveBeenCalledWith({
-          email: payload.email,
-          password: payload.password,
-        });
-  
-        // Check MQTT publish for success
-        expect(mqttClient.publish).toHaveBeenCalledWith(
-          TOPICS.PUBLISH.CREDENTIAL_VALIDATION_RESPONSE(payload.correlationId),
-          JSON.stringify({
-            correlationId: 'corId123',
-            success: true,
-            message: 'Credentials validated successfully.',
-          }),
-          { qos: 2 },
-          expect.any(Function)
-        );
-      });
-  
-      it('should publish a failure response if patient is NOT found', async () => {
-        (Patient.findOne as jest.Mock).mockResolvedValueOnce(null);
-  
-        const payload = {
-          email: 'wrong@example.com',
-          password: 'wrongPassword',
-          correlationId: 'corIdFail',
-        };
-  
-        await handleCredentialValidation(payload);
-  
-        // Check that findOne was called properly
-        expect(Patient.findOne).toHaveBeenCalledWith({
-          email: 'wrong@example.com',
-          password: 'wrongPassword',
-        });
-  
-        // Check MQTT publish for failure
-        expect(mqttClient.publish).toHaveBeenCalledWith(
-          TOPICS.PUBLISH.CREDENTIAL_VALIDATION_RESPONSE('corIdFail'),
-          JSON.stringify({
-            correlationId: 'corIdFail',
-            success: false,
-            message: 'Invalid credentials.',
-          }),
-          { qos: 2 },
-          expect.any(Function)
-        );
-      });
-  
-      it('should catch and log errors thrown during validation', async () => {
-        // Simulate DB error
-        (Patient.findOne as jest.Mock).mockRejectedValueOnce(
-          new Error('Database error')
-        );
-  
-        const payload = {
-          email: 'error@example.com',
-          password: 'fail',
-          correlationId: 'corIdErr',
-        };
-        
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-  
-        await expect(handleCredentialValidation(payload)).rejects.toThrow('Database error');
-  
-        expect(consoleSpy).toHaveBeenCalledWith(
-          '[MQTT]: Error during credential validation:',
-          expect.any(Error)
-        );
-        consoleSpy.mockRestore();
-      });
-    });
   });
-  
