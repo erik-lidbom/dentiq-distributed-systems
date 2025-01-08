@@ -25,6 +25,9 @@ import { useRouter } from 'vue-router';
 import GlobalNav from './components/shared/Header.vue';
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_API_GATEWAY
+
+
 const router = useRouter();
 const sessionId = ref<string | null>(null);
 const userId = ref<string | null>(null);
@@ -44,7 +47,7 @@ onMounted(async () => {
 
     if (sessionId.value) {
       const response = await axios.post(
-        `http://localhost:4000/api/auth/validate-session`,
+        `${BASE_URL}/api/auth/validate-session`,
         { sessionId: sessionId.value }
       );
 
