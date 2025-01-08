@@ -16,7 +16,6 @@ export const subscribeTopics = async () => {
     mqttClient?.subscribe(topic, (err) => {
       if (!err) {
         console.log(`Subscribed to ${topic}`);
-        return;
       } else {
         console.log(
           '[MQTT]: Subscribed to topics:',

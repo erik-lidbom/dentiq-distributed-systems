@@ -40,7 +40,7 @@ export const createPatient = async (req: Request, res: Response, next: NextFunct
 
     // Publish message to Notification Service topic
         const message = {
-        type: "PatientRegistered",
+            type: "PatientRegistered",
             patientId: savedPatient._id,
             Firstname,
             Lastname,
@@ -142,3 +142,71 @@ export const patchPatient = async (req: Request, res: Response, next: NextFuncti
         handleError(error, res);
     }
 };
+
+// MQTT: Handle Credential Validation
+const handleCredentialValidation = async (payload: any) => {
+    try {
+      const { email, password, correlationId } = payload; // Updated to destructure 'email'
+  
+      if (!email || !password || !correlationId) { // Validate 'email' instead of 'username'
+        console.error("[MQTT]: Invalid payload received:", payload);
+        throw new Error("Invalid payload: Missing required fields");
+      }
+  
+      console.log(
+        `[DEBUG]: Validating credentials for email: ${email}, correlationId: ${correlationId}`
+      );
+  
+      // Query database for email and password
+      const patient = await Patient.findOne({ email, password });
+  
+      const responsePayload = {
+        correlationId,
+        success: !!patient,
+        message: patient
+          ? "Credentials validated successfully."
+          : "Invalid credentials.",
+      };
+  
+      mqttClient.publish(
+        TOPICS.PUBLISH.CREDENTIAL_VALIDATION_RESPONSE(correlationId),
+        JSON.stringify(responsePayload),
+        { qos: 2 },
+        (err) => {
+          if (err) {
+            console.error(
+              `[MQTT]: Failed to publish response to topic ${TOPICS.PUBLISH.CREDENTIAL_VALIDATION_RESPONSE(
+                correlationId
+              )}:`,
+              err
+            );
+          } else {
+            console.log(
+              `[MQTT]: Response published to topic ${TOPICS.PUBLISH.CREDENTIAL_VALIDATION_RESPONSE(
+                correlationId
+              )}:`,
+              responsePayload
+            );
+          }
+        }
+      );
+    } catch (err) {
+      console.error("[MQTT]: Error during credential validation:", err);
+    }
+  };  
+
+// MQTT: Subscribe to topics
+mqttClient.on("message", async (topic, message) => {
+    try {
+        const payload = JSON.parse(message.toString());
+
+        if (topic === TOPICS.SUBSCRIBE.CREDENTIAL_VALIDATION_REQUEST) {
+            console.log(`[MQTT]: Received credential validation request: ${message.toString()}`);
+            await handleCredentialValidation(payload);
+        } else {
+            console.warn(`[MQTT]: Unhandled topic: ${topic}`);
+        }
+    } catch (err) {
+        console.error("[MQTT]: Error handling message:", err);
+    }
+});
