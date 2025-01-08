@@ -90,9 +90,7 @@ export const login = async (payload: any): Promise<any> => {
  */
 
 export const validateAuthToken = async (token: string): Promise<any> => {
-  console.log('TOKEN PASSED TO validateAuthTOKEN:', token);
-  let decoded = validateToken(token);
-  console.log('Even after Decoded:', decoded);
+  const decoded = await validateToken(token);
 
   if (!decoded) {
     console.log('Access token invalid or expired.');
@@ -135,7 +133,6 @@ export const getTokensBySessionId = async (sessionId: string): Promise<any> => {
     if (!session) {
       return { status: 404, message: 'Session not found' };
     }
-
     return {
       status: 200,
       token: session.token,

@@ -46,10 +46,9 @@ onMounted(async () => {
     }
 
     if (sessionId.value) {
-      const response = await axios.post(
-        `${BASE_URL}/api/auth/validate-session`,
-        { sessionId: sessionId.value }
-      );
+      const response = await axios.post(`${BASE_URL}/auth/validate-session`, {
+        sessionId: sessionId.value,
+      });
 
       const token = response.data.data.token;
 

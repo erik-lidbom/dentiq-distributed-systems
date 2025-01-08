@@ -125,7 +125,6 @@ const onSubmit = async () => {
     .post(`${BASE_URL}/auth/login`, form.value)
     .then((response: AxiosResponse) => {
       const { sessionId, userId } = response.data.data
-      console.log(' SEssion ID and USER ID ', sessionId, userId)
       window.location.href = `${PATIENT_URL}/${userId}/?sessionId=${sessionId}`
     })
     .catch((error: AxiosError) => {
