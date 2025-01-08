@@ -1,9 +1,10 @@
 import { logout } from '@/utils/helpers';
 
 //TODO --> Change all of these to env variables
-const QUERY_URL = 'http://localhost:4000/api/booking/query';
-const BOOK_URL = 'http://localhost:4000/api/booking/book';
-const CANCEL_URL = 'http://localhost:4000/api/booking/cancel';
+const BASE_URL = import.meta.env.VITE_API_GATEWAY;
+const QUERY_URL = `${BASE_URL}/api/booking/query`;
+const BOOK_URL = `${BASE_URL}/api/booking/book`;
+const CANCEL_URL = `${BASE_URL}/api/booking/cancel`;
 
 export async function fetchAppointments(body = {}): Promise<any> {
   const token = localStorage.getItem('token');

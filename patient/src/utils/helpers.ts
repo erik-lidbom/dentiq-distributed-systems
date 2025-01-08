@@ -1,5 +1,4 @@
-//TODO --> Change to env variables
-const LOGIN_URL = `http://localhost:5173/login`;
+const LOGIN_URL = import.meta.env.VITE_LOGIN;
 
 export const logout = () => {
   localStorage.removeItem('token');
