@@ -71,6 +71,7 @@ import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { ref } from 'vue'
 
 const BASE_URL = import.meta.env.VITE_API_GATEWAY
+const PATIENT_URL = import.meta.env.VITE_PATIENT_URL
 
 // Signup form Type
 type SignupForm = {
@@ -121,10 +122,11 @@ const onSubmit = async () => {
 
   if (!res) return
   await axios
-    .post(`${BASE_URL}/api/auth/login`, form.value)
+    .post(`${BASE_URL}/auth/login`, form.value)
     .then((response: AxiosResponse) => {
       const { sessionId, userId } = response.data.data
-      window.location.href = `${BASE_URL}/${userId}/?sessionId=${sessionId}`
+      console.log(' SEssion ID and USER ID ', sessionId, userId)
+      window.location.href = `${PATIENT_URL}/${userId}/?sessionId=${sessionId}`
     })
     .catch((error: AxiosError) => {
       console.log(error)

@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.VITE_API_GATEWAY;
 export async function fetchDentists(): Promise<any> {
   const token = localStorage.getItem('token');
 
-  const response = await fetch(`${BASE_URL}/api/dentist/query`, {
+  const response = await fetch(`${BASE_URL}/dentist/query`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

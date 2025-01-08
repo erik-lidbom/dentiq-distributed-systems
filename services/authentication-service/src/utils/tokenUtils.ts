@@ -11,6 +11,7 @@ export const generateToken = (userId: string): string => {
 export const validateToken = async (token: string, isRefreshToken = false) => {
   try {
     const decoded = jwt.verify(token, SECRET_KEY) as { id: string };
+    console.log('Decoded:', decoded);
 
     // Checks if the token exists in an active session
     const session = await Session.findOne({
@@ -23,6 +24,7 @@ export const validateToken = async (token: string, isRefreshToken = false) => {
     }
     return decoded;
   } catch (error) {
+    console.log('Something Random');
     return null;
   }
 };

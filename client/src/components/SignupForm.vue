@@ -200,7 +200,7 @@ const onSubmit = async () => {
 
   if (!res) return
   await axios
-    .post(`${BASE_URL}/api/auth/create`, form.value)
+    .post(`${BASE_URL}/auth/create`, form.value)
     .then(() => {
       router.push('/login')
     })

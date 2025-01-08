@@ -67,6 +67,7 @@ export const login = async (payload: any): Promise<any> => {
     return { status: 401, message: 'Invalid credentials' };
   }
   const token = generateToken(user._id);
+  console.log('Token:', token);
 
   await Session.deleteMany({ userId: user._id });
 
@@ -89,7 +90,9 @@ export const login = async (payload: any): Promise<any> => {
  */
 
 export const validateAuthToken = async (token: string): Promise<any> => {
+  console.log('TOKEN PASSED TO validateAuthTOKEN:', token);
   let decoded = validateToken(token);
+  console.log('Even after Decoded:', decoded);
 
   if (!decoded) {
     console.log('Access token invalid or expired.');

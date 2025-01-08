@@ -24,9 +24,9 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import GlobalNav from './components/shared/Header.vue';
 import axios from 'axios';
+import { logout } from '@/utils/helpers';
 
-const BASE_URL = import.meta.env.VITE_API_GATEWAY
-
+const BASE_URL = import.meta.env.VITE_API_GATEWAY;
 
 const router = useRouter();
 const sessionId = ref<string | null>(null);
@@ -66,7 +66,7 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error during authentication:', error);
-    router.replace('/login');
+    logout();
   } finally {
     isLoading.value = false;
   }
