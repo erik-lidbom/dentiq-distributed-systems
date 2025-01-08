@@ -698,11 +698,11 @@ const submit = async () => {
 
     // Success handling
     isSuccess.value = true;
-    submissionMessage.value = `Your booking for ${appointmentPayload.time} on ${new Date(
-      appointmentPayload.date
-    ).toLocaleDateString()} with Dr. ${selectedDoctor.value.name} at ${
-      props.clinic.name
-    } has been confirmed! 🎉`;
+    submissionMessage.value = `Your booking for ${
+      appointmentPayload.time
+    } on ${new Date(appointmentPayload.date).toLocaleDateString()} with Dr. ${
+      selectedDoctor.value.name
+    } at ${props.clinic.name} has been confirmed! 🎉`;
   } catch (error) {
     // Failure handling
     isSuccess.value = false;

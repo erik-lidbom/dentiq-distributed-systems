@@ -1,19 +1,32 @@
-import express, { Express } from "express";
-import dotenv from "dotenv";
-import mqttClient from "./mqtt/mqttClient";
-import authRouter from "./routes/authRoutes";
+import express, { Express } from 'express';
+import dotenv from 'dotenv';
+import mqttClient from './mqtt/mqttClient';
+import mongoose from 'mongoose';
 
 // Load environment variables
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3003;
+const mongoURI = process.env.MONGODB_URI || '';
+console.log('MONGOURI: ' + mongoURI);
 
 // Middleware
 app.use(express.json());
 
-// Routes
-app.use("/api/auth", authRouter);
+// MongoDB Connection
+
+// Connect to MongoDB
+mongoose
+  .connect(mongoURI)
+  .catch(function (err) {
+    console.log(`Failed to connect to MongoDB with URI: ${mongoURI}`);
+    console.log(err.stack);
+    process.exit(1);
+  })
+  .then(function () {
+    console.log(`Connected to MongoDB with URI: ${mongoURI}`);
+  });
 
 // Start MQTT client
 mqttClient;
