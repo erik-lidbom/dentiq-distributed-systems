@@ -48,6 +48,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
 import router from '@/router';
+import { logout } from '@/utils/helpers';
 
 interface Notification {
   id: number;
@@ -80,8 +81,7 @@ const handleNavigateToMyBookings = () => {
 
 const handleLogOut = () => {
   isOpen.value = false;
-  router.push('/');
-  // TODO: Implement logout functionality
+  logout();
 };
 
 // Function to handle clicks outside the dropdown

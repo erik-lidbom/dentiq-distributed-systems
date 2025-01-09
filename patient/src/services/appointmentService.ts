@@ -1,6 +1,6 @@
 import { logout } from '@/utils/helpers';
 
-const BASE_URL = 'http://localhost:4000/api/booking';
+const BASE_URL = import.meta.env.VITE_API_GATEWAY;
 
 /**
  * Fetch clinics from the API gateway
@@ -11,7 +11,7 @@ export async function bookAppointment(body: any): Promise<any> {
   try {
     const token = localStorage.getItem('token');
     // Post an appointment
-    const response = await fetch(`${BASE_URL}/book`, {
+    const response = await fetch(`${BASE_URL}/api/booking/book`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ export async function getAppointments(): Promise<any> {
   const token = localStorage.getItem('token');
   try {
     // Get all appointments
-    const response = await fetch(`${BASE_URL}/query`, {
+    const response = await fetch(`${BASE_URL}/api/booking/query`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,

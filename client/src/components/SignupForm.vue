@@ -120,6 +120,8 @@ import SignupHeader from './SignupHeader.vue'
 import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { useRouter } from 'vue-router'
 
+const BASE_URL = import.meta.env.VITE_API_GATEWAY
+
 const router = useRouter()
 
 // Signup form Type
@@ -198,7 +200,7 @@ const onSubmit = async () => {
 
   if (!res) return
   await axios
-    .post(`http://localhost:4000/api/auth/create`, form.value)
+    .post(`${BASE_URL}/auth/create`, form.value)
     .then(() => {
       router.push('/login')
     })

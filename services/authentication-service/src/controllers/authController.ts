@@ -49,10 +49,9 @@ export const createAccount = async (payload: any): Promise<any> => {
 };
 
 /**
- * Checks if the credentials are valid, and if it is valid it creates a new session that is stored in the database.
+ * Checks if the credentials are valid, and if it is valid it deletes the previous session and  creates a new session that is stored in the database.
  * Lastly the method returns a status, token and refreshToken.
- * @param {string} email - Email provided.
- * @param {string} password - Password provided.
+ * @param {string} payload - Payload containing the email and password
  * @returns {any} - Returns an object with success status, token and a refresh token
  */
 
@@ -67,13 +66,14 @@ export const login = async (payload: any): Promise<any> => {
   if (!user || !decodedPassword) {
     return { status: 401, message: 'Invalid credentials' };
   }
-  const token = generateToken(user.email);
-  //const refreshToken = generateRefreshToken(user.email);
+  const token = generateToken(user._id);
+  console.log('Token:', token);
+
+  await Session.deleteMany({ userId: user._id });
 
   const session = await Session.create({
     userId: user._id,
     token,
-    // refreshToken,
   });
 
   return {
@@ -90,7 +90,7 @@ export const login = async (payload: any): Promise<any> => {
  */
 
 export const validateAuthToken = async (token: string): Promise<any> => {
-  let decoded = validateToken(token);
+  const decoded = await validateToken(token);
 
   if (!decoded) {
     console.log('Access token invalid or expired.');
@@ -133,7 +133,6 @@ export const getTokensBySessionId = async (sessionId: string): Promise<any> => {
     if (!session) {
       return { status: 404, message: 'Session not found' };
     }
-
     return {
       status: 200,
       token: session.token,

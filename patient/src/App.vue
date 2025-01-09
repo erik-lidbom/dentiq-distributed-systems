@@ -21,13 +21,16 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import {  useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import GlobalNav from './components/shared/Header.vue';
 import axios from 'axios';
-import test from 'node:test';
+import { logout } from '@/utils/helpers';
+
+const BASE_URL = import.meta.env.VITE_API_GATEWAY;
 
 const router = useRouter();
 const sessionId = ref<string | null>(null);
+const userId = ref<string | null>(null);
 const isLoading = ref(true); // Controls whether the application is loading
 
 onMounted(async () => {
@@ -36,19 +39,24 @@ onMounted(async () => {
       'sessionId'
     );
 
+    userId.value = window.location.pathname.split('/')[1];
+
+    if (userId.value) {
+      localStorage.setItem('userId', userId.value);
+    }
+
     if (sessionId.value) {
-      const response = await axios.post(
-        `http://localhost:4000/api/auth/validate-session`,
-        { sessionId: sessionId.value }
-      );
+      const response = await axios.post(`${BASE_URL}/auth/validate-session`, {
+        sessionId: sessionId.value,
+      });
 
       const token = response.data.data.token;
 
       if (token) {
         localStorage.setItem('token', token);
 
-        // Remove sessionId from URL
-        router.replace({ query: {} });
+        // Remove sessionId and userId from URL
+        router.replace({ query: {}, path: '/' });
       } else {
         console.warn('Token or refreshToken missing from response');
       }
@@ -57,9 +65,9 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Error during authentication:', error);
-    router.replace('/login');
+    logout();
   } finally {
-    isLoading.value = false; 
+    isLoading.value = false;
   }
 });
 </script>

@@ -70,6 +70,9 @@
 import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { ref } from 'vue'
 
+const BASE_URL = import.meta.env.VITE_API_GATEWAY
+const PATIENT_URL = import.meta.env.VITE_PATIENT_URL
+
 // Signup form Type
 type SignupForm = {
   email: string
@@ -119,10 +122,10 @@ const onSubmit = async () => {
 
   if (!res) return
   await axios
-    .post(`http://localhost:4000/api/auth/login`, form.value)
+    .post(`${BASE_URL}/auth/login`, form.value)
     .then((response: AxiosResponse) => {
       const { sessionId, userId } = response.data.data
-      window.location.href = `http://localhost:5174/${userId}/?sessionId=${sessionId}`
+      window.location.href = `${PATIENT_URL}/${userId}/?sessionId=${sessionId}`
     })
     .catch((error: AxiosError) => {
       console.log(error)
