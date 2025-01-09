@@ -6,12 +6,36 @@ variables:
   PATIENT_SERVICE_PATH: services/patient-service
   AUTHENTICATION_SERVICE_PATH: services/authentication-service
   LOGGING_SERVICE_PATH: services/logging-service
+  CLIENT_PATH: client
 
 
 # Defining stages for the pipeline
 stages:
   - build
   - test
+
+# Testing Login Interface
+test_login_view:
+  stage: test
+  image: node:18
+  tags:
+    - docker
+  cache: 
+    paths:
+      - $CLIENT_PATH/node_modules
+  before_script:
+    - cd $CLIENT_PATH
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - echo "Running Login.spec.ts test..."
+    - npx vitest run tests/Login.spec.ts --coverage
+  artifacts:
+    when: always
+    paths:
+      - $CLIENT_PATH/coverage
+    reports:
+      junit: $CLIENT_PATH/coverage/junit.xml
+
 
 # Building the appointment-service
 build-appointment-service:
