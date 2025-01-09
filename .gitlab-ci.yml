@@ -170,12 +170,13 @@ test_login_view:
   image: node:18
   tags:
     - docker
-  cache: 
-    paths:
-      - $CLIENT_PATH/node_modules
+  #cache: 
+    #paths:
+      #- $CLIENT_PATH/node_modules
   before_script:
     - cd $CLIENT_PATH
     - npm ci --cache .npm --prefer-offline
   script:
     - echo "Running Login.spec.ts test..."
+    - npm install
     - npx vitest
