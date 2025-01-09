@@ -62,6 +62,5 @@ describe('LoginView.vue', () => {
     // Check if the correct error message is shown
     expect(wrapper.text()).toContain('Invalid email address.')
 
-    // TODO: Add login button test
   })
 })
