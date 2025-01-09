@@ -68,6 +68,7 @@ import { mqttClient, client } from '@/mqtt/mqtt';
 import { TOPICS } from '@/mqtt/topics';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faBell, faTrash } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 interface Notification {
   id: number;
@@ -135,10 +136,28 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(async () => {
   // Attach the outside click listener
   document.addEventListener('click', handleClickOutside);
+  const token = localStorage.getItem('token');
+
+  // Retrieves all notifications onMount
+  const response = await axios.get(
+    `${import.meta.env.VITE_API_GATEWAY}/notification/get`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  // If there are notifications, add them to the list.
+  if (response.data.data.status === 200) {
+    const notifications = response.data.data.message;
+    notifications.map((notification) => addNotification(notification.message));
+  }
 
   try {
     console.log('[MQTT]: Initializing MQTT client...');
-    await mqttClient.setup();
+    const userId = localStorage.getItem('userId');
+    await mqttClient.setup(userId!);
 
     // Handle incoming messages
     client.on('message', (topic: string, message: any) => {
@@ -173,10 +192,9 @@ onUnmounted(() => {
 
 const validateTopic = (topic: string): boolean => {
   return (
-    topic === TOPICS.SUBSCRIBE.NOTIFICATION_CREATED ||
-    TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT ||
-    topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
-    topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
+    TOPICS.SUBSCRIBE.NOTIFICATION_APPOINTMENT_CREATED,
+    TOPICS.SUBSCRIBE.NOTIFICATION_APPOINTMENT_BOOKED,
+    TOPICS.SUBSCRIBE.NOTIFICATION_APPOINTMENT_CANCEL
   );
 };
 </script>
