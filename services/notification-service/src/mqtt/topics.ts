@@ -1,5 +1,6 @@
 export const TOPICS = {
   SUBSCRIBE: {
+    APPOINTMENT_GET_NOTIFICATIONS: 'gateway/notification/get/response',
     APPOINTMENT_CREATED:
       'dentiq/appointmentService/notificationService/addSlots',
     APPOINTMENT_BOOKED:
@@ -10,6 +11,7 @@ export const TOPICS = {
       'dentiq/appointmentService/notificationService/deleteSlot',
   },
   PUBLISH: {
+    APPOINTMENT_GET_NOTIFICATIONS: 'notification/get/response',
     APPOINTMENT_CREATED_DENTIST:
       'dentiq/notificationService/dentistService/addSlots',
     APPOINTMENT_CREATED_PATIENT:

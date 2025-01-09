@@ -21,7 +21,7 @@ app.use(express.json());
 // Start the Server
 app.listen(port, () => {
   console.log(
-    `[SERVER]: Dentist Microservice is running at http://localhost:${port}`
+    `[SERVER]: Appointment Microservice is running at http://localhost:${port}`
   );
   console.log('-------------------------------------------------------');
 });
