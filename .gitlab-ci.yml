@@ -14,27 +14,6 @@ stages:
   - build
   - test
 
-# Testing Login Interface
-test_login_view:
-  stage: test
-  image: node:18
-  tags:
-    - docker
-  cache: 
-    paths:
-      - $CLIENT_PATH/node_modules
-  before_script:
-    - cd $CLIENT_PATH
-    - npm ci --cache .npm --prefer-offline
-  script:
-    - echo "Running Login.spec.ts test..."
-    - npx vitest run tests/Login.spec.ts --coverage
-  artifacts:
-    when: always
-    paths:
-      - $CLIENT_PATH/coverage
-
-
 # Building the appointment-service
 build-appointment-service:
   stage: build
@@ -184,3 +163,19 @@ test_notification_service:
   script:
     - echo "Testing notification-service..."
     - npm test
+
+    # Testing Login Interface
+test_login_view:
+  stage: test
+  image: node:18
+  tags:
+    - docker
+  cache: 
+    paths:
+      - $CLIENT_PATH/node_modules
+  before_script:
+    - cd $CLIENT_PATH
+    - npm ci --cache .npm --prefer-offline
+  script:
+    - echo "Running Login.spec.ts test..."
+    - npx vitest
