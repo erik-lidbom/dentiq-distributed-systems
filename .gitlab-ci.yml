@@ -33,8 +33,6 @@ test_login_view:
     when: always
     paths:
       - $CLIENT_PATH/coverage
-    reports:
-      junit: $CLIENT_PATH/coverage/junit.xml
 
 
 # Building the appointment-service
