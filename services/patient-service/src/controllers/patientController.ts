@@ -40,7 +40,7 @@ export const createPatient = async (req: Request, res: Response, next: NextFunct
 
     // Publish message to Notification Service topic
         const message = {
-        type: "PatientRegistered",
+            type: "PatientRegistered",
             patientId: savedPatient._id,
             Firstname,
             Lastname,

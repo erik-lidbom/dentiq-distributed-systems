@@ -117,12 +117,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import SignupHeader from './SignupHeader.vue'
+import axios, { AxiosError, type AxiosResponse } from 'axios'
+import { useRouter } from 'vue-router'
+
+const BASE_URL = import.meta.env.VITE_API_GATEWAY
+
+const router = useRouter()
 
 // Signup form Type
 type SignupForm = {
   fullname: string
   personnummer: string
   email: string
+  role: 'patient'
   password: string
   confirmPassword: string
 }
@@ -132,6 +139,7 @@ const form = ref<SignupForm>({
   fullname: '',
   personnummer: '',
   email: '',
+  role: 'patient',
   password: '',
   confirmPassword: '',
 })
@@ -187,11 +195,18 @@ const validateForm = (): boolean => {
   return isValid
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
   const res: boolean = validateForm()
 
   if (!res) return
-
-  // TODO --> Add valid form submission logic here
+  await axios
+    .post(`${BASE_URL}/auth/create`, form.value)
+    .then(() => {
+      router.push('/login')
+    })
+    .catch((error: AxiosError) => {
+      console.log(error)
+    })
+  // TODO --> DISPLAY ERROR MESSAGE IF USER ALREADY EXIST
 }
 </script>

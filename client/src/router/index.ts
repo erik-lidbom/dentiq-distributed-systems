@@ -6,8 +6,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'home',
+      path: '/signup',
+      name: 'signup',
       component: SignupView,
     },
     {
@@ -15,7 +15,19 @@ const router = createRouter({
       name: 'login',
       component: LoginView,
     },
+    {
+      path: '/:pathMatch(.)',
+      redirect: '/login',
+    },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.path !== '/login' && to.path !== '/signup') {
+    next('/login') // Redirect to /login
+  } else {
+    next()
+  }
 })
 
 export default router

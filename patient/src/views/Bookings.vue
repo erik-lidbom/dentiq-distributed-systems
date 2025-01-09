@@ -135,10 +135,4 @@ const handleCancel = async (id: string) => {
     stopLoading();
   }
 };
-
-// Retry fetching bookings
-const retryFetch = async () => {
-  errorMessage.value = null; // Clear the error message
-  await onMounted(); // Retry fetching bookings
-};
 </script>

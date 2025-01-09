@@ -9,6 +9,7 @@ export const TOPICS = {
     CLINICS: {
       QUERY_RESPONSE: 'gateway/clinic/query/response',
     },
+    CREDENTIAL_VALIDATION_REQUEST: 'dentiq/dentist/validate-credentials',
   },
   PUBLISH: {
     DENTIST_AWAIT_CONF:
@@ -21,5 +22,7 @@ export const TOPICS = {
     CLINICS: {
       QUERY_RESPONSE: 'clinic/query/response',
     },
+    CREDENTIAL_VALIDATION_RESPONSE: (correlationId: string) =>
+      `dentiq/authService/response/validate-credentials/${correlationId}`,
   },
 };
