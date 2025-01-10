@@ -1,3 +1,5 @@
+import { useDentistStore } from '@/stores';
+
 const BASE_URL = import.meta.env.VITE_API_GATEWAY;
 
 export async function fetchAppointments(
@@ -42,6 +44,7 @@ export async function postAppointments(body: any): Promise<any> {
 export async function fetchAllAppointments(): Promise<any[]> {
   try {
     const dentistId = localStorage.getItem('userId');
+    console.log('dentistId:', dentistId);
     const token = localStorage.getItem('token');
     const response = await fetch(`${BASE_URL}/booking/query`, {
       method: 'POST',
