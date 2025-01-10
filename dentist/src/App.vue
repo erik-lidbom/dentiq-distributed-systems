@@ -19,6 +19,7 @@ import axios from 'axios';
 import { logout } from '@/utils/helpers';
 import { onBeforeMount, onMounted, ref } from 'vue';
 import Header from '@/components/shared/Header.vue';
+import { useDentistStore } from '@/stores';
 
 const BASE_URL = import.meta.env.VITE_API_GATEWAY;
 

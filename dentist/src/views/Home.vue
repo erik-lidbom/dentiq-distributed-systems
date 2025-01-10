@@ -65,7 +65,7 @@ const appointments = computed(() => appointmentStore.appointments);
 const dentistAppointments = computed(() =>
   appointmentStore.appointments.filter(
     (appointment) =>
-      appointment.dentistId === dentistStore.dentist?._id &&
+      appointment.dentistId === localStorage.getItem('userId') &&
       appointment.status === 'booked'
   )
 );
@@ -75,7 +75,7 @@ watchEffect(() => {
   if (dentistStore.dentist && appointments.value.length > 0) {
     dentistAppointments.value = appointments.value.filter(
       (appointment) =>
-        appointment.dentistId === dentistStore.dentist?._id &&
+        appointment.dentistId === dentistStore.dentist?.id &&
         appointment.status === 'booked'
     );
   }
@@ -123,7 +123,7 @@ onMounted(async () => {
     await dentistStore.fetchAndSetDentists();
 
     if (dentistStore.dentists.length > 0) {
-      dentistStore.setActiveDentist(dentistStore.dentists[0]._id);
+      dentistStore.setActiveDentist(dentistStore.dentists[0].id);
     }
   } catch (error) {
     console.error('Error initializing data:', error);
