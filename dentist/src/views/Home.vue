@@ -122,8 +122,9 @@ onMounted(async () => {
     await clinicStore.fetchAndSetClinics();
     await dentistStore.fetchAndSetDentists();
 
+    const userId = localStorage.getItem('userId');
     if (dentistStore.dentists.length > 0) {
-      dentistStore.setActiveDentist(dentistStore.dentists[0].id);
+      dentistStore.setActiveDentist(userId);
     }
   } catch (error) {
     console.error('Error initializing data:', error);
