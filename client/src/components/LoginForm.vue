@@ -54,7 +54,7 @@
           <div class="flex flex row gap-2">
             <p class="text-dentiqGray">New to DentiQ?</p>
             <router-link
-              to="/"
+              to="/signup"
               class="relative text-dentiqLightBlue transition-all duration-300 hover:after:w-full after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-dentiqLightBlue after:transition-all after:duration-300"
             >
               Join now</router-link
