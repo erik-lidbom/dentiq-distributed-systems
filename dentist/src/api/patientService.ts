@@ -20,8 +20,11 @@ export async function fetchPatient(patientId: string): Promise<any> {
   }
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch clinics: ${response.statusText}`);
+    throw new Error(`Failed to fetch patient: ${response.statusText}`);
   }
 
-  return response.json();
+  // Await and return the JSON response properly
+  const responseData = await response.json();
+  console.log('patient response from service:', responseData);
+  return responseData;
 }

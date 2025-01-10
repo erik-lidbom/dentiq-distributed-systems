@@ -83,7 +83,6 @@ const handleClickOutside = (event: MouseEvent) => {
 
 onMounted(() => {
   // Attach the outside click listener
-  console.log('dentistStore: ', dentistStore.dentist);
   document.addEventListener('click', handleClickOutside);
 });
 
