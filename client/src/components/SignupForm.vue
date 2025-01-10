@@ -117,7 +117,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import SignupHeader from './SignupHeader.vue'
-import axios, { AxiosError, type AxiosResponse } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { useRouter } from 'vue-router'
 
 const BASE_URL = import.meta.env.VITE_API_GATEWAY
