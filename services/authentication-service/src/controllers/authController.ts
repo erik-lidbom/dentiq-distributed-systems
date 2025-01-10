@@ -151,3 +151,28 @@ export const getTokensBySessionId = async (sessionId: string): Promise<any> => {
     return { status: 500, message: 'Internal server error' };
   }
 };
+
+/**
+ * Retrieves a user by their ID.
+ * @param {string} userId - The user ID.
+ * @returns {any} - Returns the user object or an error message.
+ */
+
+export const getUserById = async (userId: string): Promise<any> => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return { status: 404, message: 'User not found' };
+    }
+    return {
+      status: 200,
+      user: {
+        email: user.email,
+        fullname: user.fullname,
+      },
+    };
+  } catch (error) {
+    console.error('Error retrieving user:', error);
+    return { status: 500, message: 'Internal server error' };
+  }
+};

@@ -11,6 +11,7 @@ export interface Dentist {
   availability?: Availability[];
   image?: string;
   clinic: string; // Clinic ID
+  id: string;
 }
 
 export interface Clinic {

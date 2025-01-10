@@ -7,6 +7,7 @@ import {
   login,
   refreshAuthToken,
   getTokensBySessionId,
+  getUserById,
 } from '../controllers/authController';
 
 dotenv.config();
@@ -46,6 +47,7 @@ mqttClient.on('connect', () => {
       TOPICS.SUBSCRIBE.AUTH_LOGIN,
       TOPICS.SUBSCRIBE.AUTH_VALIDATE_TOKEN,
       TOPICS.SUBSCRIBE.AUTH_VALIDATE_SESSION,
+      TOPICS.SUBSCRIBE.AUTH_GET,
     ],
     { qos: 2 },
     (err) => {
@@ -88,8 +90,12 @@ mqttClient.on('message', async (topic, message) => {
     } else if (topic === TOPICS.SUBSCRIBE.AUTH_VALIDATE_SESSION) {
       const { sessionId } = payload;
       const result = await getTokensBySessionId(sessionId);
-
       publishMessage(TOPICS.PUBLISH.AUTH_VALIDATE_SESSION, result);
+    } else if (topic === TOPICS.PUBLISH.AUTH_GET) {
+      const { userId } = payload;
+      const result = await getUserById(userId);
+      const parsedResult = JSON.parse(result);
+      publishMessage(TOPICS.PUBLISH.AUTH_GET, parsedResult);
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
