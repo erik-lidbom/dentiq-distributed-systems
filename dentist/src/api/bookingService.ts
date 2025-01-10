@@ -1,16 +1,15 @@
-const QUERY_URL = 'http://localhost:3000/api/booking/query';
-const POST_URL = 'http://localhost:3000/api/booking/create';
-const DELETE_URL = 'http://localhost:3000/api/booking/delete';
-const CANCEL_URL = 'http://localhost:3000/api/booking/cancel';
+const BASE_URL = import.meta.env.VITE_API_GATEWAY;
 
 export async function fetchAppointments(
   dentistId: string,
   date?: string
 ): Promise<any> {
-  const response = await fetch(QUERY_URL, {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${BASE_URL}/booking/query`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ dentistId, date }),
   });
@@ -23,10 +22,12 @@ export async function fetchAppointments(
 }
 
 export async function postAppointments(body: any): Promise<any> {
-  const response = await fetch(POST_URL, {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${BASE_URL}/booking/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(body),
   });
@@ -40,10 +41,12 @@ export async function postAppointments(body: any): Promise<any> {
 
 export async function deleteAppointment(id: string): Promise<any> {
   try {
-    const response = await fetch(DELETE_URL, {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/booking/delete`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ appointmentId: id }),
     });
@@ -64,10 +67,12 @@ export const cancelAppointment = async (
   appointmentId: string
 ): Promise<any> => {
   try {
-    const response = await fetch(CANCEL_URL, {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/booking/cancel`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
       body: JSON.stringify({ appointmentId: appointmentId }),
     });
