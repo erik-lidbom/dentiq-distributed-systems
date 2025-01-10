@@ -29,6 +29,7 @@ const dentistSchema: Schema<IDentist> = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Clinic',
   },
+  id: { type: String },
 });
 
 const Dentist: Model<IDentist> =
