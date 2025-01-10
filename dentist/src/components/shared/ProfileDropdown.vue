@@ -14,7 +14,7 @@
             <p
               class="text-dentiq-muted-default font-normal text-dentiq-body-small"
             >
-              {{ user.email }}
+              {{ user.speciality }}
             </p>
           </div>
           <img
@@ -42,15 +42,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
-import router from '@/router';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { logout } from '@/utils/helpers';
-
-interface Notification {
-  id: number;
-  message: string;
-  date: string;
-}
+import { useDentistStore } from '@/stores';
 
 // State for visibility of the dropdown
 const isOpen = ref(false);
@@ -63,11 +57,14 @@ const toggleDropdownVisibility = () => {
   isOpen.value = !isOpen.value;
 };
 
-// User data
-const user = ref({
-  name: 'John Doe',
-  email: 'dummy@email.com',
-});
+// Fetch user data
+const dentistStore = useDentistStore();
+
+// Use a computed property for reactive user data
+const user = computed(() => ({
+  name: dentistStore.dentist?.name || 'Loading Name...',
+  speciality: dentistStore.dentist?.speciality || 'Specialty',
+}));
 
 const handleLogOut = () => {
   isOpen.value = false;
