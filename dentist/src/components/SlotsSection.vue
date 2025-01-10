@@ -82,15 +82,15 @@ import 'vue3-datepicker';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { fetchAppointments, postAppointments, deleteAppointments } from '@/api';
+import { useDentistStore } from '@/stores';
 
 // Fetch data
 const fetchData = async () => {
   const date = formatDate(selectedDate.value);
+  const dentist = localStorage.getItem('userId');
+  console.log('Fetching appointments for:', dentist);
   try {
-    const appointments = await fetchAppointments(
-      '6770eb7b0f353c41ad4f9422',
-      date
-    );
+    const appointments = await fetchAppointments(dentist, date);
     const appointmentData = appointments?.data?.data || [];
 
     slots.value.forEach((slot) => {
@@ -233,22 +233,6 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// Load slots from API for the selected date
-const loadSlotsForDate = async (id, date) => {
-  try {
-    const response = await fetchAppointments(id, formatDate(date));
-    const serverSlots = response.data || [];
-    slots.value.forEach((slot) => {
-      const serverSlot = serverSlots.find((s) => s.time === slot.time);
-      slot.isSelected = serverSlot ? serverSlot.active : false;
-    });
-  } catch (error) {
-    console.error('Error fetching slots for the date:', error);
-    // Reset all slots to inactive on error
-    slots.value.forEach((slot) => (slot.isSelected = false));
-  }
-};
-
 // Watcher for selectedDate
 watch(selectedDate, async (newDate, oldDate) => {
   console.log('Date changed:', newDate);
@@ -293,10 +277,11 @@ const confirmChanges = async () => {
     console.log('Slots to create:', slotsToCreate);
     console.log('Slots to delete:', slotsToDelete);
 
+    const dentistId = localStorage.getItem('userId');
     // Batch API requests
     if (slotsToCreate.length > 0) {
       await postAppointments({
-        dentistId: '6770eb7b0f353c41ad4f9422',
+        dentistId: dentistId,
         patientId: null,
         date: formatDate(selectedDate.value),
         start_times: slotsToCreate.map((slot) => slot.time),
