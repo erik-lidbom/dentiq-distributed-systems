@@ -91,11 +91,10 @@ mqttClient.on('message', async (topic, message) => {
       const { sessionId } = payload;
       const result = await getTokensBySessionId(sessionId);
       publishMessage(TOPICS.PUBLISH.AUTH_VALIDATE_SESSION, result);
-    } else if (topic === TOPICS.PUBLISH.AUTH_GET) {
-      const { userId } = payload;
-      const result = await getUserById(userId);
-      const parsedResult = JSON.parse(result);
-      publishMessage(TOPICS.PUBLISH.AUTH_GET, parsedResult);
+    } else if (topic === TOPICS.SUBSCRIBE.AUTH_GET) {
+      const { patientId } = payload;
+      const result = await getUserById(patientId);
+      publishMessage(TOPICS.PUBLISH.AUTH_GET, result);
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
