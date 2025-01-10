@@ -64,15 +64,17 @@ export const login = async (payload: any): Promise<any> => {
     : null;
 
   if (!user || !decodedPassword) {
-    return { status: 401, message: 'Invalid credentials' };
+    return { status: 401, message: 'Invalid credentials', success: false };
   }
-  const token = generateToken(user._id);
+
+  const token = generateToken(user._id, user.role);
   console.log('Token:', token);
 
   await Session.deleteMany({ userId: user._id });
 
   const session = await Session.create({
     userId: user._id,
+    role: user.role,
     token,
   });
 
@@ -80,6 +82,7 @@ export const login = async (payload: any): Promise<any> => {
     status: 200,
     sessionId: session._id,
     userId: user._id,
+    userRole: user.role,
   };
 };
 
@@ -100,10 +103,14 @@ export const validateAuthToken = async (token: string): Promise<any> => {
     } catch (error) {
       console.error('Error deleting session:', error);
     }
-    return { success: false, message: 'Access token invalid or expired.' };
+    return {
+      status: 401,
+      success: false,
+      message: 'Access token invalid or expired.',
+    };
   }
 
-  return { success: true, user: decoded };
+  return { status: 200, success: true, user: decoded };
 };
 
 /**
@@ -117,7 +124,7 @@ export const refreshAuthToken = async (refreshToken: string): Promise<any> => {
     return { success: false, message: 'Invalid or expired refresh token' };
   }
 
-  const newToken = generateToken(decoded.email);
+  const newToken = generateToken(decoded.email, decoded.role);
 
   return { success: true, token: newToken };
 };
@@ -136,6 +143,7 @@ export const getTokensBySessionId = async (sessionId: string): Promise<any> => {
     return {
       status: 200,
       token: session.token,
+      role: session.role,
       // refreshToken: session.refreshToken,
     };
   } catch (error) {
