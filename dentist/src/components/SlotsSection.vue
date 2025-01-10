@@ -79,13 +79,9 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import Datepicker from 'vue3-datepicker';
 import 'vue3-datepicker';
-import {
-  deleteAppointment,
-  fetchAppointments,
-  postAppointments,
-} from '@/api/bookingservice';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { fetchAppointments, postAppointments, deleteAppointments } from '@/api';
 
 // Fetch data
 const fetchData = async () => {
@@ -102,14 +98,14 @@ const fetchData = async () => {
         (a) => a.start_time === slot.time && a.date === date
       );
       // Mark as created if there's an appointment
-      slot.isCreated = !!appointment; 
-       // Assign appointment ID if available
+      slot.isCreated = !!appointment;
+      // Assign appointment ID if available
       slot.id = appointment?._id || '';
       // Mark as booked if a patient exists
-      slot.isBooked = !!appointment?.patientId; 
-      slot.isSelected = false; 
+      slot.isBooked = !!appointment?.patientId;
+      slot.isSelected = false;
       slot.isToBeCreated = false;
-      slot.isToBeDeleted = false; 
+      slot.isToBeDeleted = false;
     });
   } catch (error) {
     console.error('Error fetching appointments:', error);
@@ -125,13 +121,13 @@ const fetchData = async () => {
   }
 };
 
-onMounted(() => {
-  fetchData();
+onMounted(async () => {
+  await fetchData();
 });
 
 // State for the date picker
 const showCalendar = ref(false);
-const selectedDate = ref(new Date()); 
+const selectedDate = ref(new Date());
 
 // Computed property to format the selected date
 const formattedDate = computed(() => {
@@ -298,22 +294,28 @@ const confirmChanges = async () => {
     console.log('Slots to delete:', slotsToDelete);
 
     // Batch API requests
-    await Promise.all([
-      postAppointments({
+    if (slotsToCreate.length > 0) {
+      await postAppointments({
         dentistId: '6770eb7b0f353c41ad4f9422',
         patientId: null,
         date: formatDate(selectedDate.value),
         start_times: slotsToCreate.map((slot) => slot.time),
-      }),
-      ...slotsToDelete.map((slot) => deleteAppointment(slot.id)),
-    ]);
+      });
+    }
+
+    if (slotsToDelete.length > 0) {
+      await deleteAppointments({
+        appointmentIds: slotsToDelete.map((slot) => slot.id),
+      });
+    }
 
     alert('Changes confirmed!');
     // Fetch data again to update the UI
-    await fetchData(); 
   } catch (error) {
     console.error('Error confirming changes:', error);
     alert('An error occurred while confirming changes.');
+  } finally {
+    await fetchData();
   }
 };
 </script>
