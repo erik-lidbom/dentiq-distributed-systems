@@ -330,6 +330,7 @@
 import { ref, computed, onUnmounted, onMounted } from 'vue';
 import { getMonth, getYear } from 'date-fns';
 import { bookAppointment } from '@/api/bookingService';
+import { logout } from '@/utils/helpers';
 
 // Define Types
 interface Availability {
@@ -684,10 +685,16 @@ const submit = async () => {
 
   // Set loading state
   isLoading.value = true;
+  const patientId = localStorage.getItem('userId');
+
+  if (!patientId) {
+    logout();
+    return;
+  }
 
   const appointmentPayload = {
-    patientId: '11111111', // TODO: Replace with actual patient ID when Auth is Implemented
-    dentistId: selectedDoctor.value?._id,
+    patientId: patientId,
+    dentistId: selectedDoctor.value?.id,
     date: selectedAppointment.value.date,
     time: selectedAppointment.value.time,
     reason_for_visit: reason.value || null,
