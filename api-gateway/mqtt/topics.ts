@@ -28,6 +28,7 @@ export const TOPICS = {
     BOOKING_GET: 'booking/get/response',
     BOOKING_UPDATE: 'booking/update/response',
     BOOKING_DELETE: 'booking/delete/response',
+    BOOKING_DELETE_MANY: 'booking/delete-many/response',
     BOOKING_CANCEL: 'booking/cancel/response',
     BOOKING_QUERY: 'booking/query/response',
     BOOKING_BOOK: 'booking/book/response',
@@ -52,6 +53,7 @@ export const TOPICS = {
       | 'GET'
       | 'UPDATE'
       | 'DELETE'
+      | 'DELETE_MANY'
       | 'QUERY'
       | 'BOOK'
       | 'CANCEL'
@@ -89,6 +91,7 @@ export const TOPICS = {
     BOOKING_GET_RESPONSE: 'gateway/booking/get/response',
     BOOKING_UPDATE_RESPONSE: 'gateway/booking/update/response',
     BOOKING_DELETE_RESPONSE: 'gateway/booking/delete/response',
+    BOOKING_DELETE_MANY_RESPONSE: 'gateway/booking/delete-many/response',
     BOOKING_CANCEL_RESPONSE: 'gateway/booking/cancel/response',
     BOOKING_QUERY_RESPONSE: 'gateway/booking/query/response',
     BOOKING_BOOK_RESPONSE: 'gateway/booking/book/response',
@@ -113,6 +116,7 @@ export const TOPICS = {
       | 'GET'
       | 'UPDATE'
       | 'DELETE'
+      | 'DELETE_MANY'
       | 'QUERY'
       | 'BOOK'
       | 'CANCEL'

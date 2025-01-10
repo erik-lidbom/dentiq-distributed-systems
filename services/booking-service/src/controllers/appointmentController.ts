@@ -199,6 +199,100 @@ export const bookAppointment = async (
 };
 
 /**
+ * Delete multiple appointments
+ */
+
+export const deleteAppointments = async (
+  topic: string,
+  message: Buffer
+): Promise<ResponsePayload> => {
+  try {
+    const payload: { appointmentIds: string[] } = JSON.parse(
+      message.toString()
+    );
+    const { appointmentIds } = payload;
+
+    console.log(`[DEBUG]: Received delete request for IDs - ${appointmentIds}`);
+
+    // Validate the input
+    if (
+      !Array.isArray(appointmentIds) ||
+      appointmentIds.some((id) => typeof id !== 'string')
+    ) {
+      const resPayload: ResponsePayload = {
+        status: 400,
+        message: 'Invalid or missing appointment IDs.',
+        notificationPayload: {
+          typeOfNotification: 'AppointmentDeleted',
+          error: true,
+        },
+      };
+      console.warn(
+        `[WARN]: Invalid delete payload - ${JSON.stringify(payload)}`
+      );
+      publishResponse(topic, resPayload);
+      return resPayload;
+    }
+
+    // Find appointments matching the IDs
+    const appointments = await Appointment.find({
+      _id: { $in: appointmentIds },
+    });
+
+    if (appointments.length === 0) {
+      const resPayload: ResponsePayload = {
+        status: 404,
+        message: 'No appointments found for the provided IDs.',
+        notificationPayload: {
+          typeOfNotification: 'AppointmentDeleted',
+          error: true,
+        },
+      };
+      console.warn(
+        `[WARN]: No matching appointments found for deletion - ${appointmentIds}`
+      );
+      publishResponse(topic, resPayload);
+      return resPayload;
+    }
+
+    // Delete the appointments
+    await Appointment.deleteMany({ _id: { $in: appointmentIds } });
+
+    const resPayload: ResponsePayload = {
+      status: 200,
+      message: `Successfully deleted ${appointments.length} appointment(s).`,
+      notificationPayload: {
+        senderService: 'AppointmentService',
+        message: `Deleted appointments for dentist(s) ${[...new Set(appointments.map((a) => a.dentistId))]}`,
+        typeOfNotification: 'AppointmentDeleted',
+      },
+    };
+
+    publishResponse(topic, resPayload);
+    publishMessage('appointment/removed', {
+      topic: 'appointment/removed',
+      message: `Slots with IDs ${appointmentIds.join(', ')} have been deleted.`,
+    });
+
+    return resPayload;
+  } catch (error) {
+    console.error('[ERROR]: Failed to delete appointments:', error);
+
+    const resPayload: ResponsePayload = {
+      status: 500,
+      message: 'Internal server error, please try again later.',
+      notificationPayload: {
+        typeOfNotification: 'AppointmentDeleted',
+        error: true,
+      },
+    };
+
+    publishResponse(topic, resPayload);
+    return resPayload;
+  }
+};
+
+/**
  * Delete an appointment
  */
 export const deleteAppointment = async (

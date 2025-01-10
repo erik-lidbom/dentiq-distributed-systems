@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, response } from 'express';
 import { publishAndSubscribe } from '../mqtt/mqtt';
 
 const routingController = async (
@@ -21,7 +21,10 @@ const routingController = async (
       serviceName !== 'auth' &&
       path !== 'create'
     ) {
+      console.log('[INFO]: Checking authorization header');
+      console.log(`[INFO]: Header: ${header.authorization}`);
       // Checks if authorization header is included in the requests. Returns authorization error if not.
+
       if (!header.authorization) {
         return res.status(401).json({
           success: false,
@@ -42,7 +45,10 @@ const routingController = async (
         );
 
         const parsedResponse = JSON.parse(mqttResponse);
-        if (!parsedResponse.success) {
+        if (
+          !parsedResponse.success &&
+          ![200, 201, 202].includes(parsedResponse.status)
+        ) {
           return res.status(401).json({
             message: 'Session expired or invalid. Please re-authenticate.',
           });

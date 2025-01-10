@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
 import { retrievePublishTopic, retrieveSubscribedTopic } from './helpers';
@@ -43,6 +44,8 @@ export const publishAndSubscribe = (
   duration: number
 ) => {
   return new Promise((resolve, reject) => {
+    const correlationId = uuidv4(); // Generate a unique correlation ID
+
     // Convert the data to a string
     const payload =
       typeof data === 'string' ? data : JSON.stringify(data) || '*';
@@ -55,7 +58,7 @@ export const publishAndSubscribe = (
     console.log('Subscribing to topic:', subscribeToTopic);
 
     // Publish the message
-    mqttClient.publish(publishToTopic, payload, { qos: 1 }, (err) => {
+    mqttClient.publish(publishToTopic, payload, { qos: 2 }, (err) => {
       if (err) {
         console.error(`Failed to publish to ${publishToTopic}:`, err);
         reject(`Failed to publish to ${publishToTopic}`);
@@ -65,7 +68,7 @@ export const publishAndSubscribe = (
     });
 
     // Subscribe to the topic
-    mqttClient.subscribe(subscribeToTopic, (err) => {
+    mqttClient.subscribe(subscribeToTopic, { qos: 2 }, (err) => {
       if (err) {
         console.error(`Failed to subscribe to ${subscribeToTopic}:`, err);
         reject(`Failed to subscribe to ${subscribeToTopic}: ${err.message}`);
