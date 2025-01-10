@@ -30,13 +30,19 @@
           </div>
           <!-- Location -->
           <div class="flex items-center space-x-2 mt-1">
-            <i class="pi pi-globe w-5 h-5 text-gray-500"></i>
-            <span class="text-xs md:text-sm">{{ appointment }}</span>
+            <i class="pi pi-question w-5 h-5 text-gray-500"></i>
+            <span class="text-xs md:text-sm">{{
+              appointment.reason_for_visit
+                ? appointment.reason_for_visit
+                : 'Reason Not Given'
+            }}</span>
           </div>
           <!-- Patient Name -->
           <div class="flex items-center space-x-2 mt-2">
             <i class="pi pi-user w-5 h-5 text-gray-500"></i>
-            <span class="text-xs md:text-sm">{{ appointment.patientId }}</span>
+            <span class="text-xs md:text-sm">
+              {{ patientDetails[appointment.patientId]?.name || 'Loading...' }}
+            </span>
           </div>
         </div>
         <!-- Cancel Button -->
@@ -62,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { reactive, defineProps, ref } from 'vue';
 import CancelPopup from '@/components/CancelPopup.vue';
 
 // Props
@@ -72,10 +78,18 @@ const props = defineProps<{
     date: string;
     start_time: string;
     patientId: string;
-    clinic: string;
+    dentistId: string;
+    status: string;
+    reason_for_visit: string;
   }[];
 }>();
 
+// Reactive state for patient details
+const patientDetails = reactive<
+  Record<string, { name: string; email: string }>
+>({});
+
+// Emit
 const emit = defineEmits(['cancel']);
 
 // Reactive State
