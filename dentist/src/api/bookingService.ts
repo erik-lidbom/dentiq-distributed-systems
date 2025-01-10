@@ -13,7 +13,7 @@ export async function fetchAppointments(
     },
     body: JSON.stringify({ dentistId, date }),
   });
-  console.log('RESPONSE IS: ', response);
+
   if (!response.ok) {
     throw new Error(`Failed to fetch appointments: ${response.statusText}`);
   }
@@ -39,53 +39,81 @@ export async function postAppointments(body: any): Promise<any> {
   return response.json();
 }
 
-export async function deleteAppointment(id: string): Promise<any> {
+export async function fetchAllAppointments(): Promise<any[]> {
+  try {
+    const dentistId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${BASE_URL}/booking/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId: dentistId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch appointments: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+
+    if (responseData?.data?.data) {
+      return responseData.data.data; // Assuming appointments are in data.data
+    } else {
+      console.error('Unexpected response structure:', responseData);
+      throw new Error('Invalid response structure');
+    }
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    throw error;
+  }
+}
+
+export async function deleteAppointments(
+  appointmentIds: string[]
+): Promise<any> {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${BASE_URL}/booking/delete`, {
+    const response = await fetch(`${BASE_URL}/booking/delete-many`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ appointmentId: id }),
+      body: JSON.stringify(appointmentIds),
     });
 
     if (!response.ok) {
-      throw new Error(`Error deleting booked slot: ${response.statusText}`);
+      throw new Error(`Failed to delete appointments: ${response.statusText}`);
     }
-    const data = await response.json();
-    console.log('Booking cancelled successfully:', data);
-    return data;
+
+    return response.json();
   } catch (error) {
-    console.error('Error cancelling booking:', error);
+    console.error('Error deleting appointments:', error);
     throw error;
   }
 }
 
-export const cancelAppointment = async (
-  appointmentId: string
-): Promise<any> => {
+export async function cancelAppointment(appointmentId: string): Promise<any> {
   try {
     const token = localStorage.getItem('token');
     const response = await fetch(`${BASE_URL}/booking/cancel`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ appointmentId: appointmentId }),
+      body: JSON.stringify({ appointmentId }),
     });
 
     if (!response.ok) {
-      throw new Error(`Error cancelling booking: ${response.statusText}`);
+      throw new Error(`Failed to cancel appointment: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    console.log('Booking cancelled successfully:', data);
-    return data;
+    return response.json();
   } catch (error) {
-    console.error('Error cancelling booking:', error);
+    console.error('Error cancelling appointment:', error);
     throw error;
   }
-};
+}
