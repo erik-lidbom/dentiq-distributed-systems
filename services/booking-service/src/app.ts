@@ -7,7 +7,7 @@ import connectToDB from './db/db';
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3002; // Using a different port for Dentist service
+const port = process.env.PORT || 3002; // Using a different port for Booking service
 
 // MongoDB Connection
 connectToDB();
@@ -21,7 +21,7 @@ app.use(express.json());
 // Start the Server
 app.listen(port, () => {
   console.log(
-    `[SERVER]: Dentist Microservice is running at http://localhost:${port}`
+    `[SERVER]: Booking Microservice is running at http://localhost:${port}`
   );
   console.log('-------------------------------------------------------');
 });

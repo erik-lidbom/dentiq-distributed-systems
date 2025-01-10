@@ -47,6 +47,7 @@ mqttClient.on('connect', () => {
       TOPICS.SUBSCRIBE.AUTH_VALIDATE_TOKEN,
       TOPICS.SUBSCRIBE.AUTH_VALIDATE_SESSION,
     ],
+    { qos: 2 },
     (err) => {
       if (err) {
         console.error('[MQTT]: Subscription error:', err.message);
