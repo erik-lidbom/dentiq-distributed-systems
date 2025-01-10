@@ -6,26 +6,31 @@ interface Dentist {
   _id: string;
   name: string;
   speciality: string;
-  clinic: string; // Clinic ID
+  clinic: string;
   availability: { date: string; times: string[] }[];
 }
 
 export const useDentistStore = defineStore('dentistStore', {
   state: () => ({
-    dentists: [] as Dentist[], // Specify type here
+    dentists: [] as Dentist[],
+    dentist: null as Dentist | null,
   }),
   actions: {
     setDentists(dentists: Dentist[]) {
       this.dentists = dentists;
     },
+    setActiveDentist(dentistId: string | null) {
+      this.dentist =
+        this.dentists.find((dentist) => dentist._id === dentistId) || null;
+    },
     async fetchAndSetDentists() {
       try {
         const response = await fetchDentists();
-        if (response?.data) {
+        if (response?.data?.data) {
           this.setDentists(response.data.data);
-          console.log('Dentists fetched: ', this.dentists);
+          console.log('Dentists fetched:', this.dentists);
         } else {
-          console.warn('No data found in the response:', response);
+          console.warn('No dentists data in response:', response);
         }
       } catch (error) {
         console.error('Error fetching dentists:', error);

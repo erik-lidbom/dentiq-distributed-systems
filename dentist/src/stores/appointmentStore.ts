@@ -1,58 +1,39 @@
 import { defineStore } from 'pinia';
-import { fetchAppointments } from '@/api';
-import { aggregatePatientAppointments } from '@/utils/dataAggregator';
-import { useDentistStore, useClinicStore } from '@/stores';
+import {
+  fetchAllAppointments,
+  postAppointments,
+  deleteAppointments,
+} from '@/api/bookingService';
+import { fetchClinics } from '@/api';
 
-// Define a type for Appointment
-interface Appointment {
-  _id: string;
-  dentistId: string;
-  patientId: string;
-  date: string;
-  time: string;
-}
-
-export const useAppointmentStore = defineStore('appointmentStore', {
+export const useAppointmentStore = defineStore('appointment', {
   state: () => ({
-    appointments: [] as Appointment[],
-    patientBookings: [] as Appointment[], // Store filtered bookings
+    appointments: [] as any[],
+    slots: Array.from({ length: 9 }, (_, i) => ({
+      time: `${8 + i}:00`,
+      isSelected: false,
+      isBooked: false,
+      isCreated: false,
+      isToBeCreated: false,
+      isToBeDeleted: false,
+      id: '',
+    })),
+    dentistBookings: [] as any[],
   }),
   actions: {
-    setAppointments(appointments: Appointment[]) {
+    /**
+     * Load appointments for a given dentist and date
+     */
+    setAppointments(appointments: any[]) {
       this.appointments = appointments;
     },
-    setPatientBookings(bookings: Appointment[]) {
-      this.patientBookings = bookings;
-    },
-    async fetchAndAggregatePatientBookings(patientId: string) {
+    async fetchAndSetAppointments() {
       try {
-        // Fetch appointments
-        const response = await fetchAppointments();
-        const allAppointments = response.data.data;
-        this.setAppointments(allAppointments);
-
-        // Fetch dentists and clinics
-        const dentistStore = useDentistStore();
-        await dentistStore.fetchAndSetDentists();
-        const dentists = [...dentistStore.dentists];
-
-        const clinicStore = useClinicStore();
-        await clinicStore.fetchAndSetClinics();
-        const clinics = [...clinicStore.clinics.clinics];
-
-        // Aggregate patient bookings
-        const bookings = aggregatePatientAppointments(
-          allAppointments,
-          dentists,
-          clinics,
-          patientId
-        );
-        this.setPatientBookings(bookings);
+        const response = await fetchAllAppointments();
+        this.setAppointments(response);
+        console.log('Appointments fetched successfully:', response);
       } catch (error) {
-        console.error(
-          'Error fetching and aggregating patient bookings:',
-          error
-        );
+        console.error('Error fetching clinics:', error);
       }
     },
   },
