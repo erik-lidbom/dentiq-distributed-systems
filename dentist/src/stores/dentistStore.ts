@@ -8,6 +8,7 @@ interface Dentist {
   speciality: string;
   clinic: string;
   availability: { date: string; times: string[] }[];
+  id: string;
 }
 
 export const useDentistStore = defineStore('dentistStore', {
@@ -21,7 +22,7 @@ export const useDentistStore = defineStore('dentistStore', {
     },
     setActiveDentist(dentistId: string | null) {
       this.dentist =
-        this.dentists.find((dentist) => dentist._id === dentistId) || null;
+        this.dentists.find((dentist) => dentist.id === dentistId) || null;
     },
     async fetchAndSetDentists() {
       try {
@@ -29,6 +30,7 @@ export const useDentistStore = defineStore('dentistStore', {
         if (response?.data?.data) {
           this.setDentists(response.data.data);
           console.log('Dentists fetched:', this.dentists);
+          this.setActiveDentist(localStorage.getItem('userId'));
         } else {
           console.warn('No dentists data in response:', response);
         }
