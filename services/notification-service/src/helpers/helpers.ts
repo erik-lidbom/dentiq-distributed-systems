@@ -1,5 +1,5 @@
-import { Notification } from "../models/model";
-import { TOPICS } from "../mqtt/topics";
+import { Notification } from '../models/model';
+import { TOPICS } from '../mqtt/topics';
 
 export const createPublishTopics = (
   topic: string,
@@ -30,6 +30,9 @@ export const createPublishTopics = (
         `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_DENTIST}/${data.dentistId}`,
         `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_PATIENT}`,
       ];
+      break;
+    case TOPICS.SUBSCRIBE.APPOINTMENT_GET_NOTIFICATIONS:
+      topics = [TOPICS.PUBLISH.APPOINTMENT_GET_NOTIFICATIONS];
       break;
     default:
       [];

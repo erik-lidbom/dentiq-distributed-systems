@@ -1,8 +1,5 @@
 import { Router } from 'express';
-import {
-  httpCreateNotification,
-  getPatientNotifications,
-} from '../controllers/controller';
+import { httpCreateNotification } from '../controllers/controller';
 
 /**
  * API Router setup
@@ -11,4 +8,3 @@ import {
 export const router = Router();
 
 router.post('/', httpCreateNotification);
-router.get('/:patientId', getPatientNotifications);

@@ -1,17 +1,20 @@
 import mqtt, { IClientOptions, MqttClient } from 'mqtt';
 import dotenv from 'dotenv';
-import { TOPICS } from './topics';
-import { createNotification } from '../controllers/controller';
-import { NotificationDocument } from '../models/model';
+import {
+  createNotification,
+  getNotifications,
+} from '../controllers/controller';
 import { subscribeTopics } from './subscribe';
 import { publishToAllTopics } from './publish';
 import { createPublishTopics } from '../helpers/helpers';
+import { TOPICS } from './topics';
 dotenv.config();
 
 // MQTT Configuration
 const mqttConnOptions: IClientOptions = {
   host: process.env.MQTT_HOST,
-  port: parseInt(process.env.MQTT_PORT || '8883', 10),
+  port: parseInt(process.env.MQTT_PORT || '8883', 10) || 8883,
+  protocol: 'mqtts',
   username: process.env.MQTT_USERNAME,
   password: process.env.MQTT_PASSWORD,
 };
@@ -32,8 +35,11 @@ export const mqttClient = {
     client.on('message', async (topic, message) => {
       console.log(`Received message on topic ${topic}: ${message.toString()}`);
 
-      // When a message is received, the service calls the createNotification method to store the notification
-      const res = await createNotification(message);
+      // When a message is received, the service either creates or retrieves notifications
+      const res: any =
+        topic === TOPICS.SUBSCRIBE.APPOINTMENT_GET_NOTIFICATIONS
+          ? await getNotifications(message)
+          : await createNotification(message);
 
       // Retrieve all the topics that the service will publish to
       const topics: string[] = createPublishTopics(topic, res);
