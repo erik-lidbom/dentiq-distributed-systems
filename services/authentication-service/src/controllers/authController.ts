@@ -27,7 +27,7 @@ interface AuthTokenPayload {
  */
 
 export const createAccount = async (payload: any): Promise<any> => {
-  const { email, fullname, personnummer, role, password } = payload;
+  const { email, fullname, personnummer, role, password } = JSON.parse(payload);
   const existingUser = await User.findOne({ email });
   if (existingUser)
     return { status: 403, message: `User with role ${role} already exists` };
@@ -56,7 +56,7 @@ export const createAccount = async (payload: any): Promise<any> => {
  */
 
 export const login = async (payload: any): Promise<any> => {
-  const { email, password } = payload;
+  const { email, password } = JSON.parse(payload);
 
   const user: any = await User.findOne({ email });
   const decodedPassword = user

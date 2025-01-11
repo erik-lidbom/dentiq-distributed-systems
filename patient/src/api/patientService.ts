@@ -6,6 +6,7 @@ export async function fetchPatient(): Promise<any> {
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
 
+  // TODO --> Change to GET METHOD
   const response = await fetch(`${BASE_URL}/auth/get`, {
     method: 'POST',
     headers: {
@@ -26,6 +27,5 @@ export async function fetchPatient(): Promise<any> {
 
   // Await and return the JSON response properly
   const responseData = await response.json();
-  console.log('patient response from service:', responseData);
   return responseData;
 }

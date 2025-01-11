@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction, response } from 'express';
 import { publishAndSubscribe } from '../mqtt/mqtt';
+import { parse } from 'dotenv';
 
 const routingController = async (
   req: Request,
@@ -53,8 +54,6 @@ const routingController = async (
             message: 'Session expired or invalid. Please re-authenticate.',
           });
         }
-
-        userId = parsedResponse.user.id;
       } catch (error) {
         console.error('Error validating token:', error);
         return res.status(500).json({

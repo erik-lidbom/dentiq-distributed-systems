@@ -44,7 +44,6 @@ export async function postAppointments(body: any): Promise<any> {
 export async function fetchAllAppointments(): Promise<any[]> {
   try {
     const dentistId = localStorage.getItem('userId');
-    console.log('dentistId:', dentistId);
     const token = localStorage.getItem('token');
     const response = await fetch(`${BASE_URL}/booking/query`, {
       method: 'POST',

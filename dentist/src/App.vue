@@ -45,12 +45,9 @@ onMounted(async () => {
         sessionId: sessionId.value,
       });
 
-      console.log('RESPONSE: ', response);
-
       const { token, role } = response.data.data;
 
       if (role !== 'dentist' || !role) {
-        console.log('User is not a dentist. Role: ', role);
         logout();
       }
 

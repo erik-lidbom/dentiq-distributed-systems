@@ -126,7 +126,6 @@ const onSubmit = async () => {
     .post(`${BASE_URL}/auth/login`, form.value)
     .then((response: AxiosResponse) => {
       const { sessionId, userId, userRole } = response.data.data
-      console.log('RESPONSE: ', response.data)
       switch (userRole) {
         case 'patient':
           window.location.href = `${PATIENT_URL}/${userId}/?sessionId=${sessionId}`

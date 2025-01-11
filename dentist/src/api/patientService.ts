@@ -25,6 +25,5 @@ export async function fetchPatient(patientId: string): Promise<any> {
 
   // Await and return the JSON response properly
   const responseData = await response.json();
-  console.log('patient response from service:', responseData);
   return responseData;
 }
