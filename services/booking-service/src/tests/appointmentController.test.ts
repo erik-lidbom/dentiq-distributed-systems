@@ -38,20 +38,22 @@ afterEach(() => {
 });
 
 // ## Mock variables for create appointment
-const mockInvalidMessageCreateAppointment = Buffer.from(
-  JSON.stringify({
+const mockInvalidMessageCreateAppointment = {
+  payload: JSON.stringify({
     dentistId: '675dd76c3832989362ff6b2d',
     date: '2024-12-14',
-  })
-);
+  }),
+  correlationId: '57f1a44f-a4e0-4442-a651-d48cb53ab715',
+};
 
-const mockMessageCreateAppointment = Buffer.from(
-  JSON.stringify({
+const mockMessageCreateAppointment = {
+  payload: JSON.stringify({
     dentistId: '675dd76c3832989362ff6b2d',
     date: '2024-12-14',
     start_times: ['08:00', '09:00', '13:00'],
-  })
-);
+  }),
+  correlationId: '57f1a44f-a4e0-4442-a651-d48cb53ab245',
+};
 
 const mockSavedAppointmentCreateAppointment = {
   _id: '675dd76c3832989362cf6b2c',
@@ -62,20 +64,22 @@ const mockSavedAppointmentCreateAppointment = {
 };
 
 // ## Mock variables for booking
-const mockInvalidMessageBooking = Buffer.from(
-  JSON.stringify({
+const mockInvalidMessageBooking = {
+  payload: JSON.stringify({
     patientId: '675dd76c3832989362ff6b2a',
-  })
-);
+  }),
+  correlationId: '57f1a44f-a4e0-4442-a651-d48cb53ab765',
+};
 
-const mockMessageBooking = Buffer.from(
-  JSON.stringify({
+const mockMessageBooking = {
+  payload: JSON.stringify({
     patientId: '675dd76c3832989362ff6b5d',
     dentistId: '675dd76c3832989362ff6b2d',
     date: '2024-12-14',
     time: '08:00',
-  })
-);
+  }),
+  correlationId: '57f1a44f-3214-4442-a651-d48cb53ab765',
+};
 
 const mockMessageBookingDoesntExist = Buffer.from(
   JSON.stringify({
@@ -112,21 +116,27 @@ const mockUnbookedAppointmentBooking = {
     status: 'booked',
   }),
 };
-const mockMessageDeleteAppointment = Buffer.from(
-  JSON.stringify({
+
+const mockMessageDeleteAppointment = {
+  payload: JSON.stringify({
     appointmentId: '675dd76c3832989362ff6b5d',
-  })
-);
-const mockMessageCancelAppointment = Buffer.from(
-  JSON.stringify({
+  }),
+  correlationId: '4611a44f-3214-4442-a651-d48cb53ab765',
+};
+
+const mockMessageCancelAppointment = {
+  payload: JSON.stringify({
     appointmentId: '675dd76c3832989362ff6b5d',
-  })
-);
-const mockMessageGetAppointment = Buffer.from(
-  JSON.stringify({
+  }),
+  correlationId: '57f1a44f-3214-4332-a651-d48cb53ab765',
+};
+
+const mockMessageGetAppointment = {
+  payload: JSON.stringify({
     appointmentId: '675dd76c3832989362ff6b5d',
-  })
-);
+  }),
+  correlationId: '57f1a44f-3214-4332-a651-d48c443ab765',
+};
 
 describe('APPOINTMENT-SERVICE CONTROLLER', () => {
   const topic = 'test/topic';
@@ -214,9 +224,8 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
     it('should return status 404 if appointment is not found', async () => {
       jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
-      const appointmentId = JSON.parse(
-        mockMessageDeleteAppointment.toString()
-      ).appointmentId;
+      const { payload } = mockMessageDeleteAppointment;
+      const { appointmentId } = JSON.parse(payload.toString());
 
       const response = await deleteAppointment(
         topic,
@@ -282,11 +291,12 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
   describe('Appointment-Service: Cancel Appointment', () => {
     it('should return stats 400 if required fields are missing', async () => {
-      const mockData = Buffer.from(
-        JSON.stringify({
+      const mockData = {
+        payload: JSON.stringify({
           patientId: null,
-        })
-      );
+        }),
+        correlationId: '4611a44f-3214-4442-a651-d48cb53ab765',
+      };
 
       const response = await cancelAppointment(topic, mockData);
 
@@ -300,10 +310,8 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
     it('should return status 404 if appointment could not be found', async () => {
       jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
-      const appointmentId = JSON.parse(
-        mockMessageCancelAppointment.toString()
-      ).appointmentId;
-
+      const { payload } = mockMessageCancelAppointment;
+      const { appointmentId } = JSON.parse(payload.toString());
       const response = await cancelAppointment(
         topic,
         mockMessageCancelAppointment
@@ -354,10 +362,8 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
     it('should return status 404 if appointment could not be found', async () => {
       jest.spyOn(Appointment, 'findById').mockResolvedValue(null);
-      const appointmentId = JSON.parse(
-        mockMessageGetAppointment.toString()
-      ).appointmentId;
-
+      const { payload } = mockMessageGetAppointment;
+      const { appointmentId } = JSON.parse(payload.toString());
       const response = await getAppointment(topic, mockMessageGetAppointment);
 
       expect(response.status).toBe(404);
