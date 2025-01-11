@@ -44,18 +44,13 @@ export const publishAndSubscribe = (
   duration: number
 ) => {
   return new Promise((resolve, reject) => {
-    const correlationId = uuidv4(); // Generate a unique correlation ID
-
-    // Convert the data to a string
-    const payload =
+    const correlationId = uuidv4();
+    const formatData =
       typeof data === 'string' ? data : JSON.stringify(data) || '*';
 
+    const payload = JSON.stringify({ payload: formatData, correlationId });
     const publishToTopic = retrievePublishTopic(service, path);
     const subscribeToTopic = retrieveSubscribedTopic(service, path);
-
-    console.log('Publishing to topic:', publishToTopic);
-
-    console.log('Subscribing to topic:', subscribeToTopic);
 
     // Publish the message
     mqttClient.publish(publishToTopic, payload, { qos: 2 }, (err) => {
@@ -68,16 +63,25 @@ export const publishAndSubscribe = (
     });
 
     // Subscribe to the topic
-    mqttClient.subscribe(subscribeToTopic, { qos: 2 }, (err) => {
-      if (err) {
-        console.error(`Failed to subscribe to ${subscribeToTopic}:`, err);
-        reject(`Failed to subscribe to ${subscribeToTopic}: ${err.message}`);
-        return;
+    mqttClient.subscribe(
+      `${subscribeToTopic}/${correlationId}`,
+      { qos: 2 },
+      (err) => {
+        if (err) {
+          console.error(
+            `Failed to subscribe to ${subscribeToTopic}/${correlationId}:`,
+            err
+          );
+          reject(
+            `Failed to subscribe to ${subscribeToTopic}/${correlationId}: ${err.message}`
+          );
+          return;
+        }
+        console.log(
+          `Subscribing to topic "${subscribeToTopic}/${correlationId}" for ${duration}ms.`
+        );
       }
-      console.log(
-        `Subscribing to topic "${subscribeToTopic}" for ${duration}ms.`
-      );
-    });
+    );
 
     console.log('Waiting for response...');
     // Message handler to process and return the response from the subsribed topic
@@ -92,11 +96,16 @@ export const publishAndSubscribe = (
       resolve(receivedMessage);
 
       // Unsubscribes and cleanup listener
-      mqttClient.unsubscribe(subscribeToTopic, (err) => {
+      mqttClient.unsubscribe(`${subscribeToTopic}/${correlationId}`, (err) => {
         if (err) {
-          console.error(`Failed to unsubscribe from ${subscribeToTopic}:`, err);
+          console.error(
+            `Failed to unsubscribe from ${subscribeToTopic}/${correlationId}:`,
+            err
+          );
         } else {
-          console.log(`Successfully unsubscribed from ${subscribeToTopic}`);
+          console.log(
+            `Successfully unsubscribed from ${subscribeToTopic}/${correlationId}`
+          );
         }
       });
 
@@ -108,11 +117,16 @@ export const publishAndSubscribe = (
 
     // If the duration has expired, unsubscribes and cleanup
     setTimeout(() => {
-      mqttClient.unsubscribe(subscribeToTopic, (err) => {
+      mqttClient.unsubscribe(`${subscribeToTopic}/${correlationId}`, (err) => {
         if (err) {
-          console.error(`Failed to unsubscribe from ${subscribeToTopic}:`, err);
+          console.error(
+            `Failed to unsubscribe from ${subscribeToTopic}/${correlationId}:`,
+            err
+          );
         } else {
-          console.log(`Successfully unsubscribed from ${subscribeToTopic}`);
+          console.log(
+            `Successfully unsubscribed from ${subscribeToTopic}/${correlationId}`
+          );
         }
       });
 
@@ -121,7 +135,7 @@ export const publishAndSubscribe = (
 
       // Rejects the promise if the duration has expired
       reject(
-        `No response received for topic "${subscribeToTopic}" within ${duration}ms`
+        `No response received for topic "${subscribeToTopic}/${correlationId}" within ${duration}ms`
       );
     }, duration);
   });

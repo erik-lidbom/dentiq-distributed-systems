@@ -75,26 +75,36 @@ mqttClient.on('message', async (topic, message) => {
       message.toString()
     );
 
-    const payload = JSON.parse(message.toString());
+    const { payload, correlationId }: { payload: any; correlationId: string } =
+      JSON.parse(message.toString());
 
     if (topic === TOPICS.SUBSCRIBE.AUTH_CREATE_ACCOUNT) {
       const result = await createAccount(payload);
-      publishMessage(TOPICS.PUBLISH.AUTH_CREATE_ACCOUNT, result);
+      publishMessage(
+        `${TOPICS.PUBLISH.AUTH_CREATE_ACCOUNT}/${correlationId}`,
+        result
+      );
     } else if (topic === TOPICS.SUBSCRIBE.AUTH_LOGIN) {
       const result = await login(payload);
-      publishMessage(TOPICS.PUBLISH.AUTH_LOGIN, result);
+      publishMessage(`${TOPICS.PUBLISH.AUTH_LOGIN}/${correlationId}`, result);
     } else if (topic === TOPICS.SUBSCRIBE.AUTH_VALIDATE_TOKEN) {
-      const { token } = payload;
+      const { token } = JSON.parse(payload);
       const result = await validateAuthToken(token);
-      publishMessage(TOPICS.PUBLISH.AUTH_VALIDATE_TOKEN, result);
+      publishMessage(
+        `${TOPICS.PUBLISH.AUTH_VALIDATE_TOKEN}/${correlationId}`,
+        result
+      );
     } else if (topic === TOPICS.SUBSCRIBE.AUTH_VALIDATE_SESSION) {
-      const { sessionId } = payload;
+      const { sessionId } = JSON.parse(payload);
       const result = await getTokensBySessionId(sessionId);
-      publishMessage(TOPICS.PUBLISH.AUTH_VALIDATE_SESSION, result);
+      publishMessage(
+        `${TOPICS.PUBLISH.AUTH_VALIDATE_SESSION}/${correlationId}`,
+        result
+      );
     } else if (topic === TOPICS.SUBSCRIBE.AUTH_GET) {
-      const { patientId } = payload;
+      const { patientId } = JSON.parse(payload);
       const result = await getUserById(patientId);
-      publishMessage(TOPICS.PUBLISH.AUTH_GET, result);
+      publishMessage(`${TOPICS.PUBLISH.AUTH_GET}/${correlationId}`, result);
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';

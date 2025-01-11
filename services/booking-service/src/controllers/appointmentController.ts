@@ -33,16 +33,26 @@ const publishResponse = (topic: string, payload: ResponsePayload): void => {
  */
 export const createAppointment = async (
   topic: string,
-  message: Buffer
+  message: any
 ): Promise<ResponsePayload> => {
-  try {
-    const payload: {
+  /**
+   * Destructure payload and correlationId
+   * Specified type for the payload
+   */
+  const {
+    payload: data,
+    correlationId,
+  }: {
+    payload: {
       dentistId: string;
       date: string;
       start_times: string[];
-    } = JSON.parse(message.toString());
-    const { dentistId, date, start_times } = payload;
-    console.log('payload: ', payload);
+    };
+    correlationId: string;
+  } = message;
+
+  try {
+    const { dentistId, date, start_times } = JSON.parse(data.toString());
 
     if (!dentistId || !date || !Array.isArray(start_times)) {
       const resPayload: ResponsePayload = {
@@ -53,7 +63,7 @@ export const createAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -77,7 +87,7 @@ export const createAppointment = async (
       },
     };
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     if (newAppointments.length > 0) {
       publishMessage('appointment/added', {
         topic: 'appointment/added',
@@ -95,7 +105,7 @@ export const createAppointment = async (
         error: true,
       },
     };
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -103,20 +113,34 @@ export const createAppointment = async (
 /**
  * Book an existing appointment
  */
+
 export const bookAppointment = async (
   topic: string,
-  message: Buffer
+  message: any
 ): Promise<ResponsePayload> => {
-  try {
-    const payload: {
+  /**
+   * Destructure payload and correlationId
+   * Specified type for the payload
+   */
+
+  const {
+    payload: data,
+    correlationId,
+  }: {
+    payload: {
       patientId: string;
       dentistId: string;
       date: string;
       time: string;
       reason_for_visit?: string;
-    } = JSON.parse(message.toString());
+    };
+    correlationId: string;
+  } = message;
 
-    const { patientId, dentistId, date, time, reason_for_visit } = payload;
+  try {
+    const { patientId, dentistId, date, time, reason_for_visit } = JSON.parse(
+      data.toString()
+    );
 
     if (!patientId || !dentistId || !date || !time) {
       const resPayload: ResponsePayload = {
@@ -127,7 +151,7 @@ export const bookAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       publishMessage('appointment/failed', {
         topic: 'appointment/failed',
         message: 'Booking Cancellation Failed!',
@@ -152,7 +176,7 @@ export const bookAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -162,8 +186,6 @@ export const bookAppointment = async (
     appointment.reason_for_visit = reason_for_visit || '';
 
     const bookedAppointment = await appointment.save();
-
-    console.log('Booked appointment herrreeeee:', bookedAppointment);
 
     const resPayload: ResponsePayload = {
       status: 200,
@@ -177,7 +199,7 @@ export const bookAppointment = async (
       },
     };
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     publishMessage('appointment/booked', {
       topic: 'appointment/booked',
       message: `${date} at ${time} has been booked`,
@@ -193,7 +215,7 @@ export const bookAppointment = async (
         error: true,
       },
     };
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -204,15 +226,23 @@ export const bookAppointment = async (
 
 export const deleteAppointments = async (
   topic: string,
-  message: Buffer
+  message: any
 ): Promise<ResponsePayload> => {
+  /**
+   * Destructure payload and correlationId
+   * Specified type for the payload
+   */
+  const {
+    payload: data,
+    correlationId,
+  }: {
+    payload: {
+      appointmentIds: string[];
+    };
+    correlationId: string;
+  } = message;
   try {
-    const payload: { appointmentIds: string[] } = JSON.parse(
-      message.toString()
-    );
-    const { appointmentIds } = payload;
-
-    console.log(`[DEBUG]: Received delete request for IDs - ${appointmentIds}`);
+    const { appointmentIds } = JSON.parse(data.toString());
 
     // Validate the input
     if (
@@ -227,10 +257,8 @@ export const deleteAppointments = async (
           error: true,
         },
       };
-      console.warn(
-        `[WARN]: Invalid delete payload - ${JSON.stringify(payload)}`
-      );
-      publishResponse(topic, resPayload);
+      console.warn(`[WARN]: Invalid delete payload - ${JSON.stringify(data)}`);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -251,7 +279,7 @@ export const deleteAppointments = async (
       console.warn(
         `[WARN]: No matching appointments found for deletion - ${appointmentIds}`
       );
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -263,12 +291,14 @@ export const deleteAppointments = async (
       message: `Successfully deleted ${appointments.length} appointment(s).`,
       notificationPayload: {
         senderService: 'AppointmentService',
-        message: `Deleted appointments for dentist(s) ${[...new Set(appointments.map((a) => a.dentistId))]}`,
+        message: `Deleted appointments for dentist(s) ${[
+          ...new Set(appointments.map((a) => a.dentistId)),
+        ]}`,
         typeOfNotification: 'AppointmentDeleted',
       },
     };
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     publishMessage('appointment/removed', {
       topic: 'appointment/removed',
       message: `Slots with IDs ${appointmentIds.join(', ')} have been deleted.`,
@@ -287,7 +317,7 @@ export const deleteAppointments = async (
       },
     };
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -297,13 +327,24 @@ export const deleteAppointments = async (
  */
 export const deleteAppointment = async (
   topic: string,
-  message: Buffer
+  message: any
 ): Promise<ResponsePayload> => {
-  try {
-    const payload: {
+  /**
+   * Destructure payload and correlationId
+   * Specified type for the payload
+   */
+  const {
+    payload: data,
+    correlationId,
+  }: {
+    payload: {
       appointmentId: string;
-    } = JSON.parse(message.toString());
-    const { appointmentId } = payload;
+    };
+    correlationId: string;
+  } = message;
+
+  try {
+    const { appointmentId } = JSON.parse(data.toString());
 
     if (!appointmentId) {
       const resPayload: ResponsePayload = {
@@ -314,7 +355,7 @@ export const deleteAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -329,7 +370,7 @@ export const deleteAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -347,7 +388,7 @@ export const deleteAppointment = async (
       },
     };
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     publishMessage('appointment/removed', {
       topic: 'appointment/removed',
       message: `A slot has been deleted`,
@@ -363,7 +404,7 @@ export const deleteAppointment = async (
         error: true,
       },
     };
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -373,13 +414,23 @@ export const deleteAppointment = async (
  */
 export const getAppointment = async (
   topic: string,
-  message: Buffer
+  message: any
 ): Promise<ResponsePayload> => {
-  try {
-    const payload: {
+  /**
+   * Destructure payload and correlationId
+   * Specified type for the payload
+   */
+  const {
+    payload: data,
+    correlationId,
+  }: {
+    payload: {
       appointmentId: string;
-    } = JSON.parse(message.toString());
-    const { appointmentId } = payload;
+    };
+    correlationId: string;
+  } = message;
+  try {
+    const { appointmentId } = JSON.parse(data.toString());
 
     if (!appointmentId) {
       const resPayload: ResponsePayload = {
@@ -390,7 +441,7 @@ export const getAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -405,7 +456,7 @@ export const getAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -422,7 +473,7 @@ export const getAppointment = async (
       },
     };
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   } catch (error) {
     console.error('Error fetching appointment:', error);
@@ -434,7 +485,7 @@ export const getAppointment = async (
         error: true,
       },
     };
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -444,19 +495,26 @@ export const getAppointment = async (
  */
 export const getAppointments = async (
   topic: string,
-  message: Buffer = Buffer.from('')
+  message: any
 ): Promise<ResponsePayload> => {
+  /**
+   * Destructure payload and correlationId
+   * Specified type for the payload
+   */
+  const {
+    payload: data,
+    correlationId,
+  }: {
+    payload: {
+      dentistId?: string;
+      patientId?: string;
+    };
+    correlationId: string;
+  } = message;
   try {
     let appointments;
     if (message.length > 0) {
-      const payload: {
-        dentistId?: string;
-        patientId?: string;
-      } = JSON.parse(message.toString());
-      const { dentistId, patientId } = payload;
-
-      console.log('Dentist ID: ', dentistId);
-      console.log('Patient ID: ', patientId);
+      const { dentistId, patientId } = JSON.parse(data.toString());
 
       const query: any = {};
       if (dentistId) query.dentistId = dentistId;
@@ -464,8 +522,6 @@ export const getAppointments = async (
 
       appointments = await Appointment.find(query);
       //appointments = await Appointment.find( {dentistId} );
-
-      //console.log('APPS: ', appointments)
     } else {
       appointments = await Appointment.find();
     }
@@ -475,14 +531,13 @@ export const getAppointments = async (
       message: `Successfully fetched ${appointments.length} appointments.`,
       data: appointments,
     };
-    //console.log('Payload: ', resPayload)
 
     if (!appointments || appointments.length === 0) {
       resPayload.status = 404;
       resPayload.message = 'No appointments found.';
     }
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   } catch (error) {
     console.error('Error fetching appointments:', error);
@@ -490,7 +545,7 @@ export const getAppointments = async (
       status: 500,
       message: 'Internal server error, please try again later.',
     };
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -501,13 +556,23 @@ export const getAppointments = async (
 
 export const cancelAppointment = async (
   topic: string,
-  message: Buffer
+  message: any
 ): Promise<ResponsePayload> => {
-  try {
-    const payload: {
+  /**
+   * Destructure payload and correlationId
+   * Specified type for the payload
+   */
+  const {
+    payload: data,
+    correlationId,
+  }: {
+    payload: {
       appointmentId: string;
-    } = JSON.parse(message.toString());
-    const { appointmentId } = payload;
+    };
+    correlationId: string;
+  } = message;
+  try {
+    const { appointmentId } = JSON.parse(data.toString());
 
     if (!appointmentId) {
       const resPayload: ResponsePayload = {
@@ -518,7 +583,7 @@ export const cancelAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -533,7 +598,7 @@ export const cancelAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -546,7 +611,7 @@ export const cancelAppointment = async (
           error: true,
         },
       };
-      publishResponse(topic, resPayload);
+      publishResponse(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -568,7 +633,7 @@ export const cancelAppointment = async (
       },
     };
 
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     publishMessage('appointment/cancelled', {
       topic: 'appointment/cancelled',
       message: `New Available Slot`,
@@ -584,7 +649,7 @@ export const cancelAppointment = async (
         error: true,
       },
     };
-    publishResponse(topic, resPayload);
+    publishResponse(`${topic}/${correlationId}`, resPayload);
     publishMessage('appointment/failed', {
       topic: 'appointment/failed',
       message: `Booking Cancellation Failed!`,

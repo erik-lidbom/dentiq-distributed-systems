@@ -28,14 +28,14 @@ const getErrorMessage = (error: unknown): string => {
  * Handles creating a new dentist.
  */
 export const createDentist = async (payload: any): Promise<void> => {
+  const { payload: data, correlationId } = payload;
   try {
-    const { personnummer, firstName, lastName, password, email, clinic } =
-      payload;
+    const { personnummer, firstName, lastName, password, email, clinic } = data;
 
     // Validate required fields
     if (!personnummer || !firstName || !lastName || !password || !email) {
       return publishError(
-        TOPICS.PUBLISH.CREATE_RESPONSE,
+        `${TOPICS.PUBLISH.CREATE_RESPONSE}/${correlationId}`,
         'Missing required fields',
         400
       );
@@ -61,13 +61,17 @@ export const createDentist = async (payload: any): Promise<void> => {
     };
 
     mqttClient.publish(
-      TOPICS.PUBLISH.CREATE_RESPONSE,
+      `${TOPICS.PUBLISH.CREATE_RESPONSE}/${correlationId}`,
       JSON.stringify(response)
     );
     console.log('[INFO] Query response:', response);
   } catch (error) {
     console.error('[ERROR] Could not create dentist:', getErrorMessage(error));
-    publishError(TOPICS.PUBLISH.CREATE_RESPONSE, getErrorMessage(error), 500);
+    publishError(
+      `${TOPICS.PUBLISH.CREATE_RESPONSE}/${correlationId}`,
+      getErrorMessage(error),
+      500
+    );
   }
 };
 
@@ -75,12 +79,13 @@ export const createDentist = async (payload: any): Promise<void> => {
  * Handles retrieving a dentist by ID.
  */
 export const getDentist = async (payload: any): Promise<void> => {
+  const { payload: data, correlationId } = payload;
   try {
-    const { dentistId } = payload;
+    const { dentistId } = data;
 
     if (!dentistId) {
       return publishError(
-        TOPICS.PUBLISH.GET_RESPONSE,
+        `${TOPICS.PUBLISH.GET_RESPONSE}/${correlationId}`,
         'Missing required field: dentistId',
         400
       );
@@ -90,18 +95,25 @@ export const getDentist = async (payload: any): Promise<void> => {
 
     if (!dentist) {
       return publishError(
-        TOPICS.PUBLISH.GET_RESPONSE,
+        `${TOPICS.PUBLISH.GET_RESPONSE}/${correlationId}`,
         'Dentist not found',
         404
       );
     }
 
     const response = { status: 200, dentist };
-    mqttClient.publish(TOPICS.PUBLISH.GET_RESPONSE, JSON.stringify(response));
+    mqttClient.publish(
+      `${TOPICS.PUBLISH.GET_RESPONSE}/${correlationId}`,
+      JSON.stringify(response)
+    );
     console.log('[INFO] Query response:', response);
   } catch (error) {
     console.error('[ERROR] Could not fetch dentist:', getErrorMessage(error));
-    publishError(TOPICS.PUBLISH.GET_RESPONSE, getErrorMessage(error), 500);
+    publishError(
+      `${TOPICS.PUBLISH.GET_RESPONSE}/${correlationId}`,
+      getErrorMessage(error),
+      500
+    );
   }
 };
 
@@ -109,12 +121,13 @@ export const getDentist = async (payload: any): Promise<void> => {
  * Handles updating a dentist.
  */
 export const patchDentist = async (payload: any): Promise<void> => {
+  const { payload: data, correlationId } = payload;
   try {
-    const { dentistId, updates } = payload;
+    const { dentistId, updates } = data;
 
     if (!dentistId || !updates) {
       return publishError(
-        TOPICS.PUBLISH.UPDATE_RESPONSE,
+        `${TOPICS.PUBLISH.UPDATE_RESPONSE}/correlationId`,
         'Missing required fields',
         400
       );
@@ -126,7 +139,7 @@ export const patchDentist = async (payload: any): Promise<void> => {
 
     if (!updatedDentist) {
       return publishError(
-        TOPICS.PUBLISH.UPDATE_RESPONSE,
+        `${TOPICS.PUBLISH.UPDATE_RESPONSE}/correlationId`,
         'Dentist not found',
         404
       );
@@ -138,13 +151,17 @@ export const patchDentist = async (payload: any): Promise<void> => {
       dentist: updatedDentist,
     };
     mqttClient.publish(
-      TOPICS.PUBLISH.UPDATE_RESPONSE,
+      `${TOPICS.PUBLISH.UPDATE_RESPONSE}/correlationId`,
       JSON.stringify(response)
     );
     console.log('[INFO] Query response:', response);
   } catch (error) {
     console.error('[ERROR] Could not update dentist:', getErrorMessage(error));
-    publishError(TOPICS.PUBLISH.UPDATE_RESPONSE, getErrorMessage(error), 500);
+    publishError(
+      `${TOPICS.PUBLISH.UPDATE_RESPONSE}/correlationId`,
+      getErrorMessage(error),
+      500
+    );
   }
 };
 
@@ -152,12 +169,13 @@ export const patchDentist = async (payload: any): Promise<void> => {
  * Handles deleting a dentist.
  */
 export const deleteDentist = async (payload: any): Promise<void> => {
+  const { payload: data, correlationId } = payload;
   try {
-    const { dentistId } = payload;
+    const { dentistId } = data;
 
     if (!dentistId) {
       return publishError(
-        TOPICS.PUBLISH.DELETE_RESPONSE,
+        `${TOPICS.PUBLISH.DELETE_RESPONSE}/${correlationId}`,
         'Missing required field: dentistId',
         400
       );
@@ -167,7 +185,7 @@ export const deleteDentist = async (payload: any): Promise<void> => {
 
     if (!deletedDentist) {
       return publishError(
-        TOPICS.PUBLISH.DELETE_RESPONSE,
+        `${TOPICS.PUBLISH.DELETE_RESPONSE}/${correlationId}`,
         'Dentist not found',
         404
       );
@@ -175,13 +193,17 @@ export const deleteDentist = async (payload: any): Promise<void> => {
 
     const response = { status: 200, message: 'Dentist deleted', dentistId };
     mqttClient.publish(
-      TOPICS.PUBLISH.DELETE_RESPONSE,
+      `${TOPICS.PUBLISH.DELETE_RESPONSE}/${correlationId}`,
       JSON.stringify(response)
     );
     console.log('[INFO] Query response:', response);
   } catch (error) {
     console.error('[ERROR] Could not delete dentist:', getErrorMessage(error));
-    publishError(TOPICS.PUBLISH.DELETE_RESPONSE, getErrorMessage(error), 500);
+    publishError(
+      `${TOPICS.PUBLISH.DELETE_RESPONSE}/${correlationId}`,
+      getErrorMessage(error),
+      500
+    );
   }
 };
 
@@ -189,35 +211,44 @@ export const deleteDentist = async (payload: any): Promise<void> => {
  * Handles querying multiple dentists.
  */
 export const queryDentists = async (payload: any): Promise<void> => {
+  const { payload: data, correlationId } = payload;
   try {
-    const filters = payload.filters || {};
+    const filters = data.filters || {};
 
     const dentists = await Dentist.find(filters);
 
     if (!dentists || dentists.length === 0) {
       return publishError(
-        TOPICS.PUBLISH.QUERY_RESPONSE,
+        `${TOPICS.PUBLISH.QUERY_RESPONSE}/${correlationId}`,
         'No dentists found',
         404
       );
     }
 
     const response = { status: 200, data: dentists };
-    mqttClient.publish(TOPICS.PUBLISH.QUERY_RESPONSE, JSON.stringify(response));
+    mqttClient.publish(
+      `${TOPICS.PUBLISH.QUERY_RESPONSE}/${correlationId}`,
+      JSON.stringify(response)
+    );
 
     console.log(
       '[INFO] Query response:',
       response,
       ' to topic:',
-      TOPICS.PUBLISH.QUERY_RESPONSE
+      `${TOPICS.PUBLISH.QUERY_RESPONSE}/${correlationId}`
     );
   } catch (error) {
     console.error('[ERROR] Could not query dentists:', getErrorMessage(error));
-    publishError(TOPICS.PUBLISH.QUERY_RESPONSE, getErrorMessage(error), 500);
+    publishError(
+      `${TOPICS.PUBLISH.QUERY_RESPONSE}/${correlationId}`,
+      getErrorMessage(error),
+      500
+    );
   }
 };
 
 export const queryClinics = async (payload: any): Promise<void> => {
+  const { correlationId } = payload;
   try {
     const filters = payload.filters || {};
 
@@ -234,7 +265,7 @@ export const queryClinics = async (payload: any): Promise<void> => {
     const response = { status: 200, clinics };
 
     mqttClient.publish(
-      TOPICS.PUBLISH.CLINICS.QUERY_RESPONSE,
+      `${TOPICS.PUBLISH.CLINICS.QUERY_RESPONSE}/${correlationId}`,
       JSON.stringify(response)
     );
   } catch (error) {
