@@ -98,11 +98,12 @@ const fetchData = async () => {
         (a) => a.start_time === slot.time && a.date === date
       );
       // Mark as created if there's an appointment
-      slot.isCreated = !!appointment;
+      slot.isCreated = !!appointment && appointment.dentistId === dentist;
       // Assign appointment ID if available
       slot.id = appointment?._id || '';
       // Mark as booked if a patient exists
-      slot.isBooked = !!appointment?.patientId;
+      slot.isBooked =
+        !!appointment?.patientId && appointment.dentistId === dentist;
       slot.isSelected = false;
       slot.isToBeCreated = false;
       slot.isToBeDeleted = false;
