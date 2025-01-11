@@ -212,7 +212,9 @@ onMounted(async () => {
   client.on('message', async (topic, message) => {
     if (
       topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
-      topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT ||
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT ||
+      topic === TOPICS.SUBSCRIBE.NOTIFICATION_REMOVED
     ) {
       console.log(`[MQTT]: Refetching data due to ${topic}`);
       await fetchAndAggregateData();

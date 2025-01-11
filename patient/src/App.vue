@@ -41,7 +41,7 @@ onMounted(async () => {
 
     userId.value = window.location.pathname.split('/')[1];
 
-    if (userId.value) {
+    if (userId.value && userId.value !== 'bookings') {
       localStorage.setItem('userId', userId.value);
     }
 

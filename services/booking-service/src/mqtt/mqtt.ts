@@ -10,6 +10,7 @@ import {
   bookAppointment,
   getAppointment,
   cancelAppointment,
+  deleteAppointments,
 } from '../controllers/appointmentController';
 
 dotenv.config();
@@ -65,28 +66,27 @@ mqttClient.on('message', async (topic, message) => {
       ? JSON.parse(message.toString())
       : message;
 
-    if (typeof payload !== 'object' || !payload) {
-      throw new Error('Invalid payload format.');
-    }
-
     switch (topic) {
       case TOPICS.SUBSCRIBE.CREATE:
-        await createAppointment(TOPICS.PUBLISH.CREATE_RESPONSE, message);
+        await createAppointment(TOPICS.PUBLISH.CREATE_RESPONSE, payload);
         break;
       case TOPICS.SUBSCRIBE.BOOK:
-        await bookAppointment(TOPICS.PUBLISH.BOOK_RESPONSE, message);
+        await bookAppointment(TOPICS.PUBLISH.BOOK_RESPONSE, payload);
         break;
       case TOPICS.SUBSCRIBE.GET:
-        await getAppointment(TOPICS.PUBLISH.GET_RESPONSE, message);
+        await getAppointment(TOPICS.PUBLISH.GET_RESPONSE, payload);
         break;
       case TOPICS.SUBSCRIBE.DELETE:
-        await deleteAppointment(TOPICS.PUBLISH.DELETE_RESPONSE, message);
+        await deleteAppointment(TOPICS.PUBLISH.DELETE_RESPONSE, payload);
+        break;
+      case TOPICS.SUBSCRIBE.DELETE_MANY:
+        await deleteAppointments(TOPICS.PUBLISH.DELETE_MANY_RESPONSE, payload);
         break;
       case TOPICS.SUBSCRIBE.CANCEL:
-        await cancelAppointment(TOPICS.PUBLISH.CANCEL_RESPONSE, message);
+        await cancelAppointment(TOPICS.PUBLISH.CANCEL_RESPONSE, payload);
         break;
       case TOPICS.SUBSCRIBE.QUERY:
-        await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE);
+        await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE, payload);
         break;
       default:
         console.error('[MQTT]: Unknown path received:', topic);
@@ -94,6 +94,8 @@ mqttClient.on('message', async (topic, message) => {
   } catch (error: any) {
     console.error('[MQTT]: Error processing message:', error.message);
 
+    /*
+    // Todo --> Fix so that error message message back to gateway
     const errorResponse = {
       status: false,
       error: error.message,
@@ -104,7 +106,7 @@ mqttClient.on('message', async (topic, message) => {
     console.log(
       `[MQTT]: Error response published to ${errorTopic}:`,
       errorResponse
-    );
+    );*/
   }
 });
 

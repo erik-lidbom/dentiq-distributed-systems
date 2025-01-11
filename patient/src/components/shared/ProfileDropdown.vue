@@ -31,49 +31,46 @@
       v-if="isOpen"
       class="absolute top-[6px] -right-24 min-[400px]:right-0 p-1 sm:w-72 w-[290px] bg-white shadow-md rounded-xl mt-16 z-50 overflow-hidden"
     >
-      <Button
+      <button
         @click="handleNavigateToMyBookings"
         class="hover:bg-dentiq-muted-lighter text-start w-full h-[48px] px-3 rounded-lg text-dentiq-body-small"
-        >My bookings</Button
       >
-      <Button
+        My bookings
+      </button>
+      <button
         @click="handleLogOut"
         class="hover:bg-dentiq-danger-light text-dentiq-danger-default text-start w-full h-[48px] px-3 rounded-lg text-dentiq-body-small"
-        >Log out</Button
       >
+        Log out
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
-import router from '@/router';
+import { onMounted, onUnmounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { logout } from '@/utils/helpers';
-
-interface Notification {
-  id: number;
-  message: string;
-  date: string;
-}
+import { usePatientStore } from '@/stores/patientStore';
 
 // State for visibility of the dropdown
 const isOpen = ref(false);
-
-// Ref to track the dropdown wrapper
 const dropdownWrapper = ref<HTMLElement | null>(null);
+const patientStore = usePatientStore();
+
+// Reactive user data fetched from the store
+const user = computed(() => ({
+  name: patientStore.patient?.fullname || 'Loading...',
+  email: patientStore.patient?.email || 'Loading...',
+}));
 
 // Toggle visibility of the dropdown
 const toggleDropdownVisibility = () => {
   isOpen.value = !isOpen.value;
 };
 
-// User data
-const user = ref({
-  name: 'John Doe',
-  email: 'dummy@email.com',
-});
+const router = useRouter();
 
-// Function to handle navigation to My Bookings
 const handleNavigateToMyBookings = () => {
   isOpen.value = false;
   router.push('/bookings');
@@ -97,6 +94,9 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(() => {
   // Attach the outside click listener
   document.addEventListener('click', handleClickOutside);
+
+  // Fetch patient data
+  patientStore.fetchAndSetPatient();
 });
 
 onUnmounted(() => {

@@ -21,6 +21,9 @@ export const retrievePublishTopic = (
         case 'delete':
           publishTopic = TOPICS.PUBLISH.BOOKING_DELETE_RESPONSE;
           break;
+        case 'delete-many':
+          publishTopic = TOPICS.PUBLISH.BOOKING_DELETE_MANY_RESPONSE;
+          break;
         case 'cancel':
           publishTopic = TOPICS.PUBLISH.BOOKING_CANCEL_RESPONSE;
           break;
@@ -185,6 +188,9 @@ export const retrieveSubscribedTopic = (
           break;
         case 'delete':
           subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_DELETE;
+          break;
+        case 'delete-many':
+          subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_DELETE_MANY;
           break;
         case 'cancel':
           subscriptionTopic = TOPICS.SUBSCRIBE.BOOKING_CANCEL;

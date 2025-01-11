@@ -51,9 +51,6 @@ import BookingsList from '@/components/bookings/BookingsList.vue';
 import { useAppointmentStore } from '@/stores';
 import { cancelBooking } from '@/api/bookingService';
 
-// Hardcoded Patient ID (move to a config file or inject dynamically)
-const patientId = '11111111';
-
 // Appointment Store
 const appointmentStore = useAppointmentStore();
 
@@ -92,6 +89,8 @@ const stopLoading = () => {
 
 // Fetch bookings on mount
 onMounted(async () => {
+  const patientId = localStorage.getItem('userId');
+
   startLoading('Loading your bookings...');
   try {
     await appointmentStore.fetchAndAggregatePatientBookings(patientId);

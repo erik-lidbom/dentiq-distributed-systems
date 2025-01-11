@@ -3,10 +3,8 @@ const router = express.Router();
 import {
   createAppointment,
   deleteAppointment,
-  getAppointment,
   bookAppointment,
   cancelAppointment,
-  getAppointments,
 } from '../controllers/appointmentController';
 
 //outer.post("/", createAppointment); // Create an appointment

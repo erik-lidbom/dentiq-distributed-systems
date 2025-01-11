@@ -7,11 +7,13 @@ export const TOPICS = {
     AUTH_VALIDATE_TOKEN: 'gateway/auth/validate-token/response',
     AUTH_CREATE_ACCOUNT: 'gateway/auth/create/response',
     AUTH_VALIDATE_SESSION: 'gateway/auth/validate-session/response',
+    AUTH_GET: 'gateway/auth/get/response',
   },
   PUBLISH: {
     AUTH_CREATE_ACCOUNT: 'auth/create/response',
     AUTH_LOGIN: 'auth/login/response',
     AUTH_VALIDATE_SESSION: 'auth/validate-session/response',
     AUTH_VALIDATE_TOKEN: 'auth/validate-token/response',
+    AUTH_GET: 'auth/get/response',
   },
 };

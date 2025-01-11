@@ -54,7 +54,7 @@
           <div class="flex flex row gap-2">
             <p class="text-dentiqGray">New to DentiQ?</p>
             <router-link
-              to="/"
+              to="/signup"
               class="relative text-dentiqLightBlue transition-all duration-300 hover:after:w-full after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-0 after:bg-dentiqLightBlue after:transition-all after:duration-300"
             >
               Join now</router-link
@@ -72,6 +72,7 @@ import { ref } from 'vue'
 
 const BASE_URL = import.meta.env.VITE_API_GATEWAY
 const PATIENT_URL = import.meta.env.VITE_PATIENT_URL
+const DENTIST_URL = import.meta.env.VITE_DENTIST_URL
 
 // Signup form Type
 type SignupForm = {
@@ -124,8 +125,17 @@ const onSubmit = async () => {
   await axios
     .post(`${BASE_URL}/auth/login`, form.value)
     .then((response: AxiosResponse) => {
-      const { sessionId, userId } = response.data.data
-      window.location.href = `${PATIENT_URL}/${userId}/?sessionId=${sessionId}`
+      const { sessionId, userId, userRole } = response.data.data
+      switch (userRole) {
+        case 'patient':
+          window.location.href = `${PATIENT_URL}/${userId}/?sessionId=${sessionId}`
+          break
+        case 'dentist':
+          window.location.href = `${DENTIST_URL}/${userId}/?sessionId=${sessionId}`
+          break
+        default:
+          console.log('Invalid user role')
+      }
     })
     .catch((error: AxiosError) => {
       console.log(error)

@@ -2,7 +2,6 @@ import mqtt, { MqttClient, IClientOptions } from 'mqtt';
 import dotenv from 'dotenv';
 import { subscribeTopics } from './subscribe';
 import { publishMessage } from './publish';
-import { getStatus, retrievePublishTopics } from './helpers';
 import { TOPICS } from './topics';
 import {
   createDentist,
@@ -63,19 +62,9 @@ mqttClient.on('message', async (topic, message) => {
     const payload = Buffer.isBuffer(message)
       ? JSON.parse(message.toString())
       : message;
-    const correlationId = payload?.correlationId || 'unknown';
 
+    // TODO --> Add Pipe-and-filter architecture
     //Retrieve the response topic and status
-    const responseTopic: string = retrievePublishTopics(topic);
-    const responseStatus: boolean = await getStatus(topic, payload);
-
-    // Publish response
-    const responsePayload = { correlationId, responseStatus };
-    publishMessage(responseTopic, responsePayload);
-    console.log(
-      `[MQTT]: Response published to ${responseTopic}:`,
-      responsePayload
-    );
 
     switch (topic) {
       case TOPICS.SUBSCRIBE.CREATE:
