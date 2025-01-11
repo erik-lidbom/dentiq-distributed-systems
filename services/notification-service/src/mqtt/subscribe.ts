@@ -40,4 +40,16 @@ export const subscribeTopics = async () => {
       console.error('MQTT Subscription error:', err);
     }
   );
+  client?.subscribe(
+    TOPICS.SUBSCRIBE.APPOINTMENT_GET_NOTIFICATIONS,
+    (err) => {
+      if (!err) {
+        console.log(
+          `Subscribed to ${TOPICS.SUBSCRIBE.APPOINTMENT_DENTIST_CANCEL_CONFIRMATION}`
+        );
+        return;
+      }
+      console.error('MQTT Subscription error:', err);
+    }
+  );
 };

@@ -45,9 +45,16 @@ export const createNotification = async (
   }
 };
 
-// TODO --> Create functions to retrive a patient or dentists notification
-
-export const getPatientNotifications = async (req: Request, res: Response) => {
+export const getNotifications = async (data: any) => {
   try {
+    const payload = Buffer.isBuffer(data) ? JSON.parse(data.toString()) : data;
+
+    const { userId } = payload;
+    // TODO --> Retrieve role to decide whether it should retrieve dentist or patient notifications
+    const notifications = await Notification.find({
+      patientId: userId,
+    });
+
+    return notifications;
   } catch (error) {}
 };

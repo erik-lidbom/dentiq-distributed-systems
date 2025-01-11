@@ -1,6 +1,7 @@
-import mqtt from "mqtt/*";
-import { Notification, NotificationDocument } from "../models/model";
-import { client } from "./mqtt";
+import mqtt from 'mqtt/*';
+import { Notification, NotificationDocument } from '../models/model';
+import { client } from './mqtt';
+import { TOPICS } from './topics';
 
 type PublishInput = {
   message: string;
@@ -16,14 +17,25 @@ export const publishToAllTopics = async (
 ): Promise<void> => {
   try {
     if (topics.length === 0)
-      throw new Error("Something went wrong! No topics to publish to");
+      throw new Error('Something went wrong! No topics to publish to');
     const { message, createdAt } = notificationDocument;
     //Extract the appropiated message that should be messaged out
-    const messageStringified = JSON.stringify({ message, createdAt });
+    const messageStringified = JSON.stringify({
+      message,
+      createdAt,
+    });
+
     await Promise.all(
-      topics.map((topic: string) =>
-        publishNotification(client, topic, messageStringified)
-      )
+      topics.map((topic: string) => {
+        // Checks if the receiving topic is a get request or not.
+        topic === TOPICS.PUBLISH.APPOINTMENT_GET_NOTIFICATIONS
+          ? publishNotification(
+              client,
+              topic,
+              JSON.stringify({ status: 200, message: notificationDocument })
+            )
+          : publishNotification(client, topic, messageStringified);
+      })
     );
   } catch (error) {
     console.log(error);

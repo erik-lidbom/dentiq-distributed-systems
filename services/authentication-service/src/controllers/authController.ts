@@ -100,10 +100,10 @@ export const validateAuthToken = async (token: string): Promise<any> => {
     } catch (error) {
       console.error('Error deleting session:', error);
     }
-    return { success: false, message: 'Access token invalid or expired.' };
+    return { status: 401, message: 'Access token invalid or expired.' };
   }
 
-  return { success: true, user: decoded };
+  return { status: 200, user: decoded };
 };
 
 /**
@@ -114,12 +114,12 @@ export const validateAuthToken = async (token: string): Promise<any> => {
 export const refreshAuthToken = async (refreshToken: string): Promise<any> => {
   const decoded: any = validateToken(refreshToken, true);
   if (!decoded) {
-    return { success: false, message: 'Invalid or expired refresh token' };
+    return { status: 401, message: 'Invalid or expired refresh token' };
   }
 
   const newToken = generateToken(decoded.email);
 
-  return { success: true, token: newToken };
+  return { status: 200, token: newToken };
 };
 
 /**
