@@ -42,6 +42,7 @@ export const createAppointment = async (
       start_times: string[];
     } = JSON.parse(message.toString());
     const { dentistId, date, start_times } = payload;
+    console.log('payload: ', payload);
 
     if (!dentistId || !date || !Array.isArray(start_times)) {
       const resPayload: ResponsePayload = {
@@ -77,6 +78,12 @@ export const createAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    if (newAppointments.length > 0) {
+      publishMessage('appointment/added', {
+        topic: 'appointment/added',
+        message: `New Available Slot`,
+      });
+    }
     return resPayload;
   } catch (error) {
     console.error('Error creating appointment:', error);
@@ -146,10 +153,6 @@ export const bookAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      publishMessage('appointment/booked', {
-        topic: 'appointment/failed',
-        message: 'Booking Cancellation Failed!',
-      });
       return resPayload;
     }
 
@@ -176,11 +179,8 @@ export const bookAppointment = async (
 
     publishResponse(topic, resPayload);
     publishMessage('appointment/booked', {
-      dentistId: bookedAppointment.dentistId,
-      patientId: bookedAppointment.patientId,
-      date: bookedAppointment.date,
-      time: bookedAppointment.start_time,
-      message: `Booked for ${date} at ${time}`,
+      topic: 'appointment/booked',
+      message: `${date} at ${time} has been booked`,
     });
     return resPayload;
   } catch (error) {
@@ -194,10 +194,100 @@ export const bookAppointment = async (
       },
     };
     publishResponse(topic, resPayload);
-    publishMessage('appointment/failed', {
-      topic: 'appointment/failed',
-      message: 'Booking Cancellation Failed!',
+    return resPayload;
+  }
+};
+
+/**
+ * Delete multiple appointments
+ */
+
+export const deleteAppointments = async (
+  topic: string,
+  message: Buffer
+): Promise<ResponsePayload> => {
+  try {
+    const payload: { appointmentIds: string[] } = JSON.parse(
+      message.toString()
+    );
+    const { appointmentIds } = payload;
+
+    console.log(`[DEBUG]: Received delete request for IDs - ${appointmentIds}`);
+
+    // Validate the input
+    if (
+      !Array.isArray(appointmentIds) ||
+      appointmentIds.some((id) => typeof id !== 'string')
+    ) {
+      const resPayload: ResponsePayload = {
+        status: 400,
+        message: 'Invalid or missing appointment IDs.',
+        notificationPayload: {
+          typeOfNotification: 'AppointmentDeleted',
+          error: true,
+        },
+      };
+      console.warn(
+        `[WARN]: Invalid delete payload - ${JSON.stringify(payload)}`
+      );
+      publishResponse(topic, resPayload);
+      return resPayload;
+    }
+
+    // Find appointments matching the IDs
+    const appointments = await Appointment.find({
+      _id: { $in: appointmentIds },
     });
+
+    if (appointments.length === 0) {
+      const resPayload: ResponsePayload = {
+        status: 404,
+        message: 'No appointments found for the provided IDs.',
+        notificationPayload: {
+          typeOfNotification: 'AppointmentDeleted',
+          error: true,
+        },
+      };
+      console.warn(
+        `[WARN]: No matching appointments found for deletion - ${appointmentIds}`
+      );
+      publishResponse(topic, resPayload);
+      return resPayload;
+    }
+
+    // Delete the appointments
+    await Appointment.deleteMany({ _id: { $in: appointmentIds } });
+
+    const resPayload: ResponsePayload = {
+      status: 200,
+      message: `Successfully deleted ${appointments.length} appointment(s).`,
+      notificationPayload: {
+        senderService: 'AppointmentService',
+        message: `Deleted appointments for dentist(s) ${[...new Set(appointments.map((a) => a.dentistId))]}`,
+        typeOfNotification: 'AppointmentDeleted',
+      },
+    };
+
+    publishResponse(topic, resPayload);
+    publishMessage('appointment/removed', {
+      topic: 'appointment/removed',
+      message: `Slots with IDs ${appointmentIds.join(', ')} have been deleted.`,
+    });
+
+    return resPayload;
+  } catch (error) {
+    console.error('[ERROR]: Failed to delete appointments:', error);
+
+    const resPayload: ResponsePayload = {
+      status: 500,
+      message: 'Internal server error, please try again later.',
+      notificationPayload: {
+        typeOfNotification: 'AppointmentDeleted',
+        error: true,
+      },
+    };
+
+    publishResponse(topic, resPayload);
     return resPayload;
   }
 };
@@ -258,6 +348,10 @@ export const deleteAppointment = async (
     };
 
     publishResponse(topic, resPayload);
+    publishMessage('appointment/removed', {
+      topic: 'appointment/removed',
+      message: `A slot has been deleted`,
+    });
     return resPayload;
   } catch (error) {
     console.error('Error deleting appointment:', error);
@@ -356,13 +450,22 @@ export const getAppointments = async (
     let appointments;
     if (message.length > 0) {
       const payload: {
-        id: string;
+        dentistId?: string;
+        patientId?: string;
       } = JSON.parse(message.toString());
-      const { id } = payload;
+      const { dentistId, patientId } = payload;
 
-      appointments = await Appointment.find({
-        $or: [{ dentistId: id }, { patientId: id }],
-      });
+      console.log('Dentist ID: ', dentistId);
+      console.log('Patient ID: ', patientId);
+
+      const query: any = {};
+      if (dentistId) query.dentistId = dentistId;
+      if (patientId) query.patientId = patientId;
+
+      appointments = await Appointment.find(query);
+      //appointments = await Appointment.find( {dentistId} );
+
+      //console.log('APPS: ', appointments)
     } else {
       appointments = await Appointment.find();
     }
@@ -372,6 +475,7 @@ export const getAppointments = async (
       message: `Successfully fetched ${appointments.length} appointments.`,
       data: appointments,
     };
+    //console.log('Payload: ', resPayload)
 
     if (!appointments || appointments.length === 0) {
       resPayload.status = 404;
@@ -433,7 +537,7 @@ export const cancelAppointment = async (
       return resPayload;
     }
 
-    if (appointment.status !== 'booked') {
+    if (appointment.status !== 'booked' && appointment.patientId === null) {
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Appointment is not booked.',
@@ -443,10 +547,6 @@ export const cancelAppointment = async (
         },
       };
       publishResponse(topic, resPayload);
-      publishMessage('appointment/failed', {
-        topic: 'appointment/failed',
-        message: 'Booking Cancellation Failed!',
-      });
       return resPayload;
     }
 
@@ -471,9 +571,8 @@ export const cancelAppointment = async (
     publishResponse(topic, resPayload);
     publishMessage('appointment/cancelled', {
       topic: 'appointment/cancelled',
-      message: `Booking Cancelled Successfully`,
+      message: `New Available Slot`,
     });
-    return resPayload;
     return resPayload;
   } catch (error) {
     console.error('Error cancelling appointment:', error);

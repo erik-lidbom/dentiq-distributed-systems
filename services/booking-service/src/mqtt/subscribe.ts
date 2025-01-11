@@ -7,6 +7,7 @@ const subscriptionTopics = [
   TOPICS.SUBSCRIBE.GET,
   TOPICS.SUBSCRIBE.UPDATE,
   TOPICS.SUBSCRIBE.DELETE,
+  TOPICS.SUBSCRIBE.DELETE_MANY,
   TOPICS.SUBSCRIBE.QUERY,
   TOPICS.SUBSCRIBE.BOOK,
   TOPICS.SUBSCRIBE.CANCEL,
@@ -14,7 +15,7 @@ const subscriptionTopics = [
 
 export const subscribeTopics = async () => {
   subscriptionTopics.map((topic: string) => {
-    mqttClient?.subscribe(topic, (err) => {
+    mqttClient?.subscribe(topic, { qos: 2 }, (err) => {
       if (!err) {
         console.log(`Subscribed to ${topic}`);
         return;

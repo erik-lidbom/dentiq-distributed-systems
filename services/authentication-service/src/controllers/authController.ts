@@ -64,15 +64,16 @@ export const login = async (payload: any): Promise<any> => {
     : null;
 
   if (!user || !decodedPassword) {
-    return { status: 401, message: 'Invalid credentials' };
+    return { status: 401, message: 'Invalid credentials', success: false };
   }
-  const token = generateToken(user._id);
-  console.log('Token:', token);
+
+  const token = generateToken(user._id, user.role);
 
   await Session.deleteMany({ userId: user._id });
 
   const session = await Session.create({
     userId: user._id,
+    role: user.role,
     token,
   });
 
@@ -80,6 +81,7 @@ export const login = async (payload: any): Promise<any> => {
     status: 200,
     sessionId: session._id,
     userId: user._id,
+    userRole: user.role,
   };
 };
 
@@ -100,10 +102,14 @@ export const validateAuthToken = async (token: string): Promise<any> => {
     } catch (error) {
       console.error('Error deleting session:', error);
     }
-    return { status: 401, message: 'Access token invalid or expired.' };
+    return {
+      status: 401,
+      success: false,
+      message: 'Access token invalid or expired.',
+    };
   }
 
-  return { status: 200, user: decoded };
+  return { status: 200, success: true, user: decoded };
 };
 
 /**
@@ -117,7 +123,7 @@ export const refreshAuthToken = async (refreshToken: string): Promise<any> => {
     return { status: 401, message: 'Invalid or expired refresh token' };
   }
 
-  const newToken = generateToken(decoded.email);
+  const newToken = generateToken(decoded.email, decoded.role);
 
   return { status: 200, token: newToken };
 };
@@ -136,10 +142,36 @@ export const getTokensBySessionId = async (sessionId: string): Promise<any> => {
     return {
       status: 200,
       token: session.token,
+      role: session.role,
       // refreshToken: session.refreshToken,
     };
   } catch (error) {
     console.error('Error retrieving tokens:', error);
+    return { status: 500, message: 'Internal server error' };
+  }
+};
+
+/**
+ * Retrieves a user by their ID.
+ * @param {string} userId - The user ID.
+ * @returns {any} - Returns the user object or an error message.
+ */
+
+export const getUserById = async (userId: string): Promise<any> => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return { status: 404, message: 'User not found' };
+    }
+    return {
+      status: 200,
+      user: {
+        email: user.email,
+        fullname: user.fullname,
+      },
+    };
+  } catch (error) {
+    console.error('Error retrieving user:', error);
     return { status: 500, message: 'Internal server error' };
   }
 };

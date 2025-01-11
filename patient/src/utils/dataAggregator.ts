@@ -65,7 +65,7 @@ export const aggregateClinicData = (
   const aggregatedClinics = clinics.map((clinic) => {
     const clinicDentists = dentistsByClinic[clinic._id] || [];
     const enrichedDentists = clinicDentists.map((dentist) => {
-      const dentistAppointments = appointmentsByDentist[dentist._id] || {};
+      const dentistAppointments = appointmentsByDentist[dentist.id] || {};
 
       // Convert grouped appointments into `Availability` objects
       const availability: Availability[] = Object.entries(
@@ -118,7 +118,7 @@ export const aggregatePatientAppointments = (
   const appointmentsWithDentistAndClinic = patientAppointments.map(
     (appointment) => {
       const dentist = dentists.find(
-        (dentist) => dentist._id === appointment.dentistId
+        (dentist) => dentist.id === appointment.dentistId
       );
       const clinic = clinics.find((clinic) => clinic._id === dentist?.clinic);
       return {

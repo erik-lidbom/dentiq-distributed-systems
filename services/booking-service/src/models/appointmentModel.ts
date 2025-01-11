@@ -12,6 +12,7 @@ export interface IAppointment {
 export const appointmentSchema = new Schema<IAppointment>({
   patientId: { type: String, required: false, default: null },
   dentistId: { type: String, required: true },
+  date: {type: String, required: true},
   start_time: { type: String, required: true },
   reason_for_visit: { type: String, required: false },
   status: {

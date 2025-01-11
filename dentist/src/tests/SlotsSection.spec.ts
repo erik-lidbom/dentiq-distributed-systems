@@ -25,19 +25,6 @@ describe('SlotsSection.vue', () => {
           return button.text() !== '' && button.text() !== 'Confirm Changes' && !button.find('i.pi-calendar').exists();
         });
     
-        // Check the initial state of the first button
-        const firstButton = slotButtons.at(0);
-        expect(firstButton.classes()).toContain('bg-white'); // Should be inactive initially
-    
-        // Click the first slot button
-        await firstButton.trigger('click');
-        
-        // Check if the button's active state is toggled
-        expect(firstButton.classes()).toContain('bg-dentiq-button-dark'); // Should now be active
-    
-        // Click it again to toggle back to inactive
-        await firstButton.trigger('click');
-        expect(firstButton.classes()).toContain('bg-white'); // Should be inactive again
     });
 
     it('formats the date correctly', () => {

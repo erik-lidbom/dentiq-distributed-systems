@@ -10,6 +10,7 @@ import {
   bookAppointment,
   getAppointment,
   cancelAppointment,
+  deleteAppointments,
 } from '../controllers/appointmentController';
 
 dotenv.config();
@@ -82,11 +83,14 @@ mqttClient.on('message', async (topic, message) => {
       case TOPICS.SUBSCRIBE.DELETE:
         await deleteAppointment(TOPICS.PUBLISH.DELETE_RESPONSE, message);
         break;
+      case TOPICS.SUBSCRIBE.DELETE_MANY:
+        await deleteAppointments(TOPICS.PUBLISH.DELETE_MANY_RESPONSE, message);
+        break;
       case TOPICS.SUBSCRIBE.CANCEL:
         await cancelAppointment(TOPICS.PUBLISH.CANCEL_RESPONSE, message);
         break;
       case TOPICS.SUBSCRIBE.QUERY:
-        await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE);
+        await getAppointments(TOPICS.PUBLISH.QUERY_RESPONSE, message);
         break;
       default:
         console.error('[MQTT]: Unknown path received:', topic);

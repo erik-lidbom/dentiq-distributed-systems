@@ -7,7 +7,7 @@ import connectToDB from './db/db';
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3002; // Using a different port for Dentist service
+const port = process.env.PORT || 3002; // Using a different port for Booking service
 
 // MongoDB Connection
 connectToDB();

@@ -17,7 +17,6 @@
           </h1>
         </a>
       </li>
-      <Search />
       <div class="flex flex-row items-center space-x-2">
         <div class="hidden sm:flex flex-col text-right">
           <p class="text-dentiq-text-dark font-normal text-dentiq-body-small">
