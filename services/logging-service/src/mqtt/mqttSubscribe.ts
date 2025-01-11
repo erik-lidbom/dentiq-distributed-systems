@@ -2,7 +2,6 @@ import { client } from './mqtt';
 import { TOPICS } from './mqttTopics';
 
 export const subscribeToTopics = async () => {
-  console.log('In here?');
   if (client) {
     const SUB_TOPICS = [
       TOPICS.SUBSCRIBE.PATIENT,

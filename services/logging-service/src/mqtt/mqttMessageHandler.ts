@@ -21,7 +21,6 @@ export const messageHandler = () => {
         : message;
 
       const serviceName = getServiceName(topic);
-      console.log(serviceName);
 
       const matchingTopic = Object.keys(SUB_TOPICS).find((key) => topic.startsWith(key));
 
