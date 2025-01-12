@@ -33,7 +33,7 @@ export const httpCreateNotification = async (
  * @returns a promise of a Notification Document
  */
 export const createNotification = async (
-  data: Buffer
+  data: any
 ): Promise<NotificationDocument> => {
   try {
     const notification = new Notification(data);

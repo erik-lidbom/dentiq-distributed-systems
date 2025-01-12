@@ -50,7 +50,7 @@ describe('shall return topics to publish to', () => {
     ).toEqual(
       expect.arrayContaining([
         `${TOPICS.PUBLISH.APPOINTMENT_CREATED_DENTIST}/${EXAMPLE_DOCUMENT.dentistId}`,
-        TOPICS.PUBLISH.APPOINTMENT_BOOKED_PATIENT,
+        TOPICS.PUBLISH.APPOINTMENT_CREATED_DENTIST,
       ])
     );
   });
@@ -72,7 +72,7 @@ describe('shall return topics to publish to', () => {
       )
     ).toEqual(
       expect.arrayContaining([
-        `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_DENTIST}/${EXAMPLE_DOCUMENT.dentistId}`,
+        `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_PATIENT}/${EXAMPLE_DOCUMENT.dentistId}`,
         `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_PATIENT}/${EXAMPLE_DOCUMENT.patientId}`,
       ])
     );
@@ -86,7 +86,7 @@ describe('shall return topics to publish to', () => {
     ).toEqual(
       expect.arrayContaining([
         `${TOPICS.PUBLISH.APPOINTMENT_CANCEL_DENTIST}/${EXAMPLE_DOCUMENT.dentistId}`,
-        TOPICS.PUBLISH.APPOINTMENT_CANCEL_PATIENT,
+        TOPICS.PUBLISH.APPOINTMENT_CANCEL_DENTIST,
       ])
     );
   });
