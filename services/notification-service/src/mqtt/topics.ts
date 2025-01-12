@@ -12,17 +12,9 @@ export const TOPICS = {
   },
   PUBLISH: {
     APPOINTMENT_GET_NOTIFICATIONS: 'notification/get/response',
-    APPOINTMENT_CREATED_DENTIST:
-      'dentiq/notificationService/dentistService/addSlots',
-    APPOINTMENT_CREATED_PATIENT:
-      'dentiq/notificationService/patientService/addSlots',
-    APPOINTMENT_BOOKED_DENTIST:
-      'dentiq/notificationService/dentistClient/booked',
-    APPOINTMENT_BOOKED_PATIENT:
-      'dentiq/notificationService/patientClient/booked',
-    APPOINTMENT_CANCEL_DENTIST:
-      'dentiq/notificationService/dentistClient/cancelSlot',
-    APPOINTMENT_CANCEL_PATIENT:
-      'dentiq/notificationService/patientClient/cancelSlot',
+    APPOINTMENT_CREATED_DENTIST: 'appointment/added',
+    APPOINTMENT_BOOKED_PATIENT: 'appointment/booked',
+    APPOINTMENT_CANCEL_DENTIST: 'appointment/cancelled/dentist',
+    APPOINTMENT_CANCEL_PATIENT: 'appointment/cancelled/patient',
   },
 };
