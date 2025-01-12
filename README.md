@@ -31,7 +31,7 @@ To install and run the clients, gateway and services, you need to navigate to ea
 4. Repeat the above steps for each component (*Note: you need to do this in separate nodes in your CLI*).
 
 ## Continious Intergration
-The team implemented a conitinious integration practice to ensure no defect code was pushed to the main branch. We also made use of postman for end-to-end testing, as well as for stress-testing the system. In regards of our broker, HiveMQ, we utilized HiveMQ-swarm to ensure high performance during peak loads of the system, you can read more about it [here](https://docs.hivemq.com/hivemq-swarm/latest/index.html).
+The team implemented a continious integration practice to ensure no defect code was pushed to the main branch. We also made use of postman for end-to-end testing, as well as for stress-testing the system. In regards of our broker, HiveMQ, we utilized HiveMQ-swarm to ensure high performance during peak loads of the system, you can read more about it [here](https://docs.hivemq.com/hivemq-swarm/latest/index.html).
 
 ## Team Members
 *Note: We had assigned roles, such as backend or frontend developer, but as the lifetime of the project moved forward, deviations of said roles occured.*<br>
@@ -46,7 +46,13 @@ Front-end Developer & UI Designer<br>
 Full-Stack Developer & UI Designer<br>
 **Utkarsh Singh:**
 Back-end Developer
-
+| Name | Role |
+| ------ | ------ |
+|   Andreas Haataja     |   Backend Developer & Scrum Master    |
+|  Erik Lidbom      |    Full-Stack Developer    |
+|    Lilly Heier    |    Frontend Developer & UI Designer    |
+|    Nabil Al-Sayed    |    Full-Stack Developer & UI Designer    |
+|    Utkarsh Singh    |    Backend Developer    |
 
 
 
