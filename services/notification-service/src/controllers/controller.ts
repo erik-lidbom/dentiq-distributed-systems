@@ -36,8 +36,7 @@ export const createNotification = async (
   data: Buffer
 ): Promise<NotificationDocument> => {
   try {
-    const payload = Buffer.isBuffer(data) ? JSON.parse(data.toString()) : data;
-    const notification = new Notification(payload);
+    const notification = new Notification(data);
     const savedNotification: NotificationDocument = await notification.save();
     return savedNotification;
   } catch (error) {
@@ -47,14 +46,17 @@ export const createNotification = async (
 
 export const getNotifications = async (data: any) => {
   try {
-    const payload = Buffer.isBuffer(data) ? JSON.parse(data.toString()) : data;
+    const { correlationId, payload } = data;
 
-    const { userId } = payload;
-    // TODO --> Retrieve role to decide whether it should retrieve dentist or patient notifications
-    const notifications = await Notification.find({
-      patientId: userId,
-    });
+    const { userId, role } = JSON.parse(payload);
 
-    return notifications;
+    const notifications =
+      role === 'dentist'
+        ? await Notification.find({ dentistId: userId })
+        : await Notification.find({
+            $or: [{ patientId: { $exists: false } }, { patientId: userId }],
+          });
+
+    return { notifications: notifications, correlationId };
   } catch (error) {}
 };

@@ -63,9 +63,6 @@ mqttClient.on('message', async (topic, message) => {
       ? JSON.parse(message.toString())
       : message;
 
-    // TODO --> Add Pipe-and-filter architecture
-    //Retrieve the response topic and status
-
     switch (topic) {
       case TOPICS.SUBSCRIBE.CREATE:
         await createDentist(payload);
