@@ -30,8 +30,6 @@ export const createPublishTopics = (topic: string, data: any): string[] => {
       ];
       break;
     case TOPICS.SUBSCRIBE.APPOINTMENT_GET_NOTIFICATIONS:
-      console.log('CORRELATION DATA');
-      console.log(data);
       const { correlationId } = data;
 
       topics = [

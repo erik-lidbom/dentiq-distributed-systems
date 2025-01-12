@@ -108,17 +108,14 @@ const fetchAndAggregateData = async () => {
     // Fetch appointments
     const appointmentsData = await fetchAppointments();
     appointmentStore.setAppointments(appointmentsData.data.data);
-    console.log('Fetched appointments:', appointmentsData.data.data);
 
     // Fetch clinics
     const clinicsData = await fetchClinics();
     clinicStore.setClinics(clinicsData.data.clinics);
-    console.log('Fetched clinics:', clinicsData.data.clinics);
 
     // Fetch dentists
     const dentistsData = await fetchDentists();
     dentistStore.setDentists(dentistsData.data.data);
-    console.log('Fetched dentists:', dentistsData.data.data);
 
     // Aggregate the data
     clinics.value = aggregateClinicData(
@@ -126,7 +123,6 @@ const fetchAndAggregateData = async () => {
       dentistStore.dentists,
       appointmentStore.appointments
     );
-    console.log('Aggregated clinics:', clinics.value);
   } catch (error) {
     console.error('Error fetching data:', error);
     errorMessage.value = 'Failed to load clinics. Please try again later.';
@@ -180,11 +176,8 @@ const googleMapId = import.meta.env.VITE_GOOGLE_MAP_ID;
 watch(
   () => appointments.value,
   async (newAppointments, oldAppointments) => {
-    console.log('Appointments changed, refetching data');
-
     // Avoid unnecessary refetches
     if (JSON.stringify(newAppointments) === JSON.stringify(oldAppointments)) {
-      console.log('No significant changes in appointments, skipping refetch.');
       return;
     }
 
@@ -245,7 +238,6 @@ const showInfoWindow = (clinic) => {
     return;
   }
   activeClinic.value = clinic;
-  console.log('Active clinic:', activeClinic.value);
 };
 
 const openCard = (clinic) => {

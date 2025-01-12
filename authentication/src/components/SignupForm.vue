@@ -207,6 +207,5 @@ const onSubmit = async () => {
     .catch((error: AxiosError) => {
       console.log(error)
     })
-  // TODO --> DISPLAY ERROR MESSAGE IF USER ALREADY EXIST
 }
 </script>

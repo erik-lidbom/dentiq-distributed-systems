@@ -31,7 +31,6 @@ export const useAppointmentStore = defineStore('appointment', {
       try {
         const response = await fetchAllAppointments();
         this.setAppointments(response);
-        console.log('Appointments fetched successfully:', response);
       } catch (error) {
         console.error('Error fetching clinics:', error);
       }

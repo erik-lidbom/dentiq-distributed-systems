@@ -134,12 +134,10 @@ const onSubmit = async () => {
           window.location.href = `${DENTIST_URL}/${userId}/?sessionId=${sessionId}`
           break
         default:
-          console.log('Invalid user role')
       }
     })
     .catch((error: AxiosError) => {
       console.log(error)
     })
-  // TODO --> DISPLAY ERROR IF INVALID CREDENTIALS
 }
 </script>

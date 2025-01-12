@@ -9,7 +9,6 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3003;
 const mongoURI = process.env.MONGODB_URI || '';
-console.log('MONGOURI: ' + mongoURI);
 
 // Middleware
 app.use(express.json());
