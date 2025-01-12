@@ -12,16 +12,33 @@
     <clientGroups>
         <clientGroup id="notification-service">
             <clientIdPattern>client-[0-9]{4}</clientIdPattern>
-            <count>10</count>  <!-- Represents the amount of clients to simulate -->
+            <count>5</count>  <!-- Represents the amount of clients to simulate -->
         </clientGroup>
     
        <clientGroup id="appointment-service">
             <clientIdPattern>client-[0-9]{4}</clientIdPattern>
-            <count>10</count>
+            <count>5</count>
         </clientGroup>
+
+        <clientGroup id="authentication-service">
+            <clientIdPattern>client-[0-9]{4}</clientIdPattern>
+            <count>5</count>
+        </clientGroup>
+
+        <clientGroup id="dentist-service">
+            <clientIdPattern>client-[0-9]{4}</clientIdPattern>
+            <count>5</count>
+        </clientGroup>
+
+        <clientGroup id="logging-service">
+            <clientIdPattern>client-[0-9]{4}</clientIdPattern>
+            <count>5</count>
+        </clientGroup>
+
     </clientGroups>
 
     <!-- Define Topic Groups -->
+    <!-- Topic Group for Notification Service-->
     <topicGroups>
         <topicGroup id="notification-add-slots">
             <topicNamePattern>dentiq/appointmentService/notificationService/addSlots</topicNamePattern>
@@ -40,27 +57,111 @@
             <count>1</count> 
         </topicGroup>
 
-        <!-- New Topic Group for Appointment Service -->
+        <!-- Topic Group for Appointment Service -->
         <topicGroup id="appointment-add-slots">
-            <topicNamePattern>dentiq/dentistClient/appointmentService/addSlots</topicNamePattern>
+            <topicNamePattern>gateway/booking/create/response</topicNamePattern>
             <count>1</count> 
         </topicGroup>
         <topicGroup id="appointment-book-slot">
-            <topicNamePattern>dentiq/patientClient/appointmentService/bookSlot
-            </topicNamePattern>
+            <topicNamePattern>gateway/booking/book/response</topicNamePattern>
             <count>1</count> 
         </topicGroup>
         <topicGroup id="appointment-remove-slot">
-            <topicNamePattern>dentiq/dentistClient/appointmentService/removeSlot
-            </topicNamePattern>
+            <topicNamePattern>gateway/booking/delete/response</topicNamePattern>
             <count>1</count> 
         </topicGroup>
         <topicGroup id="appointment-cancel-slot">
-            <topicNamePattern>dentiq/patientClient/appointmentService/cancelSlot
-            </topicNamePattern>
+            <topicNamePattern>gateway/booking/cancel/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="appointment-get-slot">
+            <topicNamePattern>gateway/booking/get/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="appointment-update-slot">
+            <topicNamePattern>gateway/booking/update/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="appointment-delete-many-slots">
+            <topicNamePattern>gateway/booking/delete-many/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="appointment-query">
+            <topicNamePattern>gateway/booking/query/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+
+    <!-- Topic Group for Authentication Service-->
+        <topicGroup id="authentication-login">
+            <topicNamePattern>gateway/auth/login/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="authentication-validate-token">
+            <topicNamePattern>gateway/auth/validate-token/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="authentication-create-account">
+            <topicNamePattern>gateway/auth/create/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="authentication-validate-session">
+            <topicNamePattern>gateway/auth/validate-session/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="authentication-get">
+            <topicNamePattern>gateway/auth/get/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+
+    <!-- Topic Group for Dentist Service-->
+        <topicGroup id="dentist-create-appointment">
+            <topicNamePattern>gateway/dentist/create/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="dentist-get">
+            <topicNamePattern>gateway/dentist/get/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="dentist-update">
+            <topicNamePattern>gateway/dentist/update/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="dentist-delete">
+            <topicNamePattern>gateway/dentist/delete/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="dentist-query">
+            <topicNamePattern>gateway/dentist/query/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="dentist-query-clinic">
+            <topicNamePattern>gateway/clinic/query/response</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+
+    <!-- Topic Group for Logging Service -->
+        <topicGroup id="dentist-services">
+            <topicNamePattern>dentist/#</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="notification-services">
+            <topicNamePattern>notification/#</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="booking-services">
+            <topicNamePattern>booking/#</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="auth-services">
+            <topicNamePattern>auth/#</topicNamePattern>
+            <count>1</count> 
+        </topicGroup>
+        <topicGroup id="gateways">
+            <topicNamePattern>gateway/#</topicNamePattern>
             <count>1</count> 
         </topicGroup>
     </topicGroups>
+
 
     <!-- Defines Scenario Stages -->
     <stages>
@@ -75,35 +176,36 @@
         <stage id="s2">
             <lifeCycle id="s2.l1" clientGroup="notification-service">
                 <publish 
-                    message='{"email": "eriktest@gmail.com", "message": "New added slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    message='{"senderService": "appointmentService", "message": "Slot added"}'
                     topicGroup="notification-add-slots" 
-                    count="10"> <!-- How many messages in total that will be sent -->
-                </publish> 
+                    count="5">
+                </publish>
                 <publish 
-                    message='{"email": "eriktest@gmail.com", "message": "New booked slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    message='{"senderService": "appointmentService", "message": "Slot booked"}'
                     topicGroup="notification-book-slots" 
-                    count="10">
-                </publish> 
+                    count="5">
+                </publish>
                 <publish 
-                    message='{"email": "eriktest@gmail.com", "message": "Cancelled slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    message='{"senderService": "appointmentService", "message": "Slot cancelled"}'
                     topicGroup="notification-cancel-slots" 
-                    count="10">
-                </publish> 
+                    count="5">
+                </publish>
                 <publish 
-                    message='{"email": "eriktest@gmail.com", "message": "Delete slots", "senderService": "appointmentService", "patientId": "123456789", "dentistId": "1234567"}' 
+                    message='{"senderService": "appointmentService", "message": "Slots removed"}'
                     topicGroup="notification-delete-slots" 
-                    count="10">
-                </publish> 
+                    count="5">
+                </publish>
             </lifeCycle>
         </stage>
 
-        <!-- Stage 6: Disconnect clients for Notification Service -->
+        <!-- Stage 3: Disconnect clients for Notification Service -->
         <stage id="s3">
             <lifeCycle id="s3.l1" clientGroup="notification-service">
                 <disconnect/>
             </lifeCycle>
         </stage>
-
+        
+        <!-- Stage 4: Connects the clients to the broker -->
       <stage id="s4">
             <lifeCycle id="s4.l1" clientGroup="appointment-service">
                 <connect broker="b1"/>
@@ -114,29 +216,43 @@
         <stage id="s5">
             <lifeCycle id="s5.l1" clientGroup="appointment-service">
                 <publish 
-                    message='{
-                        "dentistId": "1",
-                        "date": "jebait",
-                        "start_times": ["1"]
-                    }'
+                    message='{}'
                     topicGroup="appointment-add-slots" 
                     count="5">
                 </publish>
                 <publish 
-                    message='{
-                            "patientId": "1",
-                            "appointmentId": "675da73e4a67d0ffb2a0746f"}'
+                    message='{}'
                     topicGroup="appointment-book-slot" 
                     count="5">
                 </publish>
                 <publish 
-                    message='{"appointmentId": "675da73e4a67d0ffb2a0746f"}'
+                    message='{}'
                     topicGroup="appointment-remove-slot" 
                     count="5">
                 </publish>
                 <publish 
-                    message='{"appointmentId": "675da73e4a67d0ffb2a0746f"}'
+                    message='{}'
                     topicGroup="appointment-cancel-slot" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="appointment-get-slot" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="appointment-update-slot" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="appointment-delete-many-slots" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="appointment-query" 
                     count="5">
                 </publish>
             </lifeCycle>
@@ -148,5 +264,146 @@
                 <disconnect/>
             </lifeCycle>
         </stage>
+
+        <!-- Stage 7: Connects clients to the broker-->
+      <stage id="s7">
+            <lifeCycle id="s7.l1" clientGroup="authentication-service">
+                <connect broker="b1"/>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 8: Publishes the messages to the different topics in Authentication Service -->
+        <stage id="s8">
+            <lifeCycle id="s8.l1" clientGroup="authentication-service">
+                <publish 
+                    message='{}'
+                    topicGroup="authentication-login" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="authentication-validate-token" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="authentication-create-account" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="authentication-validate-session" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="authentication-get" 
+                    count="5">
+                </publish>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 9: Disconnect clients for Authentication Service -->
+        <stage id="s9">
+            <lifeCycle id="s9.l1" clientGroup="authentication-service">
+                <disconnect/>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 10: Connects clients to the broker-->
+      <stage id="s10">
+            <lifeCycle id="s10.l1" clientGroup="dentist-service">
+                <connect broker="b1"/>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 11: Publishes the messages to the different topics in Dentist Service -->
+        <stage id="s11">
+            <lifeCycle id="s11.l1" clientGroup="dentist-service">
+                <publish 
+                    message='{}'
+                    topicGroup="dentist-create-appointment" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="dentist-get" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="dentist-update" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="dentist-delete" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="dentist-query" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="dentist-query-clinic" 
+                    count="5">
+                </publish>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 12: Disconnect clients for Dentist Service -->
+        <stage id="s12">
+            <lifeCycle id="s12.l1" clientGroup="dentist-service">
+                <disconnect/>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 13: Connects clients to the broker-->
+      <stage id="s13">
+            <lifeCycle id="s13.l1" clientGroup="logging-service">
+                <connect broker="b1"/>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 14: Publishes the messages to the different topics in Logging Service -->
+        <stage id="s14">
+            <lifeCycle id="s14.l1" clientGroup="logging-service">
+                <publish 
+                    message='{}'
+                    topicGroup="dentist-services" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="notification-services" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="booking-services" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="auth-services" 
+                    count="5">
+                </publish>
+                <publish 
+                    message='{}'
+                    topicGroup="gateways" 
+                    count="5">
+                </publish>
+            </lifeCycle>
+        </stage>
+
+        <!-- Stage 15: Disconnect clients for Logging Service -->
+        <stage id="s15">
+            <lifeCycle id="s15.l1" clientGroup="logging-service">
+                <disconnect/>
+            </lifeCycle>
+        </stage>
+
     </stages>
 </scenario>
