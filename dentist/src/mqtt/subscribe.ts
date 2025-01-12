@@ -1,55 +1,27 @@
 import { client } from './mqtt';
 import { TOPICS } from './topics';
 
-export const subscribeTopics = async (): Promise<void> => {
-  if (!client) {
-    console.error('[MQTT]: Client is not initialized');
-    return;
-  }
+// Subscribe to topics
 
-  try {
-    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_REMOVED, (err) => {
-      if (err) {
-        console.error('[MQTT]: Subscription error:', err);
-        throw err;
+export const subscribeTopics = async (userId: string) => {
+  const subscriptionTopics = [
+    `${TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT}/${userId}`,
+    `${TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT}/${userId}`,
+    `${TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT_DENTIST}/${userId}`,
+    `${TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT_PATIENT}/${userId}`,
+    TOPICS.SUBSCRIBE.NOTIFICATION_REMOVED,
+  ];
+
+  subscriptionTopics.map((topic: string) => {
+    client?.subscribe(topic, (err) => {
+      if (!err) {
+        console.log(`Subscribed to ${topic}`);
       } else {
         console.log(
-          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT}`
+          '[MQTT]: Subscribed to topics:',
+          subscriptionTopics.join(', ')
         );
       }
     });
-    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT, (err) => {
-      if (err) {
-        console.error('[MQTT]: Subscription error:', err);
-        throw err;
-      } else {
-        console.log(
-          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT}`
-        );
-      }
-    });
-    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT, (err) => {
-      if (err) {
-        console.error('[MQTT]: Subscription error:', err);
-        throw err;
-      } else {
-        console.log(
-          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT}`
-        );
-      }
-    });
-    client.subscribe(TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT, (err) => {
-      if (err) {
-        console.error('[MQTT]: Subscription error:', err);
-        throw err;
-      } else {
-        console.log(
-          `[MQTT]: Subscribed to ${TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT}`
-        );
-      }
-    });
-  } catch (error) {
-    console.error('[MQTT]: Error in subscribeTopics:', error);
-    throw error;
-  }
+  });
 };

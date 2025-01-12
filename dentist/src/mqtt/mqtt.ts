@@ -3,16 +3,16 @@ import { subscribeTopics } from './subscribe';
 
 const mqttConnOptions: IClientOptions = {
   protocol: 'wss',
-  host: '1171f0a21d314f5097e5278b94005ce9.s1.eu.hivemq.cloud',
-  port: 8884,
-  username: 'hivemq.webclient.1734134728690',
-  password: 'iDqw3l5:6Z4,EA?IVzx>',
+  host: import.meta.env.VITE_MQTT_HOST,
+  port: import.meta.env.VITE_MQTT_PORT,
+  username: import.meta.env.VITE_MQTT_USERNAME,
+  password: import.meta.env.VITE_MQTT_PASSWORD,
 };
 
 export let client: MqttClient;
 
 export const mqttClient = {
-  setup: async (): Promise<void> => {
+  setup: async (userId: string): Promise<void> => {
     if (client) {
       console.log('[MQTT]: Client already initialized');
       return;
@@ -22,7 +22,7 @@ export const mqttClient = {
       `wss://${mqttConnOptions.host}:${mqttConnOptions.port}/mqtt`,
       mqttConnOptions
     );
-    await subscribeTopics();
+    await subscribeTopics(userId);
 
     return new Promise((resolve, reject) => {
       client.on('connect', () => {

@@ -15,6 +15,7 @@ const routingController = async (
     const data = req.body || {};
     const header = req.headers;
     let userId;
+    let role;
 
     // Authorization header is required on every path excepts these ones.
     if (
@@ -54,6 +55,16 @@ const routingController = async (
             message: 'Session expired or invalid. Please re-authenticate.',
           });
         }
+
+        // Retrieve userId and role from token
+        if (
+          parsedResponse.user &&
+          parsedResponse.user.id &&
+          parsedResponse.user.role
+        ) {
+          userId = parsedResponse.user.id;
+          role = parsedResponse.user.role;
+        }
       } catch (error) {
         console.error('Error validating token:', error);
         return res.status(500).json({
@@ -62,7 +73,7 @@ const routingController = async (
       }
     }
 
-    const stringifiedData = JSON.stringify({ ...data, userId });
+    const stringifiedData = JSON.stringify({ ...data, userId, role });
 
     const mqttResponse: any = await publishAndSubscribe(
       serviceName,
