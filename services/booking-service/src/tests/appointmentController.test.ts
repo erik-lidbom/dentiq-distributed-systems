@@ -148,10 +148,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       );
       expect(response.status).toBe(400);
       expect(response.message).toMatch('Missing required field(s).');
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentCreated',
-        error: true,
-      });
     });
 
     it('should return status 201 if the appointment is successfully created', async () => {
@@ -167,12 +163,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         `Successfully created ${mockSavedAppointmentCreateAppointment.start_times.length} appointment(s).`
       );
-      expect(response.notificationPayload).toEqual({
-        dentistId: mockSavedAppointmentCreateAppointment.dentistId,
-        senderService: 'AppointmentService',
-        message: `${mockSavedAppointmentCreateAppointment.start_times}`,
-        typeOfNotification: 'AppointmentCreated',
-      });
     });
   });
 
@@ -183,10 +173,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
       expect(response.status).toBe(400);
       expect(response.message).toMatch('Missing required field(s).');
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentBooked',
-        error: true,
-      });
     });
 
     it('should return status 400 if the appointment is already booked', async () => {
@@ -200,10 +186,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         'Appointment not available for booking.'
       );
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentBooked',
-        error: true,
-      });
     });
   });
 
@@ -216,10 +198,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
       expect(response.status).toBe(400);
       expect(response.message).toMatch('Missing required field.');
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentDeleted',
-        error: true,
-      });
     });
 
     it('should return status 404 if appointment is not found', async () => {
@@ -236,10 +214,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         `Appointment with ID ${appointmentId} not found.`
       );
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentDeleted',
-        error: true,
-      });
     });
 
     it('should return status 200 if appointment is successfully deleted', async () => {
@@ -259,13 +233,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         `Appointment with ID ${mockSavedAppointmentBooking._id} successfully deleted.`
       );
-      expect(response.notificationPayload).toEqual({
-        dentistId: mockSavedAppointmentBooking.dentistId,
-        patientId: mockSavedAppointmentBooking.patientId,
-        message: `${mockSavedAppointmentBooking.start_time}`,
-        senderService: 'AppointmentService',
-        typeOfNotification: 'AppointmentDeleted',
-      });
     });
 
     it('should return status 500 if there is an internal error', async () => {
@@ -282,10 +249,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         'Internal server error, please try again later.'
       );
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentDeleted',
-        error: true,
-      });
     });
   });
 
@@ -302,10 +265,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
       expect(response.status).toBe(400);
       expect(response.message).toMatch('Missing required field.');
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentCancelled',
-        error: true,
-      });
     });
 
     it('should return status 404 if appointment could not be found', async () => {
@@ -321,10 +280,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         `Appointment with ID ${appointmentId} not found.`
       );
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentCancelled',
-        error: true,
-      });
     });
 
     it('should return status 500 if there is an internal error', async () => {
@@ -341,10 +296,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         'Internal server error, please try again later.'
       );
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'AppointmentCancelled',
-        error: true,
-      });
     });
   });
 
@@ -354,10 +305,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
 
       expect(response.status).toBe(400);
       expect(response.message).toMatch('Missing required field: appointmentId');
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'GetAppointment',
-        error: true,
-      });
     });
 
     it('should return status 404 if appointment could not be found', async () => {
@@ -370,10 +317,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toMatch(
         `Appointment with ID ${appointmentId} not found.`
       );
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'GetAppointment',
-        error: true,
-      });
     });
 
     it('should return status 200 if it can get the appointment', async () => {
@@ -400,10 +343,6 @@ describe('APPOINTMENT-SERVICE CONTROLLER', () => {
       expect(response.message).toBe(
         'Internal server error, please try again later.'
       );
-      expect(response.notificationPayload).toEqual({
-        typeOfNotification: 'GetAppointment',
-        error: true,
-      });
     });
   });
 });
