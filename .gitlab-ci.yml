@@ -5,7 +5,7 @@ variables:
   DENTIST_SERVICE_PATH: services/dentist-service
   AUTHENTICATION_SERVICE_PATH: services/authentication-service
   LOGGING_SERVICE_PATH: services/logging-service
-  CLIENT_PATH: client
+  CLIENT_PATH: authentication
   DENTIST_PATH: dentist
 
 
