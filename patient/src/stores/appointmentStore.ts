@@ -24,8 +24,9 @@ export const useAppointmentStore = defineStore('appointmentStore', {
     setPatientBookings(bookings: Appointment[]) {
       this.patientBookings = bookings;
     },
-    async fetchAndAggregatePatientBookings(patientId: string) {
+    async fetchAndAggregatePatientBookings() {
       try {
+        const patientId = localStorage.getItem('userId');
         // Fetch appointments
         const response = await fetchAppointments();
         const allAppointments = response.data.data;
