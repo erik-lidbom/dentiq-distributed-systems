@@ -89,11 +89,9 @@ const stopLoading = () => {
 
 // Fetch bookings on mount
 onMounted(async () => {
-  const patientId = localStorage.getItem('userId');
-
   startLoading('Loading your bookings...');
   try {
-    await appointmentStore.fetchAndAggregatePatientBookings(patientId);
+    await appointmentStore.fetchAndAggregatePatientBookings();
     console.log('Patient bookings fetched successfully:', bookings.value);
   } catch (error) {
     console.error('Error fetching patient bookings:', error);

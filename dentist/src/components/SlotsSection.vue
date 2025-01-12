@@ -92,6 +92,7 @@ const fetchData = async () => {
   try {
     const appointments = await fetchAppointments(dentist, date);
     const appointmentData = appointments?.data?.data || [];
+    console.log(`Appointments for dentist ${dentist}: `, appointmentData);
 
     slots.value.forEach((slot) => {
       const appointment = appointmentData.find(
