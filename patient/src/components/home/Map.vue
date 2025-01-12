@@ -69,8 +69,8 @@ import {
 } from '@/stores/index.ts';
 import { fetchClinics, fetchAppointments, fetchDentists } from '@/api/index.ts';
 import { aggregateClinicData } from '@/utils/dataAggregator.ts';
-import { TOPICS } from '@/mqtt/topics.ts';
 import { client, mqttClient } from '@/mqtt/mqtt.ts';
+import { initializeMqttClient } from '@/App.vue';
 
 // Reactive States
 const isLoading = ref(false);
@@ -151,19 +151,18 @@ watch(
 onMounted(async () => {
   await fetchAndAggregateData();
 
-  // MQTT Setup
-  await mqttClient.setup();
-  client.on('message', async (topic) => {
-    if (
-      topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
-      topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT
-    ) {
-      await fetchAndAggregateData();
-    }
-  });
-
+  const userId = localStorage.getItem('userId');
+  if (userId) {
+    await mqttClient.setup(userId);
+  }
   window.addEventListener('resize', () => {
     isMobile.value = window.innerWidth < 630;
+  });
+
+  // Refetches data if a notification is received
+  client.on('message', async (topic, message) => {
+    console.log(`[MQTT]: Refetching data due to ${topic}`);
+    await fetchAndAggregateData();
   });
 });
 
@@ -200,27 +199,6 @@ watch(
   },
   { deep: true } // Watch for nested changes in appointments
 );
-
-onMounted(async () => {
-  // Initial data fetch
-  await fetchAndAggregateData();
-
-  // Setup MQTT client
-  await mqttClient.setup();
-
-  // Listen for booking and cancellation notifications
-  client.on('message', async (topic, message) => {
-    if (
-      topic === TOPICS.SUBSCRIBE.NOTIFICATION_BOOKED_SLOT ||
-      topic === TOPICS.SUBSCRIBE.NOTIFICATION_CANCELLED_SLOT ||
-      topic === TOPICS.SUBSCRIBE.NOTIFICATION_ADDED_SLOT ||
-      topic === TOPICS.SUBSCRIBE.NOTIFICATION_REMOVED
-    ) {
-      console.log(`[MQTT]: Refetching data due to ${topic}`);
-      await fetchAndAggregateData();
-    }
-  });
-});
 
 // Function to update the mobile status
 function updateIsMobile() {

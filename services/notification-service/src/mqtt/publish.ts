@@ -1,24 +1,19 @@
 import mqtt from 'mqtt/*';
-import { Notification, NotificationDocument } from '../models/model';
 import { client } from './mqtt';
 import { TOPICS } from './topics';
-
-type PublishInput = {
-  message: string;
-  createdAt: Date;
-};
 
 /*
  * Publishes all the messages parallel. The method retrieves the message and timestamp *field that will be sent to the client
  */
 export const publishToAllTopics = async (
   topics: string[],
-  notificationDocument: PublishInput
+  data: any
 ): Promise<void> => {
   try {
     if (topics.length === 0)
       throw new Error('Something went wrong! No topics to publish to');
-    const { message, createdAt } = notificationDocument;
+
+    const { message, createdAt } = data;
     //Extract the appropiated message that should be messaged out
     const messageStringified = JSON.stringify({
       message,
@@ -28,11 +23,13 @@ export const publishToAllTopics = async (
     await Promise.all(
       topics.map((topic: string) => {
         // Checks if the receiving topic is a get request or not.
-        topic === TOPICS.PUBLISH.APPOINTMENT_GET_NOTIFICATIONS
+
+        topic ===
+        `${TOPICS.PUBLISH.APPOINTMENT_GET_NOTIFICATIONS}/${data.correlationId}`
           ? publishNotification(
               client,
               topic,
-              JSON.stringify({ status: 200, message: notificationDocument })
+              JSON.stringify({ status: 200, message: data.notifications })
             )
           : publishNotification(client, topic, messageStringified);
       })

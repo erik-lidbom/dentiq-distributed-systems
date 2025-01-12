@@ -34,13 +34,19 @@ export const mqttClient = {
 
     client.on('message', async (topic, message) => {
       console.log(`Received message on topic ${topic}: ${message.toString()}`);
+      const data = Buffer.isBuffer(message)
+        ? JSON.parse(message.toString())
+        : message;
 
       // When a message is received, the service either creates or retrieves notifications
+
       const res: any =
         topic === TOPICS.SUBSCRIBE.APPOINTMENT_GET_NOTIFICATIONS
-          ? await getNotifications(message)
-          : await createNotification(message);
+          ? await getNotifications(data)
+          : await createNotification(data);
 
+      console.log('RESPONSE HAHAHA');
+      console.log(res);
       // Retrieve all the topics that the service will publish to
       const topics: string[] = createPublishTopics(topic, res);
 

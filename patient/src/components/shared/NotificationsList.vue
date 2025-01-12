@@ -63,12 +63,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
-import { mqttClient, client } from '@/mqtt/mqtt';
-import { TOPICS } from '@/mqtt/topics';
+import { onMounted, ref } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faBell, faTrash } from '@fortawesome/free-solid-svg-icons';
+
 import axios from 'axios';
+import { client, mqttClient } from '../../mqtt/mqtt';
 
 interface Notification {
   id: number;
@@ -138,6 +138,11 @@ onMounted(async () => {
   document.addEventListener('click', handleClickOutside);
   const token = localStorage.getItem('token');
 
+  client.on('message', async (topic, message: any) => {
+    const payload = JSON.parse(message.toString());
+    addNotification(payload.message);
+  });
+
   // Retrieves all notifications onMount
   const response = await axios.get(
     `${import.meta.env.VITE_API_GATEWAY}/notification/get`,
@@ -150,51 +155,8 @@ onMounted(async () => {
 
   // If there are notifications, add them to the list.
   if (response.data.data.status === 200) {
-    const notifications = response.data.data.message;
+    const notifications = response.data.data.data;
     notifications.map((notification) => addNotification(notification.message));
   }
-
-  try {
-    console.log('[MQTT]: Initializing MQTT client...');
-    const userId = localStorage.getItem('userId');
-    await mqttClient.setup(userId!);
-
-    // Handle incoming messages
-    client.on('message', (topic: string, message: any) => {
-      const validatedTopic = validateTopic(topic);
-      if (!validatedTopic) return;
-
-      const payload = JSON.parse(message.toString());
-      console.log(`[MQTT]: Received message on topic ${topic}:`, payload);
-      addNotification(payload.message);
-    });
-  } catch (error) {
-    console.error('[MQTT]: Error during setup or subscription', error);
-  }
 });
-
-// Clean up on unmount
-onUnmounted(() => {
-  // Detach the outside click listener
-  document.removeEventListener('click', handleClickOutside);
-
-  console.log(
-    `[MQTT]: Unsubscribing from ${TOPICS.SUBSCRIBE.NOTIFICATION_CREATED}`
-  );
-  client.unsubscribe(TOPICS.SUBSCRIBE.NOTIFICATION_CREATED, (err) => {
-    if (err) {
-      console.error('[MQTT]: Unsubscription error:', err);
-    } else {
-      console.log('[MQTT]: Successfully unsubscribed.');
-    }
-  });
-});
-
-const validateTopic = (topic: string): boolean => {
-  return (
-    TOPICS.SUBSCRIBE.NOTIFICATION_APPOINTMENT_CREATED,
-    TOPICS.SUBSCRIBE.NOTIFICATION_APPOINTMENT_BOOKED,
-    TOPICS.SUBSCRIBE.NOTIFICATION_APPOINTMENT_CANCEL
-  );
-};
 </script>

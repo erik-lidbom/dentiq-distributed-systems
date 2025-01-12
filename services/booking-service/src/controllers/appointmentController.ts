@@ -1,5 +1,6 @@
 import { Appointment } from '../models/appointmentModel';
 import { publishMessage } from '../mqtt/publish';
+import { TOPICS } from '../mqtt/topics';
 
 export type NotificationPayload = {
   patientId?: string | null;
@@ -15,17 +16,6 @@ export type ResponsePayload = {
   message: string;
   data?: any;
   notificationPayload?: NotificationPayload;
-};
-
-/**
- * Helper function to publish response messages
- */
-const publishResponse = (topic: string, payload: ResponsePayload): void => {
-  if (topic) {
-    publishMessage(topic, payload);
-  } else {
-    console.error('[MQTT]: Topic not provided for publishing response.');
-  }
 };
 
 /**
@@ -58,12 +48,8 @@ export const createAppointment = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Missing required field(s).',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentCreated',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -82,30 +68,28 @@ export const createAppointment = async (
       notificationPayload: {
         dentistId,
         senderService: 'AppointmentService',
-        message: `${start_times}`,
-        typeOfNotification: 'AppointmentCreated',
+        message: `New Available Slots: ${start_times}`,
       },
     };
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
-    if (newAppointments.length > 0) {
-      publishMessage('appointment/added', {
-        topic: 'appointment/added',
-        message: `New Available Slot`,
-      });
-    }
+    // Response back to Gateway
+    publishMessage(`${topic}/${correlationId}`, resPayload);
+
+    // Message sent to notification service
+    const { notificationPayload } = resPayload;
+    publishMessage(
+      `${TOPICS.PUBLISH.CREATE_NOTIFICATION_RESPONSE}`,
+      notificationPayload
+    );
+
     return resPayload;
   } catch (error) {
     console.error('Error creating appointment:', error);
     const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
-      notificationPayload: {
-        typeOfNotification: 'AppointmentCreated',
-        error: true,
-      },
     };
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -146,16 +130,8 @@ export const bookAppointment = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Missing required field(s).',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentBooked',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
-      publishMessage('appointment/failed', {
-        topic: 'appointment/failed',
-        message: 'Booking Cancellation Failed!',
-      });
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -171,12 +147,8 @@ export const bookAppointment = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Appointment not available for booking.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentBooked',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -194,28 +166,24 @@ export const bookAppointment = async (
         dentistId: bookedAppointment.dentistId,
         patientId: bookedAppointment.patientId,
         senderService: 'AppointmentService',
-        message: `${bookedAppointment.start_time}`,
-        typeOfNotification: 'AppointmentBooked',
+        message: `Slot at ${date}, ${time} has been booked`,
       },
     };
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
-    publishMessage('appointment/booked', {
-      topic: 'appointment/booked',
-      message: `${date} at ${time} has been booked`,
-    });
+    const { notificationPayload } = resPayload;
+    publishMessage(`${topic}/${correlationId}`, resPayload);
+    publishMessage(
+      TOPICS.PUBLISH.BOOK_NOTIFICATION_RESPONSE,
+      notificationPayload
+    );
     return resPayload;
   } catch (error) {
     console.error('Error booking appointment:', error);
     const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
-      notificationPayload: {
-        typeOfNotification: 'AppointmentBooked',
-        error: true,
-      },
     };
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -252,13 +220,9 @@ export const deleteAppointments = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Invalid or missing appointment IDs.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentDeleted',
-          error: true,
-        },
       };
       console.warn(`[WARN]: Invalid delete payload - ${JSON.stringify(data)}`);
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -271,15 +235,11 @@ export const deleteAppointments = async (
       const resPayload: ResponsePayload = {
         status: 404,
         message: 'No appointments found for the provided IDs.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentDeleted',
-          error: true,
-        },
       };
       console.warn(
         `[WARN]: No matching appointments found for deletion - ${appointmentIds}`
       );
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -298,7 +258,7 @@ export const deleteAppointments = async (
       },
     };
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     publishMessage('appointment/removed', {
       topic: 'appointment/removed',
       message: `Slots with IDs ${appointmentIds.join(', ')} have been deleted.`,
@@ -311,13 +271,9 @@ export const deleteAppointments = async (
     const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
-      notificationPayload: {
-        typeOfNotification: 'AppointmentDeleted',
-        error: true,
-      },
     };
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -350,12 +306,8 @@ export const deleteAppointment = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Missing required field.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentDeleted',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -365,12 +317,8 @@ export const deleteAppointment = async (
       const resPayload: ResponsePayload = {
         status: 404,
         message: `Appointment with ID ${appointmentId} not found.`,
-        notificationPayload: {
-          typeOfNotification: 'AppointmentDeleted',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -384,27 +332,23 @@ export const deleteAppointment = async (
         patientId: appointment.patientId,
         senderService: 'AppointmentService',
         message: `${appointment.start_time}`,
-        typeOfNotification: 'AppointmentDeleted',
       },
     };
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
-    publishMessage('appointment/removed', {
-      topic: 'appointment/removed',
-      message: `A slot has been deleted`,
-    });
+    const { notificationPayload } = resPayload;
+    publishMessage(`${topic}/${correlationId}`, resPayload);
+    publishMessage(
+      TOPICS.PUBLISH.CANCEL_NOTIFICATION_DENTIST_RESPONSE,
+      notificationPayload
+    );
     return resPayload;
   } catch (error) {
     console.error('Error deleting appointment:', error);
     const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
-      notificationPayload: {
-        typeOfNotification: 'AppointmentDeleted',
-        error: true,
-      },
     };
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -436,12 +380,8 @@ export const getAppointment = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Missing required field: appointmentId.',
-        notificationPayload: {
-          typeOfNotification: 'GetAppointment',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -451,12 +391,8 @@ export const getAppointment = async (
       const resPayload: ResponsePayload = {
         status: 404,
         message: `Appointment with ID ${appointmentId} not found.`,
-        notificationPayload: {
-          typeOfNotification: 'GetAppointment',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -469,23 +405,18 @@ export const getAppointment = async (
         patientId: appointment.patientId,
         senderService: 'AppointmentService',
         message: `${appointment.start_time}`,
-        typeOfNotification: 'GetAppointment',
       },
     };
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   } catch (error) {
     console.error('Error fetching appointment:', error);
     const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
-      notificationPayload: {
-        typeOfNotification: 'GetAppointment',
-        error: true,
-      },
     };
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -513,16 +444,17 @@ export const getAppointments = async (
   } = message;
   try {
     let appointments;
+   
     if (message.payload) {
       const { dentistId, patientId } = JSON.parse(data.toString());
 
       if (dentistId) {
         appointments = await Appointment.find({ dentistId: dentistId });
-        console.log(appointments.length);
       } else if (patientId) {
         appointments = await Appointment.find({ patientId: patientId });
       } else {
         appointments = await Appointment.find();
+      
       }
     } else {
       appointments = await Appointment.find();
@@ -534,12 +466,14 @@ export const getAppointments = async (
       data: appointments,
     };
 
+
     if (!appointments || appointments.length === 0) {
       resPayload.status = 404;
       resPayload.message = 'No appointments found.';
     }
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   } catch (error) {
     console.error('Error fetching appointments:', error);
@@ -547,7 +481,7 @@ export const getAppointments = async (
       status: 500,
       message: 'Internal server error, please try again later.',
     };
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   }
 };
@@ -580,12 +514,8 @@ export const cancelAppointment = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Missing required field.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentCancelled',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -595,12 +525,8 @@ export const cancelAppointment = async (
       const resPayload: ResponsePayload = {
         status: 404,
         message: `Appointment with ID ${appointmentId} not found.`,
-        notificationPayload: {
-          typeOfNotification: 'AppointmentCancelled',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -608,12 +534,8 @@ export const cancelAppointment = async (
       const resPayload: ResponsePayload = {
         status: 400,
         message: 'Appointment is not booked.',
-        notificationPayload: {
-          typeOfNotification: 'AppointmentCancelled',
-          error: true,
-        },
       };
-      publishResponse(`${topic}/${correlationId}`, resPayload);
+      publishMessage(`${topic}/${correlationId}`, resPayload);
       return resPayload;
     }
 
@@ -630,28 +552,25 @@ export const cancelAppointment = async (
         dentistId: cancelledAppointment.dentistId,
         patientId: cancelledAppointment.patientId,
         senderService: 'AppointmentService',
-        message: `${cancelledAppointment.start_time}`,
-        typeOfNotification: 'AppointmentCancelled',
+        message: `Booking at ${cancelledAppointment.date},${cancelledAppointment.start_time} was cancelled`,
       },
     };
 
-    publishResponse(`${topic}/${correlationId}`, resPayload);
-    publishMessage('appointment/cancelled', {
-      topic: 'appointment/cancelled',
-      message: `New Available Slot`,
-    });
+    const { notificationPayload } = resPayload;
+    publishMessage(`${topic}/${correlationId}`, resPayload);
+    //TODO --> PATIENT ID FOR DYNAMIC NOTIFICATIOSN
+    publishMessage(
+      TOPICS.PUBLISH.CANCEL_NOTIFICATION_DENTIST_RESPONSE,
+      notificationPayload
+    );
     return resPayload;
   } catch (error) {
     console.error('Error cancelling appointment:', error);
     const resPayload: ResponsePayload = {
       status: 500,
       message: 'Internal server error, please try again later.',
-      notificationPayload: {
-        typeOfNotification: 'AppointmentCancelled',
-        error: true,
-      },
     };
-    publishResponse(`${topic}/${correlationId}`, resPayload);
+    publishMessage(`${topic}/${correlationId}`, resPayload);
     publishMessage('appointment/failed', {
       topic: 'appointment/failed',
       message: `Booking Cancellation Failed!`,
