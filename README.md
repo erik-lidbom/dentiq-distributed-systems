@@ -36,16 +36,6 @@ The team implemented a continious integration practice to ensure no defect code 
 ## Team Members
 *Note: We had assigned roles, such as backend or frontend developer, but as the lifetime of the project moved forward, deviations of said roles occured.*<br>
 
-**Andreas Haataja:**
-Scrum Master and Back-end Developer<br>
-**Erik Lidbom:**
-Full-Stack Developer<br>
-**Lilly Heier:**
-Front-end Developer & UI Designer<br>
-**Nabil Al-Sayed:**
-Full-Stack Developer & UI Designer<br>
-**Utkarsh Singh:**
-Back-end Developer
 | Name | Role |
 | ------ | ------ |
 |   Andreas Haataja     |   Backend Developer & Scrum Master    |
