@@ -4,13 +4,12 @@ import { TOPICS } from './mqttTopics';
 export const subscribeToTopics = async () => {
   if (client) {
     const SUB_TOPICS = [
-      TOPICS.SUBSCRIBE.PATIENT,
       TOPICS.SUBSCRIBE.DENTIST,
-      TOPICS.SUBSCRIBE.CLINIC,
       TOPICS.SUBSCRIBE.NOTIFICATION,
+      TOPICS.SUBSCRIBE.NOTIFICATION_2,
       TOPICS.SUBSCRIBE.BOOKING,
+      TOPICS.SUBSCRIBE.BOOKING_2,
       TOPICS.SUBSCRIBE.AUTH,
-      TOPICS.SUBSCRIBE.GATEWAY,
     ];
 
     SUB_TOPICS.forEach((topic) => {
