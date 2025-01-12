@@ -1,7 +1,7 @@
-import mqttClient from "./mqtt";
+import mqttClient from './mqtt';
 
 // Publish a message helper function
-export const publishMessage = (topic: string, message: object): void => {
+export const publishMessage = (topic: string, message: any): void => {
   const payload = JSON.stringify(message);
   mqttClient.publish(topic, payload, { qos: 2 }, (err) => {
     if (err) {

@@ -444,25 +444,20 @@ export const getAppointments = async (
   } = message;
   try {
     let appointments;
-    console.log('DATA');
-    console.log(data);
+   
     if (message.payload) {
       const { dentistId, patientId } = JSON.parse(data.toString());
 
       if (dentistId) {
         appointments = await Appointment.find({ dentistId: dentistId });
-        console.log('hej');
       } else if (patientId) {
         appointments = await Appointment.find({ patientId: patientId });
-        console.log('jao');
       } else {
         appointments = await Appointment.find();
-        console.log('lol');
-        console.log(appointments);
+      
       }
     } else {
       appointments = await Appointment.find();
-      console.log('wtf');
     }
 
     const resPayload: ResponsePayload = {
@@ -470,17 +465,14 @@ export const getAppointments = async (
       message: `Successfully fetched ${appointments.length} appointments.`,
       data: appointments,
     };
-    console.log('RESPAYLOAD');
-    console.log(resPayload);
+
 
     if (!appointments || appointments.length === 0) {
       resPayload.status = 404;
       resPayload.message = 'No appointments found.';
     }
 
-    console.log('HAAAALÅåå');
-    console.log(topic);
-    console.log(correlationId);
+
     publishMessage(`${topic}/${correlationId}`, resPayload);
     return resPayload;
   } catch (error) {
