@@ -1,11 +1,10 @@
 export const TOPICS = {
   SUBSCRIBE: {
-    PATIENT: 'patient/#', // =????
     DENTIST: 'dentist/#',
-    CLINIC: 'clinic/#', //????
     NOTIFICATION: 'notification/#',
+    NOTIFICATION_2: 'appointment/#',
     BOOKING: 'booking/#',
+    BOOKING_2: 'dentiq/appointmentService/notificationService/#',
     AUTH: 'auth/#',
-    GATEWAY: 'gateway/#',
   },
 };
