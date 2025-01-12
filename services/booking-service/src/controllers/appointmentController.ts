@@ -513,15 +513,17 @@ export const getAppointments = async (
   } = message;
   try {
     let appointments;
-    if (message.length > 0) {
+    if (message.payload) {
       const { dentistId, patientId } = JSON.parse(data.toString());
 
-      const query: any = {};
-      if (dentistId) query.dentistId = dentistId;
-      if (patientId) query.patientId = patientId;
-
-      appointments = await Appointment.find(query);
-      //appointments = await Appointment.find( {dentistId} );
+      if (dentistId) {
+        appointments = await Appointment.find({ dentistId: dentistId });
+        console.log(appointments.length);
+      } else if (patientId) {
+        appointments = await Appointment.find({ patientId: patientId });
+      } else {
+        appointments = await Appointment.find();
+      }
     } else {
       appointments = await Appointment.find();
     }
