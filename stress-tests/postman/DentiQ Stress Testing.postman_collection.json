@@ -1,0 +1,347 @@
+{
+	"info": {
+		"_postman_id": "a729d1dd-5678-4958-9a5d-42de46b30b28",
+		"name": "DentiQ Stress Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38092885"
+	},
+	"item": [
+		{
+			"name": "PATIENT",
+			"item": [
+				{
+					"name": "createAccount",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate random email and password\r",
+									"const randomEmail = `user${Math.floor(Math.random() * 1000000)}@example.com`;\r",
+									"const randomPassword = `Password${Math.floor(Math.random() * 1000)}`;\r",
+									"\r",
+									"// Save random email and password to environment variables\r",
+									"pm.environment.set(\"randomEmail\", randomEmail);\r",
+									"pm.environment.set(\"randomPassword\", randomPassword);\r",
+									"\r",
+									"// Debugging (optional)\r",
+									"console.log(\"Generated Email:\", randomEmail);\r",
+									"console.log(\"Generated Password:\", randomPassword);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"fullname\": \"John Doe\",\r\n  \"personnummer\": \"1234567890\",\r\n  \"email\": \"{{randomEmail}}\",\r\n  \"role\": \"patient\",\r\n  \"password\": \"{{randomPassword}}\",\r\n  \"confirmPassword\": \"{{randomPassword}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "loginToAccount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"// Save sessionId as authToken\r",
+									"if (response.data && response.data.sessionId) {\r",
+									"    pm.environment.set(\"sessionId\", response.data.sessionId);\r",
+									"    console.log(\"SessionID saved:\", response.data.sessionId);\r",
+									"} else {\r",
+									"    console.error(\"Session ID not found in response\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"{{randomEmail}}\",\r\n  \"password\": \"{{randomPassword}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ValidateSession",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"// Check if the token exists inside the response\r",
+									"if (response.data && response.data.token) {\r",
+									"  pm.environment.set(\"authToken\", response.data.token);\r",
+									"  console.log(\"Auth Token saved:\", response.data.token);\r",
+									"} else {\r",
+									"  console.error(\"Failed to validate session or retrieve token\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"sessionId\": \"{{sessionId}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/auth/validate-session",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"auth",
+								"validate-session"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "bookAppointment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Retrieve the value of the 'authToken' environment variable\r",
+									"const authToken = pm.environment.get(\"authToken\");\r",
+									"\r",
+									"// Log the value to the Postman console\r",
+									"console.log(\"Auth Token:\", authToken);\r",
+									"\r",
+									"// If the token is not set, log a message\r",
+									"if (!authToken) {\r",
+									"    console.error(\"Auth Token is not set in the environment\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"patientId\": \"11111111\",\r\n  \"dentistId\": \"{{appointmentId}}\",\r\n  \"date\": \"2025-01-06\",\r\n  \"time\": \"16:00\",\r\n  \"reason_for_visit\": null\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/booking/book",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"booking",
+								"book"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cancelAppointment",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a MongoDB ObjectId (24-character hexadecimal string)\r",
+									"const objectId = new Date().getTime().toString(16) + Math.random().toString(16).substr(2, 16);\r",
+									"\r",
+									"// Save it as an environment variable for use in the request body\r",
+									"pm.environment.set(\"objectId\", objectId);\r",
+									"\r",
+									"// Optional: Log the generated ObjectId to the console for debugging\r",
+									"console.log(\"Generated ObjectId:\", objectId);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"appointmentId\": \"{{appointmentId}}\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/booking/cancel",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"booking",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAppointments",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/booking/query",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"booking",
+								"query"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
