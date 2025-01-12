@@ -23,7 +23,6 @@ export const useClinicStore = defineStore('clinicStore', {
       try {
         const response = await fetchClinics();
         this.setClinics(response.data);
-        console.log('Clinics fetched successfully:', response.data);
       } catch (error) {
         console.error('Error fetching clinics:', error);
       }

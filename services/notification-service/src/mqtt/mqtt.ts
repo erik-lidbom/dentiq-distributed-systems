@@ -45,8 +45,6 @@ export const mqttClient = {
           ? await getNotifications(data)
           : await createNotification(data);
 
-      console.log('RESPONSE HAHAHA');
-      console.log(res);
       // Retrieve all the topics that the service will publish to
       const topics: string[] = createPublishTopics(topic, res);
 

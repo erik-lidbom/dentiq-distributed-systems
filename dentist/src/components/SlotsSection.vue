@@ -37,12 +37,12 @@
             slot.isBooked
               ? 'bg-red-500 text-white border-red-500' // Booked slots
               : slot.isSelected
-                ? slot.isCreated
-                  ? 'border-red-500 bg-white text-red-500 border-2' // Marked for deletion
-                  : 'bg-green-500 text-white border-2 border-transparent' // Selected but not created
-                : slot.isCreated
-                  ? 'text-white border-2 bg-dentiq-button-dark' // Created slots
-                  : 'text-gray-500 border-2 bg-white', // Default
+              ? slot.isCreated
+                ? 'border-red-500 bg-white text-red-500 border-2' // Marked for deletion
+                : 'bg-green-500 text-white border-2 border-transparent' // Selected but not created
+              : slot.isCreated
+              ? 'text-white border-2 bg-dentiq-button-dark' // Created slots
+              : 'text-gray-500 border-2 bg-white', // Default
           ]"
           @click="toggleSlot(slot)"
         >
@@ -88,11 +88,9 @@ import { useDentistStore } from '@/stores';
 const fetchData = async () => {
   const date = formatDate(selectedDate.value);
   const dentist = localStorage.getItem('userId');
-  console.log('Fetching appointments for:', dentist);
   try {
     const appointments = await fetchAppointments(dentist, date);
     const appointmentData = appointments?.data?.data || [];
-    console.log(`Appointments for dentist ${dentist}: `, appointmentData);
 
     slots.value.forEach((slot) => {
       const appointment = appointmentData.find(
@@ -237,8 +235,6 @@ const formatDate = (date) => {
 
 // Watcher for selectedDate
 watch(selectedDate, async (newDate, oldDate) => {
-  console.log('Date changed:', newDate);
-
   // Reset all slots to their default state
   slots.value.forEach((slot) => {
     slot.isSelected = false;
@@ -275,9 +271,6 @@ const confirmChanges = async () => {
   try {
     const slotsToCreate = slots.value.filter((slot) => slot.isToBeCreated);
     const slotsToDelete = slots.value.filter((slot) => slot.isToBeDeleted);
-
-    console.log('Slots to create:', slotsToCreate);
-    console.log('Slots to delete:', slotsToDelete);
 
     const dentistId = localStorage.getItem('userId');
     // Batch API requests

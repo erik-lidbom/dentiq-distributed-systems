@@ -86,7 +86,6 @@ const handleCancel = async (appointmentId: string) => {
   isLoading.value = true;
 
   try {
-    console.log(`Cancelling appointment: ${appointmentId}`);
     const response = await cancelAppointment(appointmentId);
 
     // Update the source data in the store

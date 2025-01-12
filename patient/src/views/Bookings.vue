@@ -92,7 +92,6 @@ onMounted(async () => {
   startLoading('Loading your bookings...');
   try {
     await appointmentStore.fetchAndAggregatePatientBookings();
-    console.log('Patient bookings fetched successfully:', bookings.value);
   } catch (error) {
     console.error('Error fetching patient bookings:', error);
     errorMessage.value = 'Failed to load bookings. Please try again.';
@@ -110,7 +109,6 @@ const handleCancel = async (id: string) => {
     bookings.value.filter((booking) => booking._id !== id)
   );
 
-  console.log(`Booking with ID ${id} was optimistically canceled.`);
 
   startLoading('Canceling your booking...');
 

@@ -93,20 +93,6 @@ mqttClient.on('message', async (topic, message) => {
     }
   } catch (error: any) {
     console.error('[MQTT]: Error processing message:', error.message);
-
-    /*
-    // Todo --> Fix so that error message message back to gateway
-    const errorResponse = {
-      status: false,
-      error: error.message,
-    };
-
-    const errorTopic = topic.replace('request', 'response');
-    publishMessage(errorTopic, errorResponse);
-    console.log(
-      `[MQTT]: Error response published to ${errorTopic}:`,
-      errorResponse
-    );*/
   }
 });
 

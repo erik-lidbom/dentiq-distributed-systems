@@ -474,10 +474,6 @@ const timeSlots = computed(() => {
     selectedDay.value
   );
 
-  console.log('Selected full date:', selectedFullDate);
-  console.log('Selected Year', currentYear.value);
-  console.log('Selected Month', currentMonth.value);
-  console.log('Selected Day', selectedDay.value);
 
   // Find the availability for the selected date
   const availability = selectedDoctor.value.availability.find(
@@ -620,7 +616,6 @@ const selectLanguage = (language: string) =>
   (selectedLanguage.value = language);
 const selectDate = (date: number) => {
   selectedDay.value = date;
-  console.log('Selected day:', selectedDay.value);
   selectedTime.value = null; // Reset time when a new date is selected
 };
 const selectTime = (time: string) => {
@@ -648,9 +643,6 @@ const selectTime = (time: string) => {
   } else {
     selectedAppointment.value = null;
   }
-
-  console.log('Selected time:', selectedTime.value);
-  console.log('Selected appointment:', selectedAppointment.value);
 };
 
 const isSelectedTime = (time: string) => selectedTime.value === time;

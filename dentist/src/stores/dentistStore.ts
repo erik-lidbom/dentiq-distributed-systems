@@ -29,7 +29,6 @@ export const useDentistStore = defineStore('dentistStore', {
         const response = await fetchDentists();
         if (response?.data?.data) {
           this.setDentists(response.data.data);
-          console.log('Dentists fetched:', this.dentists);
           this.setActiveDentist(localStorage.getItem('userId'));
         } else {
           console.warn('No dentists data in response:', response);

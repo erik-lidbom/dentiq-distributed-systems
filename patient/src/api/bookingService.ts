@@ -53,7 +53,6 @@ export async function bookAppointment(body: any): Promise<any> {
     }
 
     const data = await response.json();
-    console.log('Appointment posted successfully:', data);
     return data;
   } catch (error) {
     console.error('Error posting appointment:', error);
@@ -84,7 +83,6 @@ export const cancelBooking = async (appointmentId: string): Promise<any> => {
     }
 
     const data = await response.json();
-    console.log('Booking cancelled successfully:', data);
     return data;
   } catch (error) {
     console.error('Error cancelling booking:', error);
