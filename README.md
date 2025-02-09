@@ -38,11 +38,11 @@ The team implemented a continious integration practice to ensure no defect code 
 
 | Name | Role |
 | ------ | ------ |
-|   Andreas Haataja     |   Backend Developer & Scrum Master    |
+| [Andreas Haataja](https://github.com/andreashaataja) |   Backend Developer & Scrum Master    |
 |  Erik Lidbom      |    Full-Stack Developer    |
-|    Lilly Heier    |    Frontend Developer & UI Designer    |
-|    Nabil Al-Sayed    |    Full-Stack Developer & UI Designer    |
-|    Utkarsh Singh    |    Backend Developer    |
+| [Lilly Heier](https://github.com/lillyh04)    |    Frontend Developer & UI Designer    |
+| [Nabil Al-Sayed](https://github.com/nabil-alsayed)    |    Full-Stack Developer & UI Designer    |
+| [Utkarsh Singh](https://github.com/Utkarsh26503)    |    Backend Developer    |
 
 
 
